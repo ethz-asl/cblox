@@ -23,19 +23,19 @@ class TsdfSubmap {
   typedef std::shared_ptr<const TsdfSubmap> ConstPtr;
 
   // Constructor
-  TsdfSubmap(const Transformation& T_M_S, KFId keyframe_id,
+  TsdfSubmap(const Transformation &T_M_S, SubmapID submap_id,
              TsdfMap::Config config)
-      : T_M_S_(T_M_S), keyframe_id_(keyframe_id) {
+      : T_M_S_(T_M_S), submap_id_(submap_id) {
     tsdf_map_.reset(new TsdfMap(config));
   }
 
   ~TsdfSubmap() {
     if (!tsdf_map_.unique()) {
-      std::cout << "Underlying tsdf map from KFId: " << keyframe_id_
+      std::cout << "Underlying tsdf map from SubmapID: " << submap_id_
                 << " is NOT unique. Therefore its memory may leak."
                 << std::endl;
     } else {
-      std::cout << "TsdfSubmap " << keyframe_id_ << " is being deleted."
+      std::cout << "TsdfSubmap " << submap_id_ << " is being deleted."
                 << std::endl;
     }
   }
@@ -55,7 +55,7 @@ class TsdfSubmap {
     T_M_S_ = T_M_S;
   }
 
-  KFId getKeyframeID() const { return keyframe_id_; }
+  SubmapID getID() const { return submap_id_; }
 
   FloatingPoint block_size() const { return tsdf_map_->block_size(); }
 
@@ -73,8 +73,8 @@ class TsdfSubmap {
   // The pose of this submap in the global map frame
   mutable std::mutex transformation_mutex;
   Transformation T_M_S_;
-  // Linked keyframe ID
-  KFId keyframe_id_;
+  // Submap ID
+  SubmapID submap_id_;
   // Maps
   TsdfMap::Ptr tsdf_map_;
 

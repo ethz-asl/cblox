@@ -45,8 +45,7 @@ bool LoadTsdfSubmapFromStream(
   conversions::transformProtoToKindr(transformation_proto, &T_M_S);
 
   // DEBUG
-  std::cout << "Tsdf keyframe id: " << tsdf_sub_map_proto.keyframe_id()
-            << std::endl;
+  std::cout << "Tsdf submap id: " << tsdf_sub_map_proto.id() << std::endl;
   std::cout << "Tsdf number of allocated blocks: "
             << tsdf_sub_map_proto.num_blocks() << std::endl;
   Eigen::Vector3 t = T_M_S.getPosition();
@@ -55,8 +54,7 @@ bool LoadTsdfSubmapFromStream(
             << q.x() << ", " << q.y() << ", " << q.z() << " ]" << std::endl;
 
   // Creating a new submap to hold the data
-  tsdf_submap_collection_ptr->createNewSubMap(T_M_S,
-                                              tsdf_sub_map_proto.keyframe_id());
+  tsdf_submap_collection_ptr->createNewSubMap(T_M_S, tsdf_sub_map_proto.id());
 
   // Getting the blocks for this submap (the tsdf layer)
   if (!voxblox::io::LoadBlocksFromStream(

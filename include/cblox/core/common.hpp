@@ -24,9 +24,8 @@ typedef kindr::minimal::QuatTransformationTemplate<FloatingPoint>
 typedef kindr::minimal::RotationQuaternionTemplate<FloatingPoint> Quaternion;
 
 // Defines
-typedef unsigned int KFId;
-typedef std::pair<KFId, KFId> KFIdPair;
-typedef std::pair<KFId, KFId> KFIdPair;
+typedef unsigned int SubmapID;
+typedef std::pair<SubmapID, SubmapID> SubmapIdPair;
 
 // Aligned Eigen containers
 template <typename Type>

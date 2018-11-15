@@ -12,7 +12,7 @@ void TsdfSubmap::getProto(TsdfSubmapProto* proto) const {
       new QuatTransformationProto();
   conversions::transformKindrToProto(T_M_S_, transformation_proto_ptr);
   // Filling out the description of the submap
-  proto->set_keyframe_id(keyframe_id_);
+  proto->set_id(submap_id_);
   proto->set_num_blocks(num_blocks);
   proto->set_allocated_transform(transformation_proto_ptr);
 }

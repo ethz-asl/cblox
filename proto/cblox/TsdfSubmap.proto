@@ -3,7 +3,7 @@ package cblox;
 import public "QuatTransformation.proto";
 
 message TsdfSubmapProto {
-  optional uint32 keyframe_id = 1;
+  optional uint32 id = 1;
 
   optional uint32 num_blocks = 2;
  

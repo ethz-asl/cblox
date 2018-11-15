@@ -169,8 +169,8 @@ void TsdfSubmapMesher::generateTrimmedCombinedMesh(
   for (TsdfSubmap::ConstPtr tsdf_sub_map_ptr : tsdf_sub_maps) {
     // Creating a new map
     TsdfSubmap::Ptr trimmed_tsdf_sub_map_ptr(
-        new TsdfSubmap(tsdf_sub_map_ptr->getPose(),
-                       tsdf_sub_map_ptr->getKeyframeID(), tsdf_map_config_));
+        new TsdfSubmap(tsdf_sub_map_ptr->getPose(), tsdf_sub_map_ptr->getID(),
+                       tsdf_map_config_));
     // Trimming the map
     trimSubmapToHeight(mesh_trim_height, *tsdf_sub_map_ptr,
                        trimmed_tsdf_sub_map_ptr.get());

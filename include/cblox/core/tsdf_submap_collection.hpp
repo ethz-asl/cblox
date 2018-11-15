@@ -26,12 +26,12 @@ class TsdfSubmapCollection {
                        const std::vector<TsdfSubmap::Ptr> &tsdf_sub_maps)
       : tsdf_map_config_(tsdf_map_config), tsdf_sub_maps_(tsdf_sub_maps){};
 
-  // Gets a vector of the linked keyframe IDs
-  void getLinkedKeyframeIds(std::vector<KFId>* keyframe_ids) const;
-  bool isBaseFrame(const KFId& kf_id) const;
+  // Gets a vector of the linked IDs
+  void getIDs(std::vector<SubmapID> *submap_ids) const;
+  bool isBaseFrame(const SubmapID &submap_id) const;
 
   // Creates a new submap on the top of the collection
-  void createNewSubMap(const Transformation& T_M_S, KFId keyframe_id);
+  void createNewSubMap(const Transformation &T_M_S, SubmapID submap_id);
 
   // Gets a const reference to a raw submap
   const TsdfSubmap& getSubMap(size_t sub_map_index) const {
@@ -66,16 +66,17 @@ class TsdfSubmapCollection {
     return *(tsdf_sub_maps_.back());
   };
 
-  // Associates a keyframe to the active submap
-  void associateKFToActiveSubmap(const KFId kf_id) {
-    kf_to_submap_[kf_id] = tsdf_sub_maps_.back();
+  // Associates a to the active submap
+  void associateIDToActiveSubmap(const SubmapID submap_id) {
+    id_to_submap_[submap_id] = tsdf_sub_maps_.back();
   }
 
-  // Gets the tsdf submap associated with the passed keyframe ID
-  bool getAssociatedTsdfSubMapID(const KFId kf_id, KFId* submap_id_ptr) const;
+  // Gets the tsdf submap associated with the passed ID
+  bool getAssociatedTsdfSubMapID(const SubmapID submap_id,
+                                 SubmapID *submap_id_ptr) const;
 
   // Interacting with the submap poses
-  bool setSubMapPose(const KFId kf_id, const Transformation& pose);
+  bool setSubMapPose(const SubmapID submap_id, const Transformation &pose);
   void setSubMapPoses(const TransformationVector& transforms);
   void getSubMapPoses(AlignedVector<Transformation>* submap_poses) const;
 
@@ -104,7 +105,7 @@ class TsdfSubmapCollection {
   const TsdfMap::Config& getConfig() const { return tsdf_map_config_; };
 
   // Fusing the submap pairs
-  void fuseSubmapPair(const KFIdPair& kf_id_pair);
+  void fuseSubmapPair(const SubmapIdPair &submap_id_pair);
 
   // Gets the number of allocated blocks in the collection
   size_t getNumberAllocatedBlocks() const;
@@ -118,8 +119,8 @@ class TsdfSubmapCollection {
   // The vectors of patches
   std::vector<TsdfSubmap::Ptr> tsdf_sub_maps_;
 
-  // A map keeping track of which KF belongs to which submap
-  std::map<KFId, TsdfSubmap::Ptr> kf_to_submap_;
+  // A map keeping track of which ID belongs to which submap
+  std::map<SubmapID, TsdfSubmap::Ptr> id_to_submap_;
 };
 
 }  // namespace cblox

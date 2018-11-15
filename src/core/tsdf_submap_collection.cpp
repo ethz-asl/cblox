@@ -11,23 +11,22 @@
 
 namespace cblox {
 
-void TsdfSubmapCollection::getLinkedKeyframeIds(
-    std::vector<KFId>* keyframe_ids) const {
+void TsdfSubmapCollection::getIDs(std::vector<SubmapID> *submap_ids) const {
   // Checks
-  CHECK_NOTNULL(keyframe_ids);
-  keyframe_ids->reserve(tsdf_sub_maps_.size());
+  CHECK_NOTNULL(submap_ids);
+  submap_ids->reserve(tsdf_sub_maps_.size());
   // Populating the vector
   for (TsdfSubmap::ConstPtr tsdf_sub_map_ptr : tsdf_sub_maps_) {
-    keyframe_ids->push_back(tsdf_sub_map_ptr->getKeyframeID());
+    submap_ids->push_back(tsdf_sub_map_ptr->getID());
   }
 }
 
-bool TsdfSubmapCollection::isBaseFrame(const KFId& kf_id) const {
-  // Searching for the passed KF ID
+bool TsdfSubmapCollection::isBaseFrame(const SubmapID &submap_id) const {
+  // Searching for the passed submap ID
   const auto submap_ptr_it =
       std::find_if(tsdf_sub_maps_.begin(), tsdf_sub_maps_.end(),
-                   [kf_id](const TsdfSubmap::Ptr& sub_map_ptr) {
-                     return sub_map_ptr->getKeyframeID() == kf_id;
+                   [submap_id](const TsdfSubmap::Ptr &sub_map_ptr) {
+                     return sub_map_ptr->getID() == submap_id;
                    });
   if (submap_ptr_it != tsdf_sub_maps_.end()) {
     return true;
@@ -36,11 +35,11 @@ bool TsdfSubmapCollection::isBaseFrame(const KFId& kf_id) const {
   }
 }
 
-void TsdfSubmapCollection::createNewSubMap(const Transformation& T_M_S,
-                                           KFId keyframe_id) {
+void TsdfSubmapCollection::createNewSubMap(const Transformation &T_M_S,
+                                           SubmapID submap_id) {
   // Creating the new submap and adding it to the list
   TsdfSubmap::Ptr tsdf_sub_map(
-      new TsdfSubmap(T_M_S, keyframe_id, tsdf_map_config_));
+      new TsdfSubmap(T_M_S, submap_id, tsdf_map_config_));
   tsdf_sub_maps_.push_back(tsdf_sub_map);
 }
 
@@ -63,17 +62,18 @@ TsdfMap::Ptr TsdfSubmapCollection::getProjectedMap() const {
   return projected_tsdf_map_ptr;
 }
 
-bool TsdfSubmapCollection::setSubMapPose(const KFId kf_id,
+bool TsdfSubmapCollection::setSubMapPose(const SubmapID submap_id,
                                          const Transformation &pose) {
   // Looking for the submap
-  const auto tsdf_submap_ptr_it = kf_to_submap_.find(kf_id);
-  if (tsdf_submap_ptr_it != kf_to_submap_.end()) {
+  const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
+  if (tsdf_submap_ptr_it != id_to_submap_.end()) {
     TsdfSubmap::Ptr submap_ptr = (*tsdf_submap_ptr_it).second;
     submap_ptr->setPose(pose);
     return true;
   } else {
-    std::cout << "Tried to set the pose of the submap with kf_id: " << kf_id
-              << " and could not find the linked submap." << std::endl;
+    std::cout << "Tried to set the pose of the submap with submap_id: "
+              << submap_id << " and could not find the linked submap."
+              << std::endl;
     return false;
   }
 }
@@ -102,13 +102,13 @@ void TsdfSubmapCollection::getSubMapPoses(
 }
 
 bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(
-    const KFId kf_id, KFId *submap_id_ptr) const {
-  const auto tsdf_submap_ptr_it = kf_to_submap_.find(kf_id);
-  if (tsdf_submap_ptr_it != kf_to_submap_.end()) {
-    *submap_id_ptr = (*tsdf_submap_ptr_it).second->getKeyframeID();
+    const SubmapID submap_id, SubmapID *submap_id_ptr) const {
+  const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
+  if (tsdf_submap_ptr_it != id_to_submap_.end()) {
+    *submap_id_ptr = (*tsdf_submap_ptr_it).second->getID();
     return true;
   } else {
-    // std::cout << "Cant find the requested kf_id: " << kf_id
+    // std::cout << "Cant find the requested submap_id: " << submap_id
     //          << " associated with any submap" << std::endl;
     return false;
   }
@@ -156,25 +156,25 @@ void TsdfSubmapCollection::getProto(TsdfSubmapCollectionProto* proto) const {
 }
 
 // Fusing the submap pairs
-void TsdfSubmapCollection::fuseSubmapPair(const KFIdPair& kf_id_pair) {
-  // Extracting the kf IDs
-  KFId kf_id_1 = kf_id_pair.first;
-  KFId kf_id_2 = kf_id_pair.second;
+void TsdfSubmapCollection::fuseSubmapPair(const SubmapIdPair &submap_id_pair) {
+  // Extracting the submap IDs
+  SubmapID submap_id_1 = submap_id_pair.first;
+  SubmapID submap_id_2 = submap_id_pair.second;
   // DEBUG
-  std::cout << "Fusing submap pair: (" << kf_id_1 << ", " << kf_id_2 << ")"
-            << std::endl;
+  std::cout << "Fusing submap pair: (" << submap_id_1 << ", " << submap_id_2
+            << ")" << std::endl;
   // Getting the requested submaps
-  auto kf_id_submap_pair_1_it = kf_to_submap_.find(kf_id_1);
-  auto kf_id_submap_pair_2_it = kf_to_submap_.find(kf_id_2);
+  auto id_submap_pair_1_it = id_to_submap_.find(submap_id_1);
+  auto id_submap_pair_2_it = id_to_submap_.find(submap_id_2);
   // If the submaps are found
-  if ((kf_id_submap_pair_1_it != kf_to_submap_.end()) &&
-      (kf_id_submap_pair_2_it != kf_to_submap_.end())) {
+  if ((id_submap_pair_1_it != id_to_submap_.end()) &&
+      (id_submap_pair_2_it != id_to_submap_.end())) {
     // Getting the submaps
-    TsdfSubmap::Ptr submap_ptr_1 = (*kf_id_submap_pair_1_it).second;
-    TsdfSubmap::Ptr submap_ptr_2 = (*kf_id_submap_pair_2_it).second;
+    TsdfSubmap::Ptr submap_ptr_1 = (*id_submap_pair_1_it).second;
+    TsdfSubmap::Ptr submap_ptr_2 = (*id_submap_pair_2_it).second;
     // Checking that we're not trying to fuse a submap into itself. This can
     // occur due to fusing submap pairs in a triangle.
-    if (submap_ptr_1->getKeyframeID() == submap_ptr_2->getKeyframeID()) {
+    if (submap_ptr_1->getID() == submap_ptr_2->getID()) {
       std::cout << "Avoided fusing submap into itself." << std::endl;
       return;
     }
@@ -185,13 +185,13 @@ void TsdfSubmapCollection::fuseSubmapPair(const KFIdPair& kf_id_pair) {
     // Merging the submap layers
     mergeLayerAintoLayerB(submap_ptr_2->getTsdfMap().getTsdfLayer(), T_S1_S2,
                           submap_ptr_1->getTsdfMapPtr()->getTsdfLayerPtr());
-    // Searching for keyframes associated with submap 2
-    for (auto& kf_id_submap_pair : kf_to_submap_) {
-      if (kf_id_submap_pair.second == submap_ptr_2) {
-        kf_id_submap_pair.second = submap_ptr_1;
-        // std::cout << "Moved KF ID: " << kf_id_submap_pair.first
-        //          << " from submap ID: " << submap_ptr_2->getKeyframeID()
-        //          << " to submap ID: " << submap_ptr_1->getKeyframeID()
+    // Searching for ids associated with submap 2
+    for (auto &id_submap_pair : id_to_submap_) {
+      if (id_submap_pair.second == submap_ptr_2) {
+        id_submap_pair.second = submap_ptr_1;
+        // std::cout << "Moved submap ID: " << id_submap_pair.first
+        //          << " from submap ID: " << submap_ptr_2->getID()
+        //          << " to submap ID: " << submap_ptr_1->getID()
         //          << std::endl;
       }
     }
@@ -200,7 +200,7 @@ void TsdfSubmapCollection::fuseSubmapPair(const KFIdPair& kf_id_pair) {
          submap_ptr_it != tsdf_sub_maps_.end(); submap_ptr_it++) {
       if (*submap_ptr_it == submap_ptr_2) {
         tsdf_sub_maps_.erase(submap_ptr_it);
-        std::cout << "Erased the submap: " << submap_ptr_2->getKeyframeID()
+        std::cout << "Erased the submap: " << submap_ptr_2->getID()
                   << " from the submap collection" << std::endl;
         break;
       }
