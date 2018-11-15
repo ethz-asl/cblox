@@ -18,17 +18,9 @@
   <depend>roscpp</depend>
   <depend>cmake_modules</depend>
   <depend>glog_catkin</depend>
-<!--   <depend>pcl_conversions</depend>
-  <depend>pcl_ros</depend>
-  <depend>pangolin_catkin</depend>
- -->  
   <depend>voxblox</depend>
-<!--   <depend>voxblox_ros</depend>
- -->  
   <depend>protobuf_catkin</depend>
   <depend>minkindr</depend>
   <depend>minkindr_conversions</depend>
-<!--   <depend>orb_slam_2</depend>
-  <depend>cv_bridge</depend>
- -->
+
 </package>

@@ -5,8 +5,6 @@
 #include <map>
 #include <vector>
 
-#include <ros/time.h>
-
 #include <kindr/minimal/quat-transformation.h>
 #include <kindr/minimal/rotation-quaternion.h>
 
