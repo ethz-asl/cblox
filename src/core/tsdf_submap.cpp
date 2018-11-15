@@ -1,11 +1,9 @@
 #include "cblox/core/tsdf_submap.hpp"
-//#include "cblox/utils/quat_transformation_protobuf_utils.hpp"
+#include "cblox/utils/quat_transformation_protobuf_utils.hpp"
 
 namespace cblox {
 
-// using namespace voxblox;
-
-/*void TsdfSubmap::getProto(TsdfSubMapProto* proto) const {
+void TsdfSubmap::getProto(TsdfSubmapProto* proto) const {
   // Checks
   CHECK_NOTNULL(proto);
   // Getting the relevant data
@@ -23,7 +21,7 @@ bool TsdfSubmap::saveToStream(std::fstream* outfile_ptr) const {
   // Checks
   CHECK_NOTNULL(outfile_ptr);
   // Saving the TSDF submap header
-  TsdfSubMapProto tsdf_sub_map_proto;
+  TsdfSubmapProto tsdf_sub_map_proto;
   getProto(&tsdf_sub_map_proto);
   if (!utils::writeProtoMsgToStream(tsdf_sub_map_proto, outfile_ptr)) {
     LOG(ERROR) << "Could not write tsdf sub map message.";
@@ -41,6 +39,6 @@ bool TsdfSubmap::saveToStream(std::fstream* outfile_ptr) const {
   }
   // Success
   return true;
-}*/
+}
 
 }  // namespace cblox

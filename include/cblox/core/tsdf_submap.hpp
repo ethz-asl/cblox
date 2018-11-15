@@ -8,7 +8,7 @@
 #include <voxblox/core/tsdf_map.h>
 #include <voxblox/mesh/mesh_layer.h>
 
-//#include "./TsdfSubMap.pb.h"
+#include "./TsdfSubmap.pb.h"
 
 #include "cblox/core/common.hpp"
 
@@ -64,10 +64,10 @@ class TsdfSubmap {
   };
 
   // Getting the proto for this submap
-  //void getProto(TsdfSubMapProto* proto) const;
+  void getProto(TsdfSubmapProto* proto) const;
 
   // Save the submap to file
-  //bool saveToStream(std::fstream* outfile_ptr) const;
+  bool saveToStream(std::fstream* outfile_ptr) const;
 
  private:
   // The pose of this submap in the global map frame

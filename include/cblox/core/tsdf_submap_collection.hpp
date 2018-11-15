@@ -3,7 +3,7 @@
 
 #include <voxblox/core/tsdf_map.h>
 
-//#include "./TsdfManifoldMap.pb.h"
+#include "./TsdfSubmapCollection.pb.h"
 
 #include "cblox/core/common.hpp"
 #include "cblox/core/tsdf_submap.hpp"
@@ -96,10 +96,10 @@ class TsdfSubmapCollection {
   };
 
   // Save the manifold to file
-  //bool saveToFile(const std::string& file_path) const;
+  bool saveToFile(const std::string& file_path) const;
 
   // Getting various protos for this object
-  //void getProto(TsdfManifoldMapProto* proto) const;
+  void getProto(TsdfSubmapCollectionProto* proto) const;
 
   // Returns the config of the tsdf sub maps
   const TsdfMap::Config& getConfig() const { return tsdf_map_config_; };

@@ -116,7 +116,7 @@ bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(const KFId kf_id,
   }
 }
 
-/*bool TsdfSubmapCollection::saveToFile(const std::string& file_path) const {
+bool TsdfSubmapCollection::saveToFile(const std::string& file_path) const {
   // Opening the file (if we can)
   CHECK(!file_path.empty());
   std::fstream outfile;
@@ -126,10 +126,10 @@ bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(const KFId kf_id,
     return false;
   }
   // Saving the manifold map header object
-  TsdfManifoldMapProto tsdf_manifold_map_proto;
-  getProto(&tsdf_manifold_map_proto);
+  TsdfSubmapCollectionProto tsdf_submap_collection_proto;
+  getProto(&tsdf_submap_collection_proto);
   // Write out the layer header.
-  if (!utils::writeProtoMsgToStream(tsdf_manifold_map_proto, &outfile)) {
+  if (!utils::writeProtoMsgToStream(tsdf_submap_collection_proto, &outfile)) {
     LOG(ERROR) << "Could not write manifold map header message.";
     outfile.close();
     return false;
@@ -148,14 +148,14 @@ bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(const KFId kf_id,
   return true;
 }
 
-void TsdfSubmapCollection::getProto(TsdfManifoldMapProto* proto) const {
+void TsdfSubmapCollection::getProto(TsdfSubmapCollectionProto* proto) const {
   // Checks
   CHECK_NOTNULL(proto);
   // Filling out the description of the manifold
   proto->set_voxel_size(tsdf_map_config_.tsdf_voxel_size);
   proto->set_voxels_per_side(tsdf_map_config_.tsdf_voxels_per_side);
   proto->set_num_submaps(num_patches());
-}*/
+}
 
 // Fusing the submap pairs
 void TsdfSubmapCollection::fuseSubmapPair(const KFIdPair& kf_id_pair) {

@@ -7,7 +7,7 @@ find_package(catkin_simple REQUIRED)
 catkin_simple(ALL_DEPS_REQUIRED)
 
 # Mark these as system deps to supress warnings.
-#include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
+include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 
 find_package(Eigen3 REQUIRED)
 include_directories(${Eigen_INCLUDE_DIRS})
@@ -15,12 +15,12 @@ include_directories(${Eigen_INCLUDE_DIRS})
 ############
 # PROTOBUF #
 ############
-#[[set(PROTO_DEFNS proto/manifold_mapping/QuatTransformation.proto
-                proto/manifold_mapping/TsdfSubMap.proto
-                proto/manifold_mapping/TsdfManifoldMap.proto)
+set(PROTO_DEFNS proto/cblox/QuatTransformation.proto
+                proto/cblox/TsdfSubmap.proto
+                proto/cblox/TsdfSubmapCollection.proto)
 PROTOBUF_CATKIN_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_DEFNS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-]]
+
 #############
 # LIBRARIES #
 #############
@@ -31,12 +31,12 @@ cs_add_library(cblox_lib
   #src/library/core/frame_integrator.cpp
   #src/library/core/transformer.cpp
   #src/library/core/manifold_maintainer.cpp
-  #src/library/utils/quat_transformation_protobuf_utils.cpp
+  src/utils/quat_transformation_protobuf_utils.cpp
   #src/library/utils/conversions.cpp
-  #src/library/mesh/manifold_mesher.cpp
-  #      src/library/io/tsdf_submap_io.cpp
+  src/mesh/tsdf_submap_mesher.cpp
+  src/io/tsdf_submap_io.cpp
   #src/library/io/matrix_io.cpp
-  #${PROTO_SRCS}
+  ${PROTO_SRCS}
 )
 target_link_libraries(cblox_lib ${catkin_LIBRARIES})
 
@@ -53,5 +53,5 @@ target_link_libraries(cblox_lib ${catkin_LIBRARIES})
 ##########
 
 cs_install()
-cs_export(INCLUDE_DIRS include ${CMAKE_CURRENT_BINARY_DIR})
-          #CFG_EXTRAS manifold_mapping-extras.cmake)
+cs_export(INCLUDE_DIRS include ${CMAKE_CURRENT_BINARY_DIR}
+          CFG_EXTRAS cblox-extras.cmake)
