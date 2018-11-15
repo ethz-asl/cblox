@@ -12,26 +12,25 @@ namespace cblox {
 
 using namespace voxblox;
 
-// Class representing TSDF manifold map
 class TsdfSubmapCollection {
  public:
   typedef std::shared_ptr<TsdfSubmapCollection> Ptr;
   typedef std::shared_ptr<const TsdfSubmapCollection> ConstPtr;
 
-  // Constructor. Constructs an empty manifold map
+  // Constructor. Constructs an empty submap collection map
   TsdfSubmapCollection(const TsdfMap::Config& tsdf_map_config)
       : tsdf_map_config_(tsdf_map_config){};
 
-  // Constructor. Constructs a manifold from a list of maps
-  TsdfSubmapCollection(const TsdfMap::Config& tsdf_map_config,
-                  const std::vector<TsdfSubmap::Ptr>& tsdf_sub_maps)
+  // Constructor. Constructs a submap collection from a list of submaps
+  TsdfSubmapCollection(const TsdfMap::Config &tsdf_map_config,
+                       const std::vector<TsdfSubmap::Ptr> &tsdf_sub_maps)
       : tsdf_map_config_(tsdf_map_config), tsdf_sub_maps_(tsdf_sub_maps){};
 
   // Gets a vector of the linked keyframe IDs
   void getLinkedKeyframeIds(std::vector<KFId>* keyframe_ids) const;
   bool isBaseFrame(const KFId& kf_id) const;
 
-  // Creates a new submap on the tip of the manifold
+  // Creates a new submap on the top of the collection
   void createNewSubMap(const Transformation& T_M_S, KFId keyframe_id);
 
   // Gets a const reference to a raw submap
@@ -45,10 +44,10 @@ class TsdfSubmapCollection {
     return tsdf_sub_maps_;
   };
 
-  // Flattens the manifold map down to a normal TSDF map
+  // Flattens the collection map down to a normal TSDF map
   TsdfMap::Ptr getProjectedMap() const;
 
-  // Gets the pose of the patch on the tip of the manifold
+  // Gets the pose of the patch on the tip of the collection
   const Transformation getActiveSubMapPose() const {
     return tsdf_sub_maps_.back()->getPose();
   }
@@ -80,13 +79,13 @@ class TsdfSubmapCollection {
   void setSubMapPoses(const TransformationVector& transforms);
   void getSubMapPoses(AlignedVector<Transformation>* submap_poses) const;
 
-  // Clears the manifold map, leaving an empty map
+  // Clears the collection, leaving an empty map
   void clear() { tsdf_sub_maps_.clear(); };
 
-  // Returns true if the manifold map is empty
+  // Returns true if the collection is empty
   bool empty() const { return tsdf_sub_maps_.empty(); };
 
-  // The size of the manifold (number of patches)
+  // The size of the collection (number of patches)
   size_t size() const { return tsdf_sub_maps_.size(); };
   size_t num_patches() const { return tsdf_sub_maps_.size(); };
 
@@ -95,7 +94,7 @@ class TsdfSubmapCollection {
     return tsdf_sub_maps_.back()->block_size();
   };
 
-  // Save the manifold to file
+  // Save the collection to file
   bool saveToFile(const std::string& file_path) const;
 
   // Getting various protos for this object
@@ -107,11 +106,10 @@ class TsdfSubmapCollection {
   // Fusing the submap pairs
   void fuseSubmapPair(const KFIdPair& kf_id_pair);
 
-  // Gets the number of allocated blocks in the manifold
+  // Gets the number of allocated blocks in the collection
   size_t getNumberAllocatedBlocks() const;
 
  private:
-
   // TODO(alexmillane): Get some concurrency guards
 
   // The config used for the patches
@@ -122,7 +120,6 @@ class TsdfSubmapCollection {
 
   // A map keeping track of which KF belongs to which submap
   std::map<KFId, TsdfSubmap::Ptr> kf_to_submap_;
-
 };
 
 }  // namespace cblox

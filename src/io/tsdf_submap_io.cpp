@@ -10,24 +10,25 @@
 #include "./TsdfSubmapCollection.pb.h"
 
 #include "cblox/core/tsdf_submap.hpp"
-#include "cblox/utils/quat_transformation_protobuf_utils.hpp"
-
 #include "cblox/io/tsdf_submap_io.hpp"
+#include "cblox/utils/quat_transformation_protobuf_utils.hpp"
 
 namespace cblox {
 namespace io {
 
-bool SaveTsdfsubmapCollection(const TsdfSubmapCollection &tsdf_manifold_map,
-                              const std::string &file_path) {
-  return tsdf_manifold_map.saveToFile(file_path);
+bool SaveTsdfsubmapCollection(
+    const TsdfSubmapCollection &tsdf_submap_collection,
+    const std::string &file_path) {
+  return tsdf_submap_collection.saveToFile(file_path);
 }
 
-bool LoadTsdfSubmapFromStream(std::fstream *proto_file_ptr,
-                              TsdfSubmapCollection::Ptr tsdf_manifold_map_ptr,
-                              uint32_t *tmp_byte_offset_ptr) {
+bool LoadTsdfSubmapFromStream(
+    std::fstream *proto_file_ptr,
+    TsdfSubmapCollection::Ptr tsdf_submap_collection_ptr,
+    uint32_t *tmp_byte_offset_ptr) {
   // Checks
   CHECK_NOTNULL(proto_file_ptr);
-  CHECK(tsdf_manifold_map_ptr);
+  CHECK(tsdf_submap_collection_ptr);
   CHECK_NOTNULL(tmp_byte_offset_ptr);
 
   // Getting the header for this submap
@@ -54,14 +55,14 @@ bool LoadTsdfSubmapFromStream(std::fstream *proto_file_ptr,
             << q.x() << ", " << q.y() << ", " << q.z() << " ]" << std::endl;
 
   // Creating a new submap to hold the data
-  tsdf_manifold_map_ptr->createNewSubMap(T_M_S,
-                                         tsdf_sub_map_proto.keyframe_id());
+  tsdf_submap_collection_ptr->createNewSubMap(T_M_S,
+                                              tsdf_sub_map_proto.keyframe_id());
 
   // Getting the blocks for this submap (the tsdf layer)
   if (!voxblox::io::LoadBlocksFromStream(
           tsdf_sub_map_proto.num_blocks(),
           Layer<TsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
-          tsdf_manifold_map_ptr->getActiveTsdfMapPtr()->getTsdfLayerPtr(),
+          tsdf_submap_collection_ptr->getActiveTsdfMapPtr()->getTsdfLayerPtr(),
           tmp_byte_offset_ptr)) {
     LOG(ERROR) << "Could not load the blocks from stream.";
     return false;
@@ -72,9 +73,9 @@ bool LoadTsdfSubmapFromStream(std::fstream *proto_file_ptr,
 
 bool LoadTsdfSubmapCollection(
     const std::string &file_path,
-    TsdfSubmapCollection::Ptr *tsdf_manifold_map_ptr) {
+    TsdfSubmapCollection::Ptr *tsdf_submap_collection_ptr) {
   // Checks
-  // CHECK(tsdf_manifold_map_ptr);
+  // CHECK(tsdf_submap_collection_ptr);
   // Open and check the file
   std::fstream proto_file;
   proto_file.open(file_path, std::fstream::in);
@@ -88,7 +89,7 @@ bool LoadTsdfSubmapCollection(
   TsdfSubmapCollectionProto tsdf_submap_collection_proto;
   if (!utils::readProtoMsgFromStream(&proto_file, &tsdf_submap_collection_proto,
                                      &tmp_byte_offset)) {
-    LOG(ERROR) << "Could not read tsdf manifold map protobuf message.";
+    LOG(ERROR) << "Could not read tsdf submap collection map protobuf message.";
     return false;
   }
   // DEBUG
@@ -99,12 +100,12 @@ bool LoadTsdfSubmapCollection(
   std::cout << "tsdf_submap_collection_proto.num_submaps(): "
             << tsdf_submap_collection_proto.num_submaps() << std::endl;
 
-  // Creating the new manifold map based on the loaded parameters
+  // Creating the new submap collection based on the loaded parameters
   TsdfMap::Config tsdf_map_config;
   tsdf_map_config.tsdf_voxel_size = tsdf_submap_collection_proto.voxel_size();
   tsdf_map_config.tsdf_voxels_per_side =
       tsdf_submap_collection_proto.voxels_per_side();
-  tsdf_manifold_map_ptr->reset(new TsdfSubmapCollection(tsdf_map_config));
+  tsdf_submap_collection_ptr->reset(new TsdfSubmapCollection(tsdf_map_config));
 
   // Loading each of the tsdf sub maps
   for (size_t sub_map_index = 0;
@@ -113,7 +114,7 @@ bool LoadTsdfSubmapCollection(
     // DEBUG
     std::cout << "Loading tsdf sub map number: " << sub_map_index << std::endl;
     // Loading the submaps
-    if (!LoadTsdfSubmapFromStream(&proto_file, *tsdf_manifold_map_ptr,
+    if (!LoadTsdfSubmapFromStream(&proto_file, *tsdf_submap_collection_ptr,
                                   &tmp_byte_offset)) {
       LOG(ERROR) << "Could not load the tsdf sub map from stream.";
       return false;
@@ -230,4 +231,4 @@ bool LoadTransformationArray(
 
 }  // namespace io
 
-}  // namespace cblox
+} // namespace cblox

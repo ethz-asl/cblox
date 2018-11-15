@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 #include <glog/logging.h>
 
@@ -36,7 +37,7 @@ void TsdfSubmapMesher::generateCombinedMesh(
   // Getting the submaps
   const std::vector<TsdfSubmap::Ptr>& tsdf_sub_maps =
       tsdf_submap_collection.getSubMaps();
-  // Getting the Tsdf map which is the projection of the manifold
+  // Getting the Tsdf map which is the projection of the submap collection
   TsdfMap::Ptr combined_tsdf_map_ptr = tsdf_submap_collection.getProjectedMap();
   // Creating a new mesh layer and making it active
   MeshIntegrator<voxblox::TsdfVoxel> mesh_integrator(
@@ -176,13 +177,13 @@ void TsdfSubmapMesher::generateTrimmedCombinedMesh(
     // Adding the new map to the list
     trimmed_tsdf_sub_maps.push_back(trimmed_tsdf_sub_map_ptr);
   }
-  // Creating a new manifold from these maps
-  TsdfSubmapCollection tsdf_manifold_map_trimmed(
+  // Creating a new submap collection from these maps
+  TsdfSubmapCollection tsdf_submap_collection_trimmed(
       tsdf_submap_collection.getConfig(), trimmed_tsdf_sub_maps);
   std::cout << "Starting combination." << std::endl;
-  // Getting the Tsdf map which is the projection of the manifold
+  // Getting the Tsdf map which is the projection of the submap collection
   TsdfMap::Ptr combined_tsdf_map_ptr =
-      tsdf_manifold_map_trimmed.getProjectedMap();
+      tsdf_submap_collection_trimmed.getProjectedMap();
   // Getting the pointers to the combined Tsdf Map
   // MeshLayer combined_mesh_layer(combined_tsdf_map_ptr->block_size());
   // Creating a new mesh layer and making it active

@@ -1,18 +1,15 @@
 #include <iostream>
+#include <string>
+#include <vector>
 
 #include <glog/logging.h>
 
 #include <voxblox/integrator/merge_integration.h>
 #include <voxblox/utils/protobuf_utils.h>
 
-// REMOVE MEEEE ONCE INSIDE THE SUBMAP
-//#include "./QuatTransformation.pb.h"
-
 #include "cblox/core/tsdf_submap_collection.hpp"
 
 namespace cblox {
-
-// using namespace voxblox;
 
 void TsdfSubmapCollection::getLinkedKeyframeIds(
     std::vector<KFId>* keyframe_ids) const {
@@ -67,7 +64,7 @@ TsdfMap::Ptr TsdfSubmapCollection::getProjectedMap() const {
 }
 
 bool TsdfSubmapCollection::setSubMapPose(const KFId kf_id,
-                                    const Transformation& pose) {
+                                         const Transformation &pose) {
   // Looking for the submap
   const auto tsdf_submap_ptr_it = kf_to_submap_.find(kf_id);
   if (tsdf_submap_ptr_it != kf_to_submap_.end()) {
@@ -81,7 +78,8 @@ bool TsdfSubmapCollection::setSubMapPose(const KFId kf_id,
   }
 }
 
-void TsdfSubmapCollection::setSubMapPoses(const TransformationVector& transforms) {
+void TsdfSubmapCollection::setSubMapPoses(
+    const TransformationVector &transforms) {
   // Updating the poses
   // NOTE(alexmillane): This assumes that the order of transforms matches the
   //                    submap order.
@@ -103,8 +101,8 @@ void TsdfSubmapCollection::getSubMapPoses(
   }
 }
 
-bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(const KFId kf_id,
-                                                KFId* submap_id_ptr) const {
+bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(
+    const KFId kf_id, KFId *submap_id_ptr) const {
   const auto tsdf_submap_ptr_it = kf_to_submap_.find(kf_id);
   if (tsdf_submap_ptr_it != kf_to_submap_.end()) {
     *submap_id_ptr = (*tsdf_submap_ptr_it).second->getKeyframeID();
@@ -125,12 +123,12 @@ bool TsdfSubmapCollection::saveToFile(const std::string& file_path) const {
     LOG(ERROR) << "Could not open file for writing: " << file_path;
     return false;
   }
-  // Saving the manifold map header object
+  // Saving the submap collection header object
   TsdfSubmapCollectionProto tsdf_submap_collection_proto;
   getProto(&tsdf_submap_collection_proto);
   // Write out the layer header.
   if (!utils::writeProtoMsgToStream(tsdf_submap_collection_proto, &outfile)) {
-    LOG(ERROR) << "Could not write manifold map header message.";
+    LOG(ERROR) << "Could not write submap collection header message.";
     outfile.close();
     return false;
   }
@@ -151,7 +149,7 @@ bool TsdfSubmapCollection::saveToFile(const std::string& file_path) const {
 void TsdfSubmapCollection::getProto(TsdfSubmapCollectionProto* proto) const {
   // Checks
   CHECK_NOTNULL(proto);
-  // Filling out the description of the manifold
+  // Filling out the description of the submap collection
   proto->set_voxel_size(tsdf_map_config_.tsdf_voxel_size);
   proto->set_voxels_per_side(tsdf_map_config_.tsdf_voxels_per_side);
   proto->set_num_submaps(num_patches());
@@ -191,7 +189,7 @@ void TsdfSubmapCollection::fuseSubmapPair(const KFIdPair& kf_id_pair) {
     for (auto& kf_id_submap_pair : kf_to_submap_) {
       if (kf_id_submap_pair.second == submap_ptr_2) {
         kf_id_submap_pair.second = submap_ptr_1;
-        //std::cout << "Moved KF ID: " << kf_id_submap_pair.first
+        // std::cout << "Moved KF ID: " << kf_id_submap_pair.first
         //          << " from submap ID: " << submap_ptr_2->getKeyframeID()
         //          << " to submap ID: " << submap_ptr_1->getKeyframeID()
         //          << std::endl;
@@ -203,7 +201,7 @@ void TsdfSubmapCollection::fuseSubmapPair(const KFIdPair& kf_id_pair) {
       if (*submap_ptr_it == submap_ptr_2) {
         tsdf_sub_maps_.erase(submap_ptr_it);
         std::cout << "Erased the submap: " << submap_ptr_2->getKeyframeID()
-                  << " from the manifold" << std::endl;
+                  << " from the submap collection" << std::endl;
         break;
       }
     }
@@ -222,4 +220,4 @@ size_t TsdfSubmapCollection::getNumberAllocatedBlocks() const {
   return total_blocks;
 }
 
-}  // namespace cblox
+} // namespace cblox

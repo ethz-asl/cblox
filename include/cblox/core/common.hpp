@@ -1,9 +1,9 @@
 #ifndef CBLOX_CORE_COMMON_H_
 #define CBLOX_CORE_COMMON_H_
 
-#include <vector>
 #include <deque>
 #include <map>
+#include <vector>
 
 #include <ros/time.h>
 
@@ -24,7 +24,7 @@ typedef kindr::minimal::QuatTransformationTemplate<FloatingPoint>
 typedef kindr::minimal::RotationQuaternionTemplate<FloatingPoint> Quaternion;
 
 // Defines
-typedef unsigned int KFId; 
+typedef unsigned int KFId;
 typedef std::pair<KFId, KFId> KFIdPair;
 typedef std::pair<KFId, KFId> KFIdPair;
 
@@ -39,14 +39,14 @@ typedef AlignedVector<Transformation> TransformationVector;
 
 // Taking timing from voxblox
 namespace timing {
-  using namespace voxblox::timing;
+using namespace voxblox::timing;
 }  // namespace timing
 
 }  // namespace cblox
 
 // Linking common Eigen stuff to floating point
 namespace Eigen {
-  typedef Matrix<cblox::FloatingPoint, 3, 1> Vector3;
+typedef Matrix<cblox::FloatingPoint, 3, 1> Vector3;
 }  // namespace Eigen
 
 #endif /* CBLOX_CORE_COMMON_H_ */

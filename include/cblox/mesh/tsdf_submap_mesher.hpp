@@ -27,25 +27,25 @@ class TsdfSubmapMesher {
       : tsdf_map_config_(tsdf_map_config), mesh_config_(mesh_config){};
 
   // Generating various meshes
-  void generateSeparatedMesh(const TsdfSubmapCollection& tsdf_manifold_map,
-                             MeshLayer* seperated_mesh_layer_ptr);
-  void generateCombinedMesh(const TsdfSubmapCollection& tsdf_manifold_map,
-                            MeshLayer* combined_mesh_layer_ptr);
-  void generatePatchMeshes(const TsdfSubmapCollection& tsdf_manifold_map,
-                           std::vector<MeshLayer::Ptr>* sub_map_mesh_layers);
+  void generateSeparatedMesh(const TsdfSubmapCollection &tsdf_submap_collection,
+                             MeshLayer *seperated_mesh_layer_ptr);
+  void generateCombinedMesh(const TsdfSubmapCollection &tsdf_submap_collection,
+                            MeshLayer *combined_mesh_layer_ptr);
+  void generatePatchMeshes(const TsdfSubmapCollection &tsdf_submap_collection,
+                           std::vector<MeshLayer::Ptr> *sub_map_mesh_layers);
 
   // NOTE(alex.millane): Generates a mesh to test interpolation methods.
   //                     Transforms the TSDF then generates meshses and combines
   // TODO(alex.millane): Remove once happy with the interpolator performance.
   void generateInterpolationTestMesh(
-      const TsdfSubmapCollection& tsdf_manifold_map,
-      MeshLayer* interpolation_test_mesh_layer_ptr);
+      const TsdfSubmapCollection &tsdf_submap_collection,
+      MeshLayer *interpolation_test_mesh_layer_ptr);
 
   // Generates a mesh from submaps which have been trimmed in height
   // TODO(alex.millane): This is kind of filthy, but useful for evaluation.
   void generateTrimmedCombinedMesh(
-      const TsdfSubmapCollection& tsdf_manifold_map, double mesh_trim_height,
-      MeshLayer* combined_mesh_layer_ptr);
+      const TsdfSubmapCollection &tsdf_submap_collection,
+      double mesh_trim_height, MeshLayer *combined_mesh_layer_ptr);
 
   // Generates mesh layers from the TSDF submaps
   void generateSeparatedMeshLayers(
@@ -90,8 +90,8 @@ class TsdfSubmapMesher {
       std::vector<MeshLayer::Ptr>* sub_map_mesh_layers) const;
   void colorMeshLayer(const Color& color_in, MeshLayer* mesh_layer_ptr) const;
 
-  // Functions for interacting with the manifold map
-  // TODO(alex.millane): Should be encapsulated into the manifold map
+  // Functions for interacting with the submap collection
+  // TODO(alex.millane): Should be encapsulated into the submap collection
   void trimSubmapToHeight(const float trim_height,
                           const TsdfSubmap& tsdf_sub_map,
                           TsdfSubmap* trimmed_tsdf_sub_map_ptr) const;

@@ -11,7 +11,7 @@ void TsdfSubmap::getProto(TsdfSubmapProto* proto) const {
   QuatTransformationProto* transformation_proto_ptr =
       new QuatTransformationProto();
   conversions::transformKindrToProto(T_M_S_, transformation_proto_ptr);
-  // Filling out the description of the manifold
+  // Filling out the description of the submap
   proto->set_keyframe_id(keyframe_id_);
   proto->set_num_blocks(num_blocks);
   proto->set_allocated_transform(transformation_proto_ptr);
@@ -41,4 +41,4 @@ bool TsdfSubmap::saveToStream(std::fstream* outfile_ptr) const {
   return true;
 }
 
-}  // namespace cblox
+} // namespace cblox
