@@ -7,7 +7,7 @@
 #include <voxblox/integrator/merge_integration.h>
 #include <voxblox/utils/protobuf_utils.h>
 
-#include "cblox/core/tsdf_submap_collection.hpp"
+#include "cblox/core/tsdf_submap_collection.h"
 
 namespace cblox {
 

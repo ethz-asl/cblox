@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include "cblox/core/common.hpp"
-#include "cblox/core/tsdf_submap_collection.hpp"
+#include "cblox/core/common.h"
+#include "cblox/core/tsdf_submap_collection.h"
 
 namespace cblox {
 namespace io {

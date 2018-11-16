@@ -3,7 +3,7 @@
 
 #include <glog/logging.h>
 
-#include "cblox/mesh/tsdf_submap_mesher.hpp"
+#include "cblox/mesh/tsdf_submap_mesher.h"
 
 namespace cblox {
 

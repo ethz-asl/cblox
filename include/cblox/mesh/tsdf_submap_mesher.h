@@ -1,6 +1,9 @@
 #ifndef CBLOX_MESH_TSDF_SUBMAP_MESHER_H_
 #define CBLOX_MESH_TSDF_SUBMAP_MESHER_H_
 
+#include <memory>
+#include <vector>
+
 #include <voxblox/core/tsdf_map.h>
 #include <voxblox/integrator/merge_integration.h>
 #include <voxblox/integrator/tsdf_integrator.h>
@@ -8,9 +11,9 @@
 #include <voxblox/mesh/mesh_integrator.h>
 #include <voxblox/mesh/mesh_layer.h>
 
-#include "cblox/core/common.hpp"
-#include "cblox/core/tsdf_submap.hpp"
-#include "cblox/core/tsdf_submap_collection.hpp"
+#include "cblox/core/common.h"
+#include "cblox/core/tsdf_submap.h"
+#include "cblox/core/tsdf_submap_collection.h"
 
 namespace cblox {
 
@@ -22,9 +25,9 @@ class TsdfSubmapMesher {
   typedef std::shared_ptr<const TsdfSubmapMesher> ConstPtr;
 
   // Constructor
-  TsdfSubmapMesher(const TsdfMap::Config& tsdf_map_config,
-                   const MeshIntegratorConfig& mesh_config)
-      : tsdf_map_config_(tsdf_map_config), mesh_config_(mesh_config){};
+  TsdfSubmapMesher(const TsdfMap::Config &tsdf_map_config,
+                   const MeshIntegratorConfig &mesh_config)
+      : tsdf_map_config_(tsdf_map_config), mesh_config_(mesh_config) {}
 
   // Generating various meshes
   void generateSeparatedMesh(const TsdfSubmapCollection &tsdf_submap_collection,
@@ -49,52 +52,52 @@ class TsdfSubmapMesher {
 
   // Generates mesh layers from the TSDF submaps
   void generateSeparatedMeshLayers(
-      const std::vector<TsdfSubmap::Ptr>& tsdf_sub_maps,
-      std::vector<MeshLayer::Ptr>* sub_map_mesh_layers);
+      const std::vector<TsdfSubmap::Ptr> &tsdf_sub_maps,
+      std::vector<MeshLayer::Ptr> *sub_map_mesh_layers);
 
   // Transforms a vector of mesh layers by a vector of posses
   void transformMeshLayers(
-      const std::vector<MeshLayer::Ptr>& sub_map_mesh_layers,
-      const AlignedVector<Transformation>& sub_map_poses,
-      std::vector<MeshLayer::Ptr>* transformed_sub_map_mesh_layers);
+      const std::vector<MeshLayer::Ptr> &sub_map_mesh_layers,
+      const AlignedVector<Transformation> &sub_map_poses,
+      std::vector<MeshLayer::Ptr> *transformed_sub_map_mesh_layers);
   // Transforms a single mesh layer
-  MeshLayer::Ptr transformMeshLayer(const MeshLayer& mesh_layer,
-                                    const Transformation& transformation);
+  MeshLayer::Ptr transformMeshLayer(const MeshLayer &mesh_layer,
+                                    const Transformation &transformation);
 
   // Combine the mesh layers
-  void combineMeshLayers(const std::vector<MeshLayer::Ptr>& sub_map_mesh_layers,
-                         const AlignedVector<Transformation>& submap_poses,
-                         MeshLayer* combined_mesh_layer_ptr);
+  void combineMeshLayers(const std::vector<MeshLayer::Ptr> &sub_map_mesh_layers,
+                         const AlignedVector<Transformation> &submap_poses,
+                         MeshLayer *combined_mesh_layer_ptr);
 
   // Transform and add funcions
   // TODO(alex.millane): There's a lot of code duplication in the
   //                     implementation. Clean up.
-  void transformAndAddTrianglesToLayer(const MeshLayer& input_mesh_layer,
-                                       const Transformation& T_B_A,
-                                       MeshLayer* output_mesh_layer);
-  void transformAndAddTriangleToMesh(const Mesh& input_mesh,
+  void transformAndAddTrianglesToLayer(const MeshLayer &input_mesh_layer,
+                                       const Transformation &T_B_A,
+                                       MeshLayer *output_mesh_layer);
+  void transformAndAddTriangleToMesh(const Mesh &input_mesh,
                                      const VertexIndex start_index,
-                                     const Transformation& T_B_A,
-                                     Mesh* output_mesh);
+                                     const Transformation &T_B_A,
+                                     Mesh *output_mesh);
 
   // Add without transforming functions
   // TODO(alex.millane): There's a lot of code duplication in the
   //                     implementation. Clean up.
-  void addTrianglesToLayer(const MeshLayer& input_mesh_layer,
-                           MeshLayer* output_mesh_layer);
-  void addTriangleToMesh(const Mesh& input_mesh, const VertexIndex start_index,
-                         Mesh* output_mesh);
+  void addTrianglesToLayer(const MeshLayer &input_mesh_layer,
+                           MeshLayer *output_mesh_layer);
+  void addTriangleToMesh(const Mesh &input_mesh, const VertexIndex start_index,
+                         Mesh *output_mesh);
 
   // Functions for coloring meshes
   void colorMeshLayersWithIndex(
-      std::vector<MeshLayer::Ptr>* sub_map_mesh_layers) const;
-  void colorMeshLayer(const Color& color_in, MeshLayer* mesh_layer_ptr) const;
+      std::vector<MeshLayer::Ptr> *sub_map_mesh_layers) const;
+  void colorMeshLayer(const Color &color_in, MeshLayer *mesh_layer_ptr) const;
 
   // Functions for interacting with the submap collection
   // TODO(alex.millane): Should be encapsulated into the submap collection
   void trimSubmapToHeight(const float trim_height,
-                          const TsdfSubmap& tsdf_sub_map,
-                          TsdfSubmap* trimmed_tsdf_sub_map_ptr) const;
+                          const TsdfSubmap &tsdf_sub_map,
+                          TsdfSubmap *trimmed_tsdf_sub_map_ptr) const;
 
  private:
   // The configs

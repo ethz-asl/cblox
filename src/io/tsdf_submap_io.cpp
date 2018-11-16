@@ -9,9 +9,9 @@
 #include "./TsdfSubmap.pb.h"
 #include "./TsdfSubmapCollection.pb.h"
 
-#include "cblox/core/tsdf_submap.hpp"
-#include "cblox/io/tsdf_submap_io.hpp"
-#include "cblox/utils/quat_transformation_protobuf_utils.hpp"
+#include "cblox/core/tsdf_submap.h"
+#include "cblox/io/tsdf_submap_io.h"
+#include "cblox/utils/quat_transformation_protobuf_utils.h"
 
 namespace cblox {
 namespace io {

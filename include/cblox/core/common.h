@@ -3,6 +3,7 @@
 
 #include <deque>
 #include <map>
+#include <utility>
 #include <vector>
 
 #include <kindr/minimal/quat-transformation.h>

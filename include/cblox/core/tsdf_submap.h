@@ -1,6 +1,7 @@
 #ifndef CBLOX_CORE_TSDF_SUBMAP_H_
 #define CBLOX_CORE_TSDF_SUBMAP_H_
 
+#include <memory>
 #include <mutex>
 
 #include <Eigen/Geometry>
@@ -10,7 +11,7 @@
 
 #include "./TsdfSubmap.pb.h"
 
-#include "cblox/core/common.hpp"
+#include "cblox/core/common.h"
 
 namespace cblox {
 
@@ -42,7 +43,7 @@ class TsdfSubmap {
 
   // Returns the underlying map pointers
   TsdfMap::Ptr getTsdfMapPtr() { return tsdf_map_; }
-  const TsdfMap& getTsdfMap() const { return *tsdf_map_; }
+  const TsdfMap &getTsdfMap() const { return *tsdf_map_; }
 
   // Submap pose interaction
   const Transformation getPose() const {
@@ -50,7 +51,7 @@ class TsdfSubmap {
     return T_M_S_;
   }
 
-  void setPose(const Transformation& T_M_S) {
+  void setPose(const Transformation &T_M_S) {
     std::unique_lock<std::mutex> lock(transformation_mutex);
     T_M_S_ = T_M_S;
   }
@@ -61,13 +62,13 @@ class TsdfSubmap {
 
   size_t getNumberAllocatedBlocks() const {
     return tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks();
-  };
+  }
 
   // Getting the proto for this submap
-  void getProto(TsdfSubmapProto* proto) const;
+  void getProto(TsdfSubmapProto *proto) const;
 
   // Save the submap to file
-  bool saveToStream(std::fstream* outfile_ptr) const;
+  bool saveToStream(std::fstream *outfile_ptr) const;
 
  private:
   // The pose of this submap in the global map frame

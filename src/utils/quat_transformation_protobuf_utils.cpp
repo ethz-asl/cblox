@@ -1,4 +1,4 @@
-#include "cblox/utils/quat_transformation_protobuf_utils.hpp"
+#include "cblox/utils/quat_transformation_protobuf_utils.h"
 
 namespace cblox {
 namespace conversions {
@@ -29,5 +29,5 @@ void transformProtoToKindr(
   *transformation = Transformation(q, t);
 }
 
-}  // namespace utils
+}  // namespace conversions
 }  // namespace cblox
