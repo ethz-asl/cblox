@@ -9,7 +9,7 @@
 namespace cblox {
 namespace io {
 
-bool SaveTsdfsubmapCollection(
+bool SaveTsdfSubmapCollection(
     const TsdfSubmapCollection &tsdf_submap_collection,
     const std::string &file_path);
 
