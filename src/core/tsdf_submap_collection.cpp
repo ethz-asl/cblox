@@ -43,6 +43,13 @@ void TsdfSubmapCollection::createNewSubMap(const Transformation &T_M_S,
   tsdf_sub_maps_.push_back(tsdf_sub_map);
 }
 
+void TsdfSubmapCollection::createNewSubMap(const Transformation &T_M_S) {
+  // Increment ID and create new submap
+  SubmapID new_ID = 0;
+  if (!tsdf_sub_maps_.empty()) new_ID = tsdf_sub_maps_.back()->getID() + 1;
+  createNewSubMap(T_M_S, new_ID);
+}
+
 TsdfMap::Ptr TsdfSubmapCollection::getProjectedMap() const {
   // Creating the global tsdf map and getting its tsdf layer
   TsdfMap::Ptr projected_tsdf_map_ptr =

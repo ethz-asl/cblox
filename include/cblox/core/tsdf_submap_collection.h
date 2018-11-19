@@ -37,6 +37,7 @@ class TsdfSubmapCollection {
 
   // Creates a new submap on the top of the collection
   void createNewSubMap(const Transformation &T_M_S, SubmapID submap_id);
+  void createNewSubMap(const Transformation &T_M_S);
 
   // Gets a const reference to a raw submap
   const TsdfSubmap &getSubMap(size_t sub_map_index) const {
