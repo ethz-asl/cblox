@@ -22,14 +22,6 @@ bool LoadTsdfSubmapCollection(
     const std::string &file_path,
     TsdfSubmapCollection::Ptr *tsdf_submap_collection_ptr);
 
-bool SaveTransformationArray(
-    const AlignedVector<Transformation> &transformation_array,
-    const std::string &file_path);
-
-bool LoadTransformationArray(
-    const std::string &file_path,
-    AlignedVector<Transformation> *transformation_array_ptr);
-
 }  // namespace io
 }  // namespace cblox
 
