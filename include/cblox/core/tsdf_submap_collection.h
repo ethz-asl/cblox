@@ -58,6 +58,11 @@ class TsdfSubmapCollection {
     return tsdf_sub_maps_.back()->getPose();
   }
 
+  // Gets the ID of the patch on the tip of the collection
+  const SubmapID getActiveSubMapID() const {
+    return tsdf_sub_maps_.back()->getID();
+  }
+
   // Gets a pointer to the active tsdf_map
   TsdfMap::Ptr getActiveTsdfMapPtr() {
     return tsdf_sub_maps_.back()->getTsdfMapPtr();
