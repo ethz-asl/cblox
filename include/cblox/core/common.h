@@ -35,10 +35,11 @@ using AlignedDeque = std::deque<Type, Eigen::aligned_allocator<Type>>;
 // Containers of transforms
 typedef AlignedVector<Transformation> TransformationVector;
 
+// TODO(alexmillane): Put this back in when transitioning the integrator.
 // Taking timing from voxblox
-namespace timing {
-using namespace voxblox::timing;
-}  // namespace timing
+// namespace timing {
+// using namespace voxblox::timing;
+//}  // namespace timing
 
 }  // namespace cblox
 

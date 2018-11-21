@@ -30,6 +30,7 @@ cs_add_library(cblox_lib
   src/utils/quat_transformation_protobuf_utils.cpp
   src/mesh/tsdf_submap_mesher.cpp
   src/io/tsdf_submap_io.cpp
+  src/io/transformation_io.cpp
   ${PROTO_SRCS}
 )
 target_link_libraries(cblox_lib ${catkin_LIBRARIES})
