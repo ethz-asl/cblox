@@ -53,7 +53,7 @@ class TsdfSubmapCollection {
   TsdfMap::Ptr getProjectedMap() const;
 
   // Gets the pose of the patch on the tip of the collection
-  const Transformation getActiveSubMapPose() const {
+  const Transformation &getActiveSubMapPose() const {
     return tsdf_sub_maps_.back()->getPose();
   }
 
