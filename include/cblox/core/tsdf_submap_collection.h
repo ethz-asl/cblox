@@ -60,7 +60,9 @@ class TsdfSubmapCollection {
 
   // Gets the ID of the patch on the tip of the collection
   const SubmapID getActiveSubMapID() const {
-    return tsdf_sub_maps_.back()->getID();
+    if (!tsdf_sub_maps_.empty())  // First check if the collection is not empty (to avoid segfault)
+      return tsdf_sub_maps_.back()->getID();
+    else return 0;
   }
 
   // Gets a pointer to the active tsdf_map
