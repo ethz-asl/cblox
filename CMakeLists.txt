@@ -27,6 +27,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 cs_add_library(cblox_lib
   src/core/tsdf_submap_collection.cpp
   src/core/tsdf_submap.cpp
+  src/integrator/tsdf_submap_collection_integrator.cpp
   src/utils/quat_transformation_protobuf_utils.cpp
   src/mesh/tsdf_submap_mesher.cpp
   src/io/tsdf_submap_io.cpp
