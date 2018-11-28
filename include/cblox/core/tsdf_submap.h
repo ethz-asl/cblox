@@ -46,7 +46,7 @@ class TsdfSubmap {
   const TsdfMap &getTsdfMap() const { return *tsdf_map_; }
 
   // Submap pose interaction
-  const Transformation getPose() const {
+  const Transformation &getPose() const {
     std::unique_lock<std::mutex> lock(transformation_mutex);
     return T_M_S_;
   }
