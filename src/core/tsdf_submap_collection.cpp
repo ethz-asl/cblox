@@ -97,6 +97,21 @@ void TsdfSubmapCollection::setSubMapPoses(
   }
 }
 
+bool TsdfSubmapCollection::getSubMapPose(const cblox::SubmapID submap_id, cblox::Transformation &pose) const {
+  // Looking for the submap
+  const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
+  if (tsdf_submap_ptr_it != id_to_submap_.end()) {
+    TsdfSubmap::Ptr submap_ptr = (*tsdf_submap_ptr_it).second;
+    pose = submap_ptr->getPose();
+    return true;
+  } else {
+    std::cout << "Tried to get the pose of the submap with submap_id: "
+              << submap_id << " and could not find the linked submap."
+              << std::endl;
+    return false;
+  }
+}
+
 void TsdfSubmapCollection::getSubMapPoses(
     AlignedVector<Transformation>* submap_poses_ptr) const {
   // Checks
