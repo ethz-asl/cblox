@@ -41,6 +41,7 @@ void TsdfSubmapCollection::createNewSubMap(const Transformation &T_M_S,
   TsdfSubmap::Ptr tsdf_sub_map(
       new TsdfSubmap(T_M_S, submap_id, tsdf_map_config_));
   tsdf_sub_maps_.push_back(tsdf_sub_map);
+  id_to_submap_.emplace(submap_id, tsdf_sub_map);
 }
 
 void TsdfSubmapCollection::createNewSubMap(const Transformation &T_M_S) {
