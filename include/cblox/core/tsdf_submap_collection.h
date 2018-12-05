@@ -87,6 +87,8 @@ class TsdfSubmapCollection {
   // Gets the tsdf submap associated with the passed ID
   bool getAssociatedTsdfSubMapID(const SubmapID submap_id,
                                  SubmapID *submap_id_ptr) const;
+  bool getTsdfSubmapPtrById(const SubmapID submap_id,
+                            TsdfMap::Ptr& submap_ptr) const;
 
   // Interacting with the submap poses
   bool setSubMapPose(const SubmapID submap_id, const Transformation &pose);
@@ -135,6 +137,7 @@ class TsdfSubmapCollection {
 
   // A map keeping track of which ID belongs to which submap
   std::map<SubmapID, TsdfSubmap::Ptr> id_to_submap_;
+  // TODO(victorr): why not always use this and remove tsdf_sub_maps_ to avoid redudant data storage
 };
 
 }  // namespace cblox
