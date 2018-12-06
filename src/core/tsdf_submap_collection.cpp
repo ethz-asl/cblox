@@ -138,10 +138,10 @@ bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(
 }
 
 bool TsdfSubmapCollection::getTsdfSubmapPtrById(const SubmapID submap_id,
-                                                TsdfMap::Ptr& submap_ptr) const {
+                                                TsdfSubmap::Ptr& submap_ptr) const {
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
-    submap_ptr = tsdf_submap_ptr_it->second->getTsdfMapPtr();
+    submap_ptr = tsdf_submap_ptr_it->second;
     return true;
   } else {
     // std::cout << "Cant find the requested submap_id: " << submap_id
