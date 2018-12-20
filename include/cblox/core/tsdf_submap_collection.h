@@ -39,6 +39,9 @@ class TsdfSubmapCollection {
   void createNewSubMap(const Transformation &T_M_S, SubmapID submap_id);
   void createNewSubMap(const Transformation &T_M_S);
 
+  // Create a new submap which duplicates an existing source submap
+  bool duplicateSubMap(const cblox::SubmapID source_submap_id, const cblox::SubmapID new_submap_id);
+
   // Gets a const reference to a raw submap
   const TsdfSubmap &getSubMap(size_t sub_map_index) const {
     CHECK_LT(sub_map_index, tsdf_sub_maps_.size());
@@ -87,8 +90,10 @@ class TsdfSubmapCollection {
   // Gets the tsdf submap associated with the passed ID
   bool getAssociatedTsdfSubMapID(const SubmapID submap_id,
                                  SubmapID *submap_id_ptr) const;
+  bool getTsdfSubmapRawPtrById(const SubmapID submap_id,
+                               const TsdfSubmap *submap_ptr) const;
   bool getTsdfSubmapConstPtrById(const SubmapID submap_id,
-                                 const TsdfSubmap* submap_ptr) const;
+                                 TsdfSubmap::ConstPtr submap_const_ptr) const;
 
   // Interacting with the submap poses
   bool setSubMapPose(const SubmapID submap_id, const Transformation &pose);

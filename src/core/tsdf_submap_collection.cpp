@@ -51,6 +51,27 @@ void TsdfSubmapCollection::createNewSubMap(const Transformation &T_M_S) {
   createNewSubMap(T_M_S, new_ID);
 }
 
+bool TsdfSubmapCollection::duplicateSubMap(const cblox::SubmapID source_submap_id, const cblox::SubmapID new_submap_id) {
+  // Get pointer to the source submap
+  const auto src_submap_ptr_it = id_to_submap_.find(source_submap_id);
+  if (src_submap_ptr_it != id_to_submap_.end()) {
+    TsdfSubmap::Ptr src_submap_ptr = src_submap_ptr_it->second;
+    // Create a new submap with the same pose and get its pointer
+    const Transformation T_M_S = src_submap_ptr->getPose();
+    createNewSubMap(T_M_S, new_submap_id);
+    const auto new_submap_ptr_it = id_to_submap_.find(new_submap_id);
+    if (new_submap_ptr_it != id_to_submap_.end()) {
+      TsdfSubmap::Ptr new_submap_ptr = new_submap_ptr_it->second;
+      // Copy the TSDF layer from the source to the new submap
+      Layer<TsdfVoxel>* new_tsdf_layer_ptr = new_submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr();
+      delete(new_tsdf_layer_ptr);
+      *new_tsdf_layer_ptr = *(new voxblox::Layer<voxblox::TsdfVoxel>(new_submap_ptr->getTsdfMap().getTsdfLayer()));
+      return true;
+    }
+  }
+  return false;
+}
+
 TsdfMap::Ptr TsdfSubmapCollection::getProjectedMap() const {
   // Creating the global tsdf map and getting its tsdf layer
   TsdfMap::Ptr projected_tsdf_map_ptr =
@@ -124,8 +145,8 @@ void TsdfSubmapCollection::getSubMapPoses(
   }
 }
 
-bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(
-    const SubmapID submap_id, SubmapID *submap_id_ptr) const {
+bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(const SubmapID submap_id,
+                                                     SubmapID *submap_id_ptr) const {
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
     *submap_id_ptr = tsdf_submap_ptr_it->second->getID();
@@ -137,11 +158,24 @@ bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(
   }
 }
 
-bool TsdfSubmapCollection::getTsdfSubmapConstPtrById(const SubmapID submap_id,
-                                                     const TsdfSubmap* submap_ptr) const {
+bool TsdfSubmapCollection::getTsdfSubmapRawPtrById(const SubmapID submap_id,
+                                                   const TsdfSubmap *submap_ptr) const {
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
     submap_ptr = tsdf_submap_ptr_it->second.get();
+    return true;
+  } else {
+    // std::cout << "Cant find the requested submap_id: " << submap_id
+    //          << " associated with any submap" << std::endl;
+    return false;
+  }
+}
+
+bool TsdfSubmapCollection::getTsdfSubmapConstPtrById(const cblox::SubmapID submap_id,
+                                                     cblox::TsdfSubmap::ConstPtr submap_const_ptr) const {
+  const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
+  if (tsdf_submap_ptr_it != id_to_submap_.end()) {
+    submap_const_ptr = tsdf_submap_ptr_it->second;
     return true;
   } else {
     // std::cout << "Cant find the requested submap_id: " << submap_id
