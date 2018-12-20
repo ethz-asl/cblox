@@ -58,16 +58,15 @@ bool TsdfSubmapCollection::duplicateSubMap(const cblox::SubmapID source_submap_i
     TsdfSubmap::Ptr src_submap_ptr = src_submap_ptr_it->second;
     // Create a new submap with the same pose and get its pointer
     const Transformation T_M_S = src_submap_ptr->getPose();
-    createNewSubMap(T_M_S, new_submap_id);
-    const auto new_submap_ptr_it = id_to_submap_.find(new_submap_id);
-    if (new_submap_ptr_it != id_to_submap_.end()) {
-      TsdfSubmap::Ptr new_submap_ptr = new_submap_ptr_it->second;
-      // Copy the TSDF layer from the source to the new submap
-      Layer<TsdfVoxel>* new_tsdf_layer_ptr = new_submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr();
-      delete(new_tsdf_layer_ptr);
-      *new_tsdf_layer_ptr = *(new voxblox::Layer<voxblox::TsdfVoxel>(new_submap_ptr->getTsdfMap().getTsdfLayer()));
-      return true;
-    }
+    // Creating the new submap and adding it to the list
+    TsdfSubmap::Ptr tsdf_sub_map(
+        new TsdfSubmap(T_M_S, new_submap_id, tsdf_map_config_));
+    // Reset the TsdfMap based on a copy of the source submap's TSDF layer
+    // TODO(victorr): Find a better way to do this (however with .reset(new ...) the layer doesn't show up)
+    *(tsdf_sub_map->getTsdfMapPtr()) = *(new TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
+    tsdf_sub_maps_.push_back(tsdf_sub_map);
+    id_to_submap_.emplace(new_submap_id, tsdf_sub_map);
+    return true;
   }
   return false;
 }
