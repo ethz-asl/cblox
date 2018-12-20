@@ -90,10 +90,8 @@ class TsdfSubmapCollection {
   // Gets the tsdf submap associated with the passed ID
   bool getAssociatedTsdfSubMapID(const SubmapID submap_id,
                                  SubmapID *submap_id_ptr) const;
-  bool getTsdfSubmapRawPtrById(const SubmapID submap_id,
-                               const TsdfSubmap *submap_ptr) const;
   bool getTsdfSubmapConstPtrById(const SubmapID submap_id,
-                                 TsdfSubmap::ConstPtr submap_const_ptr) const;
+                                 TsdfSubmap::ConstPtr &submap_const_ptr) const;
 
   // Interacting with the submap poses
   bool setSubMapPose(const SubmapID submap_id, const Transformation &pose);

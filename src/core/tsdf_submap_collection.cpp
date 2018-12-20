@@ -158,21 +158,8 @@ bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(const SubmapID submap_id,
   }
 }
 
-bool TsdfSubmapCollection::getTsdfSubmapRawPtrById(const SubmapID submap_id,
-                                                   const TsdfSubmap *submap_ptr) const {
-  const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
-  if (tsdf_submap_ptr_it != id_to_submap_.end()) {
-    submap_ptr = tsdf_submap_ptr_it->second.get();
-    return true;
-  } else {
-    // std::cout << "Cant find the requested submap_id: " << submap_id
-    //          << " associated with any submap" << std::endl;
-    return false;
-  }
-}
-
 bool TsdfSubmapCollection::getTsdfSubmapConstPtrById(const cblox::SubmapID submap_id,
-                                                     cblox::TsdfSubmap::ConstPtr submap_const_ptr) const {
+                                                     TsdfSubmap::ConstPtr &submap_const_ptr) const {
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
     submap_const_ptr = tsdf_submap_ptr_it->second;
