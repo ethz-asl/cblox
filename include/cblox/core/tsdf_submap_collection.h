@@ -60,7 +60,7 @@ class TsdfSubmapCollection {
 
   // Gets the ID of the patch on the tip of the collection
   const SubmapID getActiveSubMapID() const {
-    if (!tsdf_sub_maps_.empty())  // First check if the collection is not empty (to avoid segfault)
+    if (!tsdf_sub_maps_.empty())  // First check if the collection is not empty
       return tsdf_sub_maps_.back()->getID();
     else return 0;
   }
@@ -87,8 +87,8 @@ class TsdfSubmapCollection {
   // Gets the tsdf submap associated with the passed ID
   bool getAssociatedTsdfSubMapID(const SubmapID submap_id,
                                  SubmapID *submap_id_ptr) const;
-  bool getTsdfSubmapPtrById(const SubmapID submap_id,
-                            TsdfSubmap::Ptr& submap_ptr) const;
+  bool getTsdfSubmapConstPtrById(const SubmapID submap_id,
+                                 const TsdfSubmap* submap_ptr) const;
 
   // Interacting with the submap poses
   bool setSubMapPose(const SubmapID submap_id, const Transformation &pose);
@@ -135,9 +135,8 @@ class TsdfSubmapCollection {
   // The vectors of patches
   std::vector<TsdfSubmap::Ptr> tsdf_sub_maps_;
 
-  // A map keeping track of which ID belongs to which submap
+  // A map which keeps track of which ID belongs to which submap and stores the patches
   std::map<SubmapID, TsdfSubmap::Ptr> id_to_submap_;
-  // TODO(victorr): why not always use this and remove tsdf_sub_maps_ to avoid redudant data storage
 };
 
 }  // namespace cblox
