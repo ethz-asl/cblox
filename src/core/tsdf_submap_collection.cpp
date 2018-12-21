@@ -59,13 +59,14 @@ bool TsdfSubmapCollection::duplicateSubMap(const cblox::SubmapID source_submap_i
     // Create a new submap with the same pose and get its pointer
     const Transformation T_M_S = src_submap_ptr->getPose();
     // Creating the new submap and adding it to the list
-    TsdfSubmap::Ptr tsdf_sub_map(
+    TsdfSubmap::Ptr new_tsdf_sub_map(
         new TsdfSubmap(T_M_S, new_submap_id, tsdf_map_config_));
     // Reset the TsdfMap based on a copy of the source submap's TSDF layer
-    // TODO(victorr): Find a better way to do this (however with .reset(new ...) the layer doesn't show up)
-    *(tsdf_sub_map->getTsdfMapPtr()) = *(new TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
-    tsdf_sub_maps_.push_back(tsdf_sub_map);
-    id_to_submap_.emplace(new_submap_id, tsdf_sub_map);
+    // TODO(victorr): Find a better way to do this, however with .reset(...) as below the new submap appears empty
+    // new_tsdf_sub_map->getTsdfMapPtr().reset(new TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
+    *(new_tsdf_sub_map->getTsdfMapPtr()) = *(new TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
+    tsdf_sub_maps_.push_back(new_tsdf_sub_map);
+    id_to_submap_.emplace(new_submap_id, new_tsdf_sub_map);
     return true;
   }
   return false;
