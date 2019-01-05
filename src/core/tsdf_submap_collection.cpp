@@ -47,11 +47,15 @@ void TsdfSubmapCollection::createNewSubMap(const Transformation &T_M_S,
 void TsdfSubmapCollection::createNewSubMap(const Transformation &T_M_S) {
   // Increment ID and create new submap
   SubmapID new_ID = 0;
-  if (!tsdf_sub_maps_.empty()) new_ID = tsdf_sub_maps_.back()->getID() + 1;
+  if (!tsdf_sub_maps_.empty()) {
+    new_ID = tsdf_sub_maps_.back()->getID() + 1;
+  }
   createNewSubMap(T_M_S, new_ID);
 }
 
-bool TsdfSubmapCollection::duplicateSubMap(const cblox::SubmapID source_submap_id, const cblox::SubmapID new_submap_id) {
+bool TsdfSubmapCollection::duplicateSubMap(
+    const cblox::SubmapID source_submap_id,
+    const cblox::SubmapID new_submap_id) {
   // Get pointer to the source submap
   const auto src_submap_ptr_it = id_to_submap_.find(source_submap_id);
   if (src_submap_ptr_it != id_to_submap_.end()) {
@@ -62,9 +66,12 @@ bool TsdfSubmapCollection::duplicateSubMap(const cblox::SubmapID source_submap_i
     TsdfSubmap::Ptr new_tsdf_sub_map(
         new TsdfSubmap(T_M_S, new_submap_id, tsdf_map_config_));
     // Reset the TsdfMap based on a copy of the source submap's TSDF layer
-    // TODO(victorr): Find a better way to do this, however with .reset(...) as below the new submap appears empty
-    // new_tsdf_sub_map->getTsdfMapPtr().reset(new TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
-    *(new_tsdf_sub_map->getTsdfMapPtr()) = *(new TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
+    // TODO(victorr): Find a better way to do this,
+    //  however with .reset(...) as below the new submap appears empty
+    // new_tsdf_sub_map->getTsdfMapPtr().reset(
+    //     new TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
+    *(new_tsdf_sub_map->getTsdfMapPtr()) =
+        *(new TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
     tsdf_sub_maps_.push_back(new_tsdf_sub_map);
     id_to_submap_.emplace(new_submap_id, new_tsdf_sub_map);
     return true;
@@ -118,12 +125,13 @@ void TsdfSubmapCollection::setSubMapPoses(
   }
 }
 
-bool TsdfSubmapCollection::getSubMapPose(const cblox::SubmapID submap_id, cblox::Transformation &pose) const {
+bool TsdfSubmapCollection::getSubMapPose(const cblox::SubmapID submap_id,
+                                         Transformation *pose) const {
   // Looking for the submap
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
     TsdfSubmap::Ptr submap_ptr = (*tsdf_submap_ptr_it).second;
-    pose = submap_ptr->getPose();
+    *pose = submap_ptr->getPose();
     return true;
   } else {
     std::cout << "Tried to get the pose of the submap with submap_id: "
@@ -145,8 +153,8 @@ void TsdfSubmapCollection::getSubMapPoses(
   }
 }
 
-bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(const SubmapID submap_id,
-                                                     SubmapID *submap_id_ptr) const {
+bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(
+    const SubmapID submap_id, SubmapID *submap_id_ptr) const {
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
     *submap_id_ptr = tsdf_submap_ptr_it->second->getID();
@@ -158,16 +166,15 @@ bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(const SubmapID submap_id,
   }
 }
 
-bool TsdfSubmapCollection::getTsdfSubmapConstPtrById(const cblox::SubmapID submap_id,
-                                                     TsdfSubmap::ConstPtr &submap_const_ptr) const {
+TsdfSubmap::ConstPtr TsdfSubmapCollection::getTsdfSubmapConstPtrById(
+    const cblox::SubmapID submap_id) const {
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
-    submap_const_ptr = tsdf_submap_ptr_it->second;
-    return true;
+    return tsdf_submap_ptr_it->second;
   } else {
     // std::cout << "Cant find the requested submap_id: " << submap_id
     //          << " associated with any submap" << std::endl;
-    return false;
+    return nullptr;
   }
 }
 

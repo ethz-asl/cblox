@@ -63,9 +63,7 @@ class TsdfSubmapCollection {
 
   // Gets the ID of the patch on the tip of the collection
   const SubmapID getActiveSubMapID() const {
-    if (!tsdf_sub_maps_.empty())  // First check if the collection is not empty
-      return tsdf_sub_maps_.back()->getID();
-    else return 0;
+    return tsdf_sub_maps_.back()->getID();
   }
 
   // Gets a pointer to the active tsdf_map
@@ -90,13 +88,13 @@ class TsdfSubmapCollection {
   // Gets the tsdf submap associated with the passed ID
   bool getAssociatedTsdfSubMapID(const SubmapID submap_id,
                                  SubmapID *submap_id_ptr) const;
-  bool getTsdfSubmapConstPtrById(const SubmapID submap_id,
-                                 TsdfSubmap::ConstPtr &submap_const_ptr) const;
+  TsdfSubmap::ConstPtr getTsdfSubmapConstPtrById(
+      const SubmapID submap_id) const;
 
   // Interacting with the submap poses
   bool setSubMapPose(const SubmapID submap_id, const Transformation &pose);
   void setSubMapPoses(const TransformationVector &transforms);
-  bool getSubMapPose(const SubmapID submap_id, Transformation &pose) const;
+  bool getSubMapPose(const SubmapID submap_id, Transformation *pose) const;
   void getSubMapPoses(AlignedVector<Transformation> *submap_poses) const;
 
   // Clears the collection, leaving an empty map
