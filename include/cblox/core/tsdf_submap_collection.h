@@ -40,17 +40,29 @@ class TsdfSubmapCollection {
   void createNewSubMap(const Transformation &T_M_S);
 
   // Create a new submap which duplicates an existing source submap
-  bool duplicateSubMap(const cblox::SubmapID source_submap_id, const cblox::SubmapID new_submap_id);
+  bool duplicateSubMap(const SubmapID source_submap_id,
+                       const SubmapID new_submap_id);
 
-  // Gets a const reference to a raw submap
-  const TsdfSubmap &getSubMap(size_t sub_map_index) const {
-    CHECK_LT(sub_map_index, tsdf_sub_maps_.size());
-    return *(tsdf_sub_maps_[sub_map_index]);
+  // Gets a const pointer to a raw submap
+  TsdfSubmap::ConstPtr getSubMap(const SubmapID submap_id) const {
+    // NOTE(alexmillane): This departure from convension to return a const
+    // pointer (rather than a const ref) is such that we can return the nullptr
+    // to indicate the non-existance of requested submap.
+    const auto it = id_to_submap_.find(submap_id);
+    if (it != id_to_submap_.end()) {
+      return it->second;
+    } else {
+      return TsdfSubmap::ConstPtr();
+    }
   }
 
-  // Gets a const reference to the raw submap vector
-  const std::vector<TsdfSubmap::Ptr> &getSubMaps() const {
-    return tsdf_sub_maps_;
+  // Gets a const reference to the raw submap container
+  const std::vector<TsdfSubmap::Ptr> getSubMaps() const {
+    std::vector<TsdfSubmap::Ptr> submap_ptrs;
+    for (const auto &blah : id_to_submap_) {
+      submap_ptrs.emplace_back(blah.second);
+    }
+    return submap_ptrs;
   }
 
   // Flattens the collection map down to a normal TSDF map
@@ -58,34 +70,37 @@ class TsdfSubmapCollection {
 
   // Gets the pose of the patch on the tip of the collection
   const Transformation &getActiveSubMapPose() const {
-    return tsdf_sub_maps_.back()->getPose();
+    return getActiveTsdfSubMap().getPose();
   }
 
   // Gets the ID of the patch on the tip of the collection
-  const SubmapID getActiveSubMapID() const {
-    if (!tsdf_sub_maps_.empty())  // First check if the collection is not empty
-      return tsdf_sub_maps_.back()->getID();
-    else return 0;
-  }
+  const SubmapID getActiveSubMapID() const { return active_submap_id_; }
 
   // Gets a pointer to the active tsdf_map
   TsdfMap::Ptr getActiveTsdfMapPtr() {
-    return tsdf_sub_maps_.back()->getTsdfMapPtr();
+    const auto it = id_to_submap_.find(active_submap_id_);
+    CHECK(it != id_to_submap_.end());
+    return (it->second)->getTsdfMapPtr();
   }
   // Gets a reference to the active tsdf_map
   const TsdfMap &getActiveTsdfMap() const {
-    return tsdf_sub_maps_.back()->getTsdfMap();
+    const auto it = id_to_submap_.find(active_submap_id_);
+    CHECK(it != id_to_submap_.end());
+    return (it->second)->getTsdfMap();
   }
 
   // Gets a reference to the active tsdf_map
   const TsdfSubmap &getActiveTsdfSubMap() const {
-    return *(tsdf_sub_maps_.back());
+    const auto it = id_to_submap_.find(active_submap_id_);
+    CHECK(it != id_to_submap_.end());
+    return *(it->second);
   }
 
+  // KEYFRAME RELATED FUNCTION. REMOVING
   // Associates a to the active submap
-  void associateIDToActiveSubmap(const SubmapID submap_id) {
-    id_to_submap_[submap_id] = tsdf_sub_maps_.back();
-  }
+  // void associateIDToActiveSubmap(const SubmapID submap_id) {
+  //  id_to_submap_[submap_id] = tsdf_sub_maps_.back();
+  //}
 
   // Gets the tsdf submap associated with the passed ID
   bool getAssociatedTsdfSubMapID(const SubmapID submap_id,
@@ -100,18 +115,19 @@ class TsdfSubmapCollection {
   void getSubMapPoses(AlignedVector<Transformation> *submap_poses) const;
 
   // Clears the collection, leaving an empty map
-  void clear() { tsdf_sub_maps_.clear(); }
+  void clear() { id_to_submap_.clear(); }
 
   // Returns true if the collection is empty
-  bool empty() const { return tsdf_sub_maps_.empty(); }
+  bool empty() const { return id_to_submap_.empty(); }
 
   // The size of the collection (number of patches)
-  size_t size() const { return tsdf_sub_maps_.size(); }
-  size_t num_patches() const { return tsdf_sub_maps_.size(); }
+  size_t size() const { return id_to_submap_.size(); }
+  size_t num_patches() const { return id_to_submap_.size(); }
 
   // Returns the block size of the blocks in the tsdf patches
   FloatingPoint block_size() const {
-    return tsdf_sub_maps_.back()->block_size();
+    // All maps (should) have the same block size so we just grab the first.
+    return (id_to_submap_.begin()->second)->block_size();
   }
 
   // Save the collection to file
@@ -138,7 +154,11 @@ class TsdfSubmapCollection {
   // The vectors of patches
   std::vector<TsdfSubmap::Ptr> tsdf_sub_maps_;
 
-  // A map which keeps track of which ID belongs to which submap and stores the patches
+  // The active SubmapID
+  SubmapID active_submap_id_;
+
+  // A map which keeps track of which ID belongs to which submap and stores the
+  // patches
   std::map<SubmapID, TsdfSubmap::Ptr> id_to_submap_;
 };
 

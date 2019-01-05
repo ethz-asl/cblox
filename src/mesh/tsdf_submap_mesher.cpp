@@ -13,7 +13,7 @@ void TsdfSubmapMesher::generateSeparatedMesh(
   // Checks
   CHECK_NOTNULL(seperated_mesh_layer_ptr);
   // Getting the submaps
-  const std::vector<TsdfSubmap::Ptr>& tsdf_sub_maps =
+  const std::vector<TsdfSubmap::Ptr> tsdf_sub_maps =
       tsdf_submap_collection.getSubMaps();
   // Generating the mesh layers
   std::vector<MeshLayer::Ptr> sub_map_mesh_layers;
@@ -35,7 +35,7 @@ void TsdfSubmapMesher::generateCombinedMesh(
   // Checks
   CHECK_NOTNULL(combined_mesh_layer_ptr);
   // Getting the submaps
-  const std::vector<TsdfSubmap::Ptr>& tsdf_sub_maps =
+  const std::vector<TsdfSubmap::Ptr> tsdf_sub_maps =
       tsdf_submap_collection.getSubMaps();
   // Getting the Tsdf map which is the projection of the submap collection
   TsdfMap::Ptr combined_tsdf_map_ptr = tsdf_submap_collection.getProjectedMap();
@@ -55,7 +55,7 @@ void TsdfSubmapMesher::generatePatchMeshes(
   // Checks
   CHECK_NOTNULL(sub_map_mesh_layers_ptr);
   // Getting the submaps
-  const std::vector<TsdfSubmap::Ptr>& tsdf_sub_maps =
+  const std::vector<TsdfSubmap::Ptr> tsdf_sub_maps =
       tsdf_submap_collection.getSubMaps();
   // Generating the mesh layers
   generateSeparatedMeshLayers(tsdf_sub_maps, sub_map_mesh_layers_ptr);
@@ -73,7 +73,7 @@ void TsdfSubmapMesher::generateInterpolationTestMesh(
   size_t num_sub_maps = tsdf_submap_collection.size();
 
   // Getting the submaps
-  const std::vector<TsdfSubmap::Ptr>& tsdf_sub_maps =
+  const std::vector<TsdfSubmap::Ptr> tsdf_sub_maps =
       tsdf_submap_collection.getSubMaps();
 
   // A vector containing the transformed tsdf layers
@@ -160,7 +160,7 @@ void TsdfSubmapMesher::generateTrimmedCombinedMesh(
   CHECK_NOTNULL(combined_mesh_layer_ptr);
   std::cout << "Starting map trimming." << std::endl;
   // Getting the submaps
-  const std::vector<TsdfSubmap::Ptr>& tsdf_sub_maps =
+  const std::vector<TsdfSubmap::Ptr> tsdf_sub_maps =
       tsdf_submap_collection.getSubMaps();
   // The new trimmed TSDF submaps
   std::vector<TsdfSubmap::Ptr> trimmed_tsdf_sub_maps;
