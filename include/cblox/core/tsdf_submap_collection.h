@@ -29,14 +29,21 @@ class TsdfSubmapCollection {
   // Constructor. Constructs a submap collection from a list of submaps
   TsdfSubmapCollection(const TsdfMap::Config &tsdf_map_config,
                        const std::vector<TsdfSubmap::Ptr> &tsdf_sub_maps)
-      : tsdf_map_config_(tsdf_map_config), tsdf_sub_maps_(tsdf_sub_maps) {}
+      : tsdf_map_config_(tsdf_map_config) {
+    // Inserting into map with arbitrary SubmapIDs
+    SubmapID submap_id = 0;
+    for (const auto &tsdf_submap_ptr : tsdf_sub_maps) {
+      id_to_submap_[submap_id] = tsdf_submap_ptr;
+      submap_id++;
+    }
+  }
 
   // Gets a vector of the linked IDs
-  void getIDs(std::vector<SubmapID> *submap_ids) const;
-  bool isBaseFrame(const SubmapID &submap_id) const;
+  std::vector<SubmapID> getIDs() const;
+  bool exists(const SubmapID submap_id) const;
 
   // Creates a new submap on the top of the collection
-  void createNewSubMap(const Transformation &T_M_S, SubmapID submap_id);
+  void createNewSubMap(const Transformation &T_M_S, const SubmapID submap_id);
   void createNewSubMap(const Transformation &T_M_S);
 
   // Create a new submap which duplicates an existing source submap
@@ -96,15 +103,16 @@ class TsdfSubmapCollection {
     return *(it->second);
   }
 
-  // KEYFRAME RELATED FUNCTION. REMOVING
+  // KEYFRAME RELATED FUNCTIONS.
+  // COMMENTED OUT FOR NOW, BUT NEED TO BE MOVED TO MANIFOLD MAPPING.
   // Associates a to the active submap
   // void associateIDToActiveSubmap(const SubmapID submap_id) {
   //  id_to_submap_[submap_id] = tsdf_sub_maps_.back();
   //}
+  // bool getAssociatedTsdfSubMapID(const SubmapID submap_id,
+  //                               SubmapID *submap_id_ptr) const;
 
   // Gets the tsdf submap associated with the passed ID
-  bool getAssociatedTsdfSubMapID(const SubmapID submap_id,
-                                 SubmapID *submap_id_ptr) const;
   bool getTsdfSubmapConstPtrById(const SubmapID submap_id,
                                  TsdfSubmap::ConstPtr &submap_const_ptr) const;
 
@@ -151,14 +159,10 @@ class TsdfSubmapCollection {
   // The config used for the patches
   TsdfMap::Config tsdf_map_config_;
 
-  // The vectors of patches
-  std::vector<TsdfSubmap::Ptr> tsdf_sub_maps_;
-
   // The active SubmapID
   SubmapID active_submap_id_;
 
-  // A map which keeps track of which ID belongs to which submap and stores the
-  // patches
+  // Submap storage and access
   std::map<SubmapID, TsdfSubmap::Ptr> id_to_submap_;
 };
 

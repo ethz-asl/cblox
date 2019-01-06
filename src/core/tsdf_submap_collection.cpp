@@ -11,47 +11,48 @@
 
 namespace cblox {
 
-void TsdfSubmapCollection::getIDs(std::vector<SubmapID> *submap_ids) const {
-  // Checks
-  CHECK_NOTNULL(submap_ids);
-  submap_ids->reserve(tsdf_sub_maps_.size());
-  // Populating the vector
-  for (TsdfSubmap::ConstPtr tsdf_sub_map_ptr : tsdf_sub_maps_) {
-    submap_ids->push_back(tsdf_sub_map_ptr->getID());
+std::vector<SubmapID> TsdfSubmapCollection::getIDs() const {
+  std::vector<SubmapID> submap_ids;
+  submap_ids.reserve(id_to_submap_.size());
+  for (const auto& id_submap_pair : id_to_submap_) {
+    submap_ids.emplace_back(id_submap_pair.first);
   }
+  return submap_ids;
 }
 
-bool TsdfSubmapCollection::isBaseFrame(const SubmapID &submap_id) const {
+bool TsdfSubmapCollection::exists(const SubmapID submap_id) const {
   // Searching for the passed submap ID
-  const auto submap_ptr_it =
-      std::find_if(tsdf_sub_maps_.begin(), tsdf_sub_maps_.end(),
-                   [submap_id](const TsdfSubmap::Ptr &sub_map_ptr) {
-                     return sub_map_ptr->getID() == submap_id;
-                   });
-  if (submap_ptr_it != tsdf_sub_maps_.end()) {
+  const auto it = id_to_submap_.find(submap_id);
+  if (it != id_to_submap_.end()) {
     return true;
   } else {
     return false;
   }
 }
 
-void TsdfSubmapCollection::createNewSubMap(const Transformation &T_M_S,
-                                           SubmapID submap_id) {
+void TsdfSubmapCollection::createNewSubMap(const Transformation& T_M_S,
+                                           const SubmapID submap_id) {
+  // Checking if the submap already exists
+  const auto it = id_to_submap_.find(submap_id);
+  CHECK(it != id_to_submap_.end());
   // Creating the new submap and adding it to the list
   TsdfSubmap::Ptr tsdf_sub_map(
       new TsdfSubmap(T_M_S, submap_id, tsdf_map_config_));
-  tsdf_sub_maps_.push_back(tsdf_sub_map);
-  id_to_submap_.emplace(submap_id, tsdf_sub_map);
+  id_to_submap_.emplace(submap_id, std::move(tsdf_sub_map));
 }
 
-void TsdfSubmapCollection::createNewSubMap(const Transformation &T_M_S) {
-  // Increment ID and create new submap
+void TsdfSubmapCollection::createNewSubMap(const Transformation& T_M_S) {
+  // Creating a submap with a generated SubmapID
+  // NOTE(alexmillane): rbegin() returns the pair with the highest key.
   SubmapID new_ID = 0;
-  if (!tsdf_sub_maps_.empty()) new_ID = tsdf_sub_maps_.back()->getID() + 1;
+  if (!id_to_submap_.empty()) {
+    new_ID = id_to_submap_.rbegin()->first + 1;
+  }
   createNewSubMap(T_M_S, new_ID);
 }
 
-bool TsdfSubmapCollection::duplicateSubMap(const cblox::SubmapID source_submap_id, const cblox::SubmapID new_submap_id) {
+bool TsdfSubmapCollection::duplicateSubMap(const SubmapID source_submap_id,
+                                           const SubmapID new_submap_id) {
   // Get pointer to the source submap
   const auto src_submap_ptr_it = id_to_submap_.find(source_submap_id);
   if (src_submap_ptr_it != id_to_submap_.end()) {
@@ -62,10 +63,12 @@ bool TsdfSubmapCollection::duplicateSubMap(const cblox::SubmapID source_submap_i
     TsdfSubmap::Ptr new_tsdf_sub_map(
         new TsdfSubmap(T_M_S, new_submap_id, tsdf_map_config_));
     // Reset the TsdfMap based on a copy of the source submap's TSDF layer
-    // TODO(victorr): Find a better way to do this, however with .reset(...) as below the new submap appears empty
-    // new_tsdf_sub_map->getTsdfMapPtr().reset(new TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
-    *(new_tsdf_sub_map->getTsdfMapPtr()) = *(new TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
-    tsdf_sub_maps_.push_back(new_tsdf_sub_map);
+    // TODO(victorr): Find a better way to do this, however with .reset(...) as
+    // below the new submap appears empty
+    // new_tsdf_sub_map->getTsdfMapPtr().reset(new
+    // TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
+    *(new_tsdf_sub_map->getTsdfMapPtr()) =
+        *(new TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
     id_to_submap_.emplace(new_submap_id, new_tsdf_sub_map);
     return true;
   }
@@ -79,10 +82,10 @@ TsdfMap::Ptr TsdfSubmapCollection::getProjectedMap() const {
   Layer<TsdfVoxel>* combined_tsdf_layer_ptr =
       projected_tsdf_map_ptr->getTsdfLayerPtr();
   // Looping over the current submaps
-  for (TsdfSubmap::ConstPtr tsdf_sub_map_ptr : tsdf_sub_maps_) {
+  for (const auto& id_submap_pair : id_to_submap_) {
     // Getting the tsdf submap and its pose
-    const TsdfMap& tsdf_map = tsdf_sub_map_ptr->getTsdfMap();
-    const Transformation& T_M_S = tsdf_sub_map_ptr->getPose();
+    const TsdfMap& tsdf_map = (id_submap_pair.second)->getTsdfMap();
+    const Transformation& T_M_S = (id_submap_pair.second)->getPose();
     // Merging layers the submap into the global layer
     mergeLayerAintoLayerB(tsdf_map.getTsdfLayer(), T_M_S,
                           combined_tsdf_layer_ptr);
@@ -92,7 +95,7 @@ TsdfMap::Ptr TsdfSubmapCollection::getProjectedMap() const {
 }
 
 bool TsdfSubmapCollection::setSubMapPose(const SubmapID submap_id,
-                                         const Transformation &pose) {
+                                         const Transformation& pose) {
   // Looking for the submap
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
@@ -108,17 +111,19 @@ bool TsdfSubmapCollection::setSubMapPose(const SubmapID submap_id,
 }
 
 void TsdfSubmapCollection::setSubMapPoses(
-    const TransformationVector &transforms) {
-  // Updating the poses
+    const TransformationVector& transforms) {
+  CHECK_EQ(transforms.size(), id_to_submap_.size());
   // NOTE(alexmillane): This assumes that the order of transforms matches the
   //                    submap order.
-  for (size_t sub_map_index = 0; sub_map_index < transforms.size();
-       sub_map_index++) {
-    tsdf_sub_maps_[sub_map_index]->setPose(transforms[sub_map_index]);
+  size_t sub_map_index = 0;
+  for (const auto& id_submap_pair : id_to_submap_) {
+    (id_submap_pair.second)->setPose(transforms[sub_map_index]);
+    sub_map_index++;
   }
 }
 
-bool TsdfSubmapCollection::getSubMapPose(const cblox::SubmapID submap_id, cblox::Transformation &pose) const {
+bool TsdfSubmapCollection::getSubMapPose(const SubmapID submap_id,
+                                         Transformation& pose) const {
   // Looking for the submap
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
@@ -139,14 +144,14 @@ void TsdfSubmapCollection::getSubMapPoses(
   CHECK_NOTNULL(submap_poses_ptr);
   // Extracting transforms
   submap_poses_ptr->clear();
-  submap_poses_ptr->reserve(tsdf_sub_maps_.size());
-  for (TsdfSubmap::ConstPtr tsdf_sub_map : tsdf_sub_maps_) {
-    submap_poses_ptr->push_back(tsdf_sub_map->getPose());
+  submap_poses_ptr->reserve(id_to_submap_.size());
+  for (const auto& id_submap_pair : id_to_submap_) {
+    submap_poses_ptr->push_back((id_submap_pair.second)->getPose());
   }
 }
 
-bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(const SubmapID submap_id,
-                                                     SubmapID *submap_id_ptr) const {
+/*bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(
+    const SubmapID submap_id, SubmapID* submap_id_ptr) const {
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
     *submap_id_ptr = tsdf_submap_ptr_it->second->getID();
@@ -156,10 +161,10 @@ bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(const SubmapID submap_id,
     //          << " associated with any submap" << std::endl;
     return false;
   }
-}
+}*/
 
-bool TsdfSubmapCollection::getTsdfSubmapConstPtrById(const cblox::SubmapID submap_id,
-                                                     TsdfSubmap::ConstPtr &submap_const_ptr) const {
+bool TsdfSubmapCollection::getTsdfSubmapConstPtrById(
+    const SubmapID submap_id, TsdfSubmap::ConstPtr& submap_const_ptr) const {
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
     submap_const_ptr = tsdf_submap_ptr_it->second;
@@ -190,13 +195,12 @@ bool TsdfSubmapCollection::saveToFile(const std::string& file_path) const {
     return false;
   }
   // Saving the tsdf submaps
-  size_t sub_map_index = 0;
-  for (TsdfSubmap::ConstPtr tsdf_sub_map_ptr : tsdf_sub_maps_) {
+  for (const auto& id_submap_pair : id_to_submap_) {
     // DEBUG
-    std::cout << "Saving tsdf_sub_map number: " << sub_map_index << std::endl;
+    std::cout << "Saving tsdf_submap with ID: " << id_submap_pair.first
+              << std::endl;
     // Saving the submap
-    tsdf_sub_map_ptr->saveToStream(&outfile);
-    sub_map_index++;
+    (id_submap_pair.second)->saveToStream(&outfile);
   }
   // Closing the file
   outfile.close();
@@ -213,7 +217,7 @@ void TsdfSubmapCollection::getProto(TsdfSubmapCollectionProto* proto) const {
 }
 
 // Fusing the submap pairs
-void TsdfSubmapCollection::fuseSubmapPair(const SubmapIdPair &submap_id_pair) {
+void TsdfSubmapCollection::fuseSubmapPair(const SubmapIdPair& submap_id_pair) {
   // Extracting the submap IDs
   SubmapID submap_id_1 = submap_id_pair.first;
   SubmapID submap_id_2 = submap_id_pair.second;
@@ -242,26 +246,24 @@ void TsdfSubmapCollection::fuseSubmapPair(const SubmapIdPair &submap_id_pair) {
     // Merging the submap layers
     mergeLayerAintoLayerB(submap_ptr_2->getTsdfMap().getTsdfLayer(), T_S1_S2,
                           submap_ptr_1->getTsdfMapPtr()->getTsdfLayerPtr());
-    // Searching for ids associated with submap 2
-    for (auto &id_submap_pair : id_to_submap_) {
-      if (id_submap_pair.second == submap_ptr_2) {
-        id_submap_pair.second = submap_ptr_1;
-        // std::cout << "Moved submap ID: " << id_submap_pair.first
-        //          << " from submap ID: " << submap_ptr_2->getID()
-        //          << " to submap ID: " << submap_ptr_1->getID()
-        //          << std::endl;
-      }
-    }
-    // Searching the submaps and deleting submap 2
-    for (auto submap_ptr_it = tsdf_sub_maps_.begin();
-         submap_ptr_it != tsdf_sub_maps_.end(); submap_ptr_it++) {
-      if (*submap_ptr_it == submap_ptr_2) {
-        tsdf_sub_maps_.erase(submap_ptr_it);
-        std::cout << "Erased the submap: " << submap_ptr_2->getID()
-                  << " from the submap collection" << std::endl;
-        break;
-      }
-    }
+    // Transfering KeyFrames to the new submap
+    // TODO(alexmillane): NEEDED FOR MANIFOLD MAPPING.
+    /*    // Searching for ids associated with submap 2
+        for (auto& id_submap_pair : id_to_submap_) {
+          if (id_submap_pair.second == submap_ptr_2) {
+            id_submap_pair.second = submap_ptr_1;
+            // std::cout << "Moved submap ID: " << id_submap_pair.first
+            //          << " from submap ID: " << submap_ptr_2->getID()
+            //          << " to submap ID: " << submap_ptr_1->getID()
+            //          << std::endl;
+          }
+        }*/
+    // Deleting Submap #2
+    const size_t num_erased = id_to_submap_.erase(submap_id_2);
+    CHECK_EQ(num_erased, 1);
+    std::cout << "Erased the submap: " << submap_ptr_2->getID()
+              << " from the submap collection" << std::endl;
+
   } else {
     std::cout << "Could not find the requested submap pair during fusion."
               << std::endl;
@@ -271,10 +273,10 @@ void TsdfSubmapCollection::fuseSubmapPair(const SubmapIdPair &submap_id_pair) {
 size_t TsdfSubmapCollection::getNumberAllocatedBlocks() const {
   // Looping over the submaps totalling the sizes
   size_t total_blocks = 0;
-  for (const TsdfSubmap::Ptr& tsdf_sub_map_ptr : tsdf_sub_maps_) {
-    total_blocks += tsdf_sub_map_ptr->getNumberAllocatedBlocks();
+  for (const auto& id_submap_pair : id_to_submap_) {
+    total_blocks += (id_submap_pair.second)->getNumberAllocatedBlocks();
   }
   return total_blocks;
 }
 
-} // namespace cblox
+}  // namespace cblox
