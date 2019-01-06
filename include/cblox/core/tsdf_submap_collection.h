@@ -28,15 +28,7 @@ class TsdfSubmapCollection {
 
   // Constructor. Constructs a submap collection from a list of submaps
   TsdfSubmapCollection(const TsdfMap::Config &tsdf_map_config,
-                       const std::vector<TsdfSubmap::Ptr> &tsdf_sub_maps)
-      : tsdf_map_config_(tsdf_map_config) {
-    // Inserting into map with arbitrary SubmapIDs
-    SubmapID submap_id = 0;
-    for (const auto &tsdf_submap_ptr : tsdf_sub_maps) {
-      id_to_submap_[submap_id] = tsdf_submap_ptr;
-      submap_id++;
-    }
-  }
+                       const std::vector<TsdfSubmap::Ptr> &tsdf_sub_maps);
 
   // Gets a vector of the linked IDs
   std::vector<SubmapID> getIDs() const;
@@ -51,72 +43,23 @@ class TsdfSubmapCollection {
                        const SubmapID new_submap_id);
 
   // Gets a const pointer to a raw submap
-  TsdfSubmap::ConstPtr getSubMap(const SubmapID submap_id) const {
-    // NOTE(alexmillane): This departure from convension to return a const
-    // pointer (rather than a const ref) is such that we can return the nullptr
-    // to indicate the non-existance of requested submap.
-    const auto it = id_to_submap_.find(submap_id);
-    if (it != id_to_submap_.end()) {
-      return it->second;
-    } else {
-      return TsdfSubmap::ConstPtr();
-    }
-  }
-
-  // Gets a const reference to the raw submap container
-  const std::vector<TsdfSubmap::Ptr> getSubMaps() const {
-    std::vector<TsdfSubmap::Ptr> submap_ptrs;
-    for (const auto &blah : id_to_submap_) {
-      submap_ptrs.emplace_back(blah.second);
-    }
-    return submap_ptrs;
-  }
-
-  // Flattens the collection map down to a normal TSDF map
-  TsdfMap::Ptr getProjectedMap() const;
-
-  // Gets the pose of the patch on the tip of the collection
-  const Transformation &getActiveSubMapPose() const {
-    return getActiveTsdfSubMap().getPose();
-  }
-
-  // Gets the ID of the patch on the tip of the collection
-  const SubmapID getActiveSubMapID() const { return active_submap_id_; }
-
-  // Gets a pointer to the active tsdf_map
-  TsdfMap::Ptr getActiveTsdfMapPtr() {
-    const auto it = id_to_submap_.find(active_submap_id_);
-    CHECK(it != id_to_submap_.end());
-    return (it->second)->getTsdfMapPtr();
-  }
-  // Gets a reference to the active tsdf_map
-  const TsdfMap &getActiveTsdfMap() const {
-    const auto it = id_to_submap_.find(active_submap_id_);
-    CHECK(it != id_to_submap_.end());
-    return (it->second)->getTsdfMap();
-  }
-
-  // Gets a reference to the active tsdf_map
-  const TsdfSubmap &getActiveTsdfSubMap() const {
-    const auto it = id_to_submap_.find(active_submap_id_);
-    CHECK(it != id_to_submap_.end());
-    return *(it->second);
-  }
-
-  // KEYFRAME RELATED FUNCTIONS.
-  // COMMENTED OUT FOR NOW, BUT NEED TO BE MOVED TO MANIFOLD MAPPING.
-  // Associates a to the active submap
-  // void associateIDToActiveSubmap(const SubmapID submap_id) {
-  //  id_to_submap_[submap_id] = tsdf_sub_maps_.back();
-  //}
-  // bool getAssociatedTsdfSubMapID(const SubmapID submap_id,
-  //                               SubmapID *submap_id_ptr) const;
-
-  // Gets the tsdf submap associated with the passed ID
-  bool getAssociatedTsdfSubMapID(const SubmapID submap_id,
-                                 SubmapID *submap_id_ptr) const;
+  // NOTE(alexmillane): This function hard fails when the submap doesn't
+  // exist... This puts the onus on the caller to call exists() first. I don't
+  // like this but I can't see a solution.
+  const TsdfSubmap &getSubMap(const SubmapID submap_id) const;
+  // Note(alexmillane): Unlike the above this function returns a nullptr when
+  // the map doesn't exist. No hard crash.
   TsdfSubmap::ConstPtr getTsdfSubmapConstPtrById(
       const SubmapID submap_id) const;
+  // A list of the submaps
+  const std::vector<TsdfSubmap::Ptr> getSubMaps() const;
+
+  // Interactions with the active submap
+  TsdfMap::Ptr getActiveTsdfMapPtr();
+  const TsdfMap &getActiveTsdfMap() const;
+  const TsdfSubmap &getActiveTsdfSubMap() const;
+  const Transformation &getActiveSubMapPose() const;
+  const SubmapID getActiveSubMapID() const;
 
   // Interacting with the submap poses
   bool setSubMapPose(const SubmapID submap_id, const Transformation &pose);
@@ -127,33 +70,39 @@ class TsdfSubmapCollection {
   // Clears the collection, leaving an empty map
   void clear() { id_to_submap_.clear(); }
 
-  // Returns true if the collection is empty
+  // Size information
   bool empty() const { return id_to_submap_.empty(); }
-
-  // The size of the collection (number of patches)
   size_t size() const { return id_to_submap_.size(); }
   size_t num_patches() const { return id_to_submap_.size(); }
-
-  // Returns the block size of the blocks in the tsdf patches
   FloatingPoint block_size() const {
-    // All maps (should) have the same block size so we just grab the first.
     return (id_to_submap_.begin()->second)->block_size();
   }
-
-  // Save the collection to file
-  bool saveToFile(const std::string &file_path) const;
-
-  // Getting various protos for this object
-  void getProto(TsdfSubmapCollectionProto *proto) const;
+  size_t getNumberAllocatedBlocks() const;
 
   // Returns the config of the tsdf sub maps
   const TsdfMap::Config &getConfig() const { return tsdf_map_config_; }
 
+  // Save the collection to file
+  bool saveToFile(const std::string &file_path) const;
+  void getProto(TsdfSubmapCollectionProto *proto) const;
+
   // Fusing the submap pairs
   void fuseSubmapPair(const SubmapIdPair &submap_id_pair);
 
-  // Gets the number of allocated blocks in the collection
-  size_t getNumberAllocatedBlocks() const;
+  // Flattens the collection map down to a normal TSDF map
+  TsdfMap::Ptr getProjectedMap() const;
+
+  // KEYFRAME RELATED FUNCTIONS.
+  // COMMENTED OUT FOR NOW, BUT NEED TO BE MOVED TO MANIFOLD MAPPING.
+  // Associates a to the active submap
+  // void associateIDToActiveSubmap(const SubmapID submap_id) {
+  //  id_to_submap_[submap_id] = tsdf_sub_maps_.back();
+  //}
+  // bool getAssociatedTsdfSubMapID(const SubmapID submap_id,
+  //                               SubmapID *submap_id_ptr) const;
+  //
+  // bool getAssociatedTsdfSubMapID(const SubmapID submap_id,
+  //                               SubmapID *submap_id_ptr) const;
 
  private:
   // TODO(alexmillane): Get some concurrency guards

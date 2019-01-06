@@ -11,6 +11,19 @@
 
 namespace cblox {
 
+TsdfSubmapCollection::TsdfSubmapCollection(
+    const TsdfMap::Config& tsdf_map_config,
+    const std::vector<TsdfSubmap::Ptr>& tsdf_sub_maps)
+    : tsdf_map_config_(tsdf_map_config) {
+  // Constructing from a list of existing submaps
+  // NOTE(alexmillane): assigning arbitrary SubmapIDs
+  SubmapID submap_id = 0;
+  for (const auto& tsdf_submap_ptr : tsdf_sub_maps) {
+    id_to_submap_[submap_id] = tsdf_submap_ptr;
+    submap_id++;
+  }
+}
+
 std::vector<SubmapID> TsdfSubmapCollection::getIDs() const {
   std::vector<SubmapID> submap_ids;
   submap_ids.reserve(id_to_submap_.size());
@@ -39,6 +52,8 @@ void TsdfSubmapCollection::createNewSubMap(const Transformation& T_M_S,
   TsdfSubmap::Ptr tsdf_sub_map(
       new TsdfSubmap(T_M_S, submap_id, tsdf_map_config_));
   id_to_submap_.emplace(submap_id, std::move(tsdf_sub_map));
+  // Updating the active submap
+  active_submap_id_ = submap_id;
 }
 
 void TsdfSubmapCollection::createNewSubMap(const Transformation& T_M_S) {
@@ -73,6 +88,49 @@ bool TsdfSubmapCollection::duplicateSubMap(const SubmapID source_submap_id,
     return true;
   }
   return false;
+}
+
+// Gets a const pointer to a raw submap
+const TsdfSubmap& TsdfSubmapCollection::getSubMap(
+    const SubmapID submap_id) const {
+  const auto it = id_to_submap_.find(submap_id);
+  CHECK(it != id_to_submap_.end());
+  return *it->second;
+}
+
+const std::vector<TsdfSubmap::Ptr> TsdfSubmapCollection::getSubMaps() const {
+  std::vector<TsdfSubmap::Ptr> submap_ptrs;
+  for (const auto& blah : id_to_submap_) {
+    submap_ptrs.emplace_back(blah.second);
+  }
+  return submap_ptrs;
+}
+
+// Gets a pointer to the active tsdf_map
+TsdfMap::Ptr TsdfSubmapCollection::getActiveTsdfMapPtr() {
+  const auto it = id_to_submap_.find(active_submap_id_);
+  CHECK(it != id_to_submap_.end());
+  return (it->second)->getTsdfMapPtr();
+}
+// Gets a reference to the active tsdf_map
+const TsdfMap& TsdfSubmapCollection::getActiveTsdfMap() const {
+  const auto it = id_to_submap_.find(active_submap_id_);
+  CHECK(it != id_to_submap_.end());
+  return (it->second)->getTsdfMap();
+}
+
+// Gets a reference to the active tsdf_map
+const TsdfSubmap& TsdfSubmapCollection::getActiveTsdfSubMap() const {
+  const auto it = id_to_submap_.find(active_submap_id_);
+  CHECK(it != id_to_submap_.end());
+  return *(it->second);
+}
+
+const Transformation& TsdfSubmapCollection::getActiveSubMapPose() const {
+  return getActiveTsdfSubMap().getPose();
+}
+const SubmapID TsdfSubmapCollection::getActiveSubMapID() const {
+  return active_submap_id_;
 }
 
 TsdfMap::Ptr TsdfSubmapCollection::getProjectedMap() const {
@@ -164,7 +222,7 @@ void TsdfSubmapCollection::getSubMapPoses(
 }*/
 
 TsdfSubmap::ConstPtr TsdfSubmapCollection::getTsdfSubmapConstPtrById(
-    const cblox::SubmapID submap_id) const {
+    const SubmapID submap_id) const {
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
     return tsdf_submap_ptr_it->second;
