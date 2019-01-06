@@ -45,14 +45,25 @@ void TsdfSubmapCollection::createNewSubMap(const Transformation& T_M_S) {
   // Creating a submap with a generated SubmapID
   // NOTE(alexmillane): rbegin() returns the pair with the highest key.
   SubmapID new_ID = 0;
+<<<<<<< HEAD
   if (!id_to_submap_.empty()) {
     new_ID = id_to_submap_.rbegin()->first + 1;
+=======
+  if (!tsdf_sub_maps_.empty()) {
+    new_ID = tsdf_sub_maps_.back()->getID() + 1;
+>>>>>>> feature/victorr/voxblox_submapping
   }
   createNewSubMap(T_M_S, new_ID);
 }
 
+<<<<<<< HEAD
 bool TsdfSubmapCollection::duplicateSubMap(const SubmapID source_submap_id,
                                            const SubmapID new_submap_id) {
+=======
+bool TsdfSubmapCollection::duplicateSubMap(
+    const cblox::SubmapID source_submap_id,
+    const cblox::SubmapID new_submap_id) {
+>>>>>>> feature/victorr/voxblox_submapping
   // Get pointer to the source submap
   const auto src_submap_ptr_it = id_to_submap_.find(source_submap_id);
   if (src_submap_ptr_it != id_to_submap_.end()) {
@@ -63,12 +74,22 @@ bool TsdfSubmapCollection::duplicateSubMap(const SubmapID source_submap_id,
     TsdfSubmap::Ptr new_tsdf_sub_map(
         new TsdfSubmap(T_M_S, new_submap_id, tsdf_map_config_));
     // Reset the TsdfMap based on a copy of the source submap's TSDF layer
+<<<<<<< HEAD
     // TODO(victorr): Find a better way to do this, however with .reset(...) as
     // below the new submap appears empty
     // new_tsdf_sub_map->getTsdfMapPtr().reset(new
     // TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
     *(new_tsdf_sub_map->getTsdfMapPtr()) =
         *(new TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
+=======
+    // TODO(victorr): Find a better way to do this,
+    //  however with .reset(...) as below the new submap appears empty
+    // new_tsdf_sub_map->getTsdfMapPtr().reset(
+    //     new TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
+    *(new_tsdf_sub_map->getTsdfMapPtr()) =
+        *(new TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
+    tsdf_sub_maps_.push_back(new_tsdf_sub_map);
+>>>>>>> feature/victorr/voxblox_submapping
     id_to_submap_.emplace(new_submap_id, new_tsdf_sub_map);
     return true;
   }
@@ -122,13 +143,18 @@ void TsdfSubmapCollection::setSubMapPoses(
   }
 }
 
+<<<<<<< HEAD
 bool TsdfSubmapCollection::getSubMapPose(const SubmapID submap_id,
-                                         Transformation* pose_ptr) const {
+                                         Transformation& pose) const {
+=======
+bool TsdfSubmapCollection::getSubMapPose(const cblox::SubmapID submap_id,
+                                         Transformation *pose) const {
+>>>>>>> feature/victorr/voxblox_submapping
   // Looking for the submap
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
     TsdfSubmap::Ptr submap_ptr = (*tsdf_submap_ptr_it).second;
-    *pose_ptr = submap_ptr->getPose();
+    *pose = submap_ptr->getPose();
     return true;
   } else {
     std::cout << "Tried to get the pose of the submap with submap_id: "
@@ -150,8 +176,13 @@ void TsdfSubmapCollection::getSubMapPoses(
   }
 }
 
+<<<<<<< HEAD
 /*bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(
     const SubmapID submap_id, SubmapID* submap_id_ptr) const {
+=======
+bool TsdfSubmapCollection::getAssociatedTsdfSubMapID(
+    const SubmapID submap_id, SubmapID *submap_id_ptr) const {
+>>>>>>> feature/victorr/voxblox_submapping
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
     *submap_id_ptr = tsdf_submap_ptr_it->second->getID();
@@ -163,8 +194,13 @@ void TsdfSubmapCollection::getSubMapPoses(
   }
 }*/
 
+<<<<<<< HEAD
+bool TsdfSubmapCollection::getTsdfSubmapConstPtrById(
+    const SubmapID submap_id, TsdfSubmap::ConstPtr& submap_const_ptr) const {
+=======
 TsdfSubmap::ConstPtr TsdfSubmapCollection::getTsdfSubmapConstPtrById(
     const cblox::SubmapID submap_id) const {
+>>>>>>> feature/victorr/voxblox_submapping
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
     return tsdf_submap_ptr_it->second;

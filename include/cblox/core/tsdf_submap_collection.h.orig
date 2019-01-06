@@ -81,7 +81,13 @@ class TsdfSubmapCollection {
   }
 
   // Gets the ID of the patch on the tip of the collection
+<<<<<<< HEAD
   const SubmapID getActiveSubMapID() const { return active_submap_id_; }
+=======
+  const SubmapID getActiveSubMapID() const {
+    return tsdf_sub_maps_.back()->getID();
+  }
+>>>>>>> feature/victorr/voxblox_submapping
 
   // Gets a pointer to the active tsdf_map
   TsdfMap::Ptr getActiveTsdfMapPtr() {
@@ -113,10 +119,15 @@ class TsdfSubmapCollection {
   //                               SubmapID *submap_id_ptr) const;
 
   // Gets the tsdf submap associated with the passed ID
+<<<<<<< HEAD
+  bool getTsdfSubmapConstPtrById(const SubmapID submap_id,
+                                 TsdfSubmap::ConstPtr &submap_const_ptr) const;
+=======
   bool getAssociatedTsdfSubMapID(const SubmapID submap_id,
                                  SubmapID *submap_id_ptr) const;
   TsdfSubmap::ConstPtr getTsdfSubmapConstPtrById(
       const SubmapID submap_id) const;
+>>>>>>> feature/victorr/voxblox_submapping
 
   // Interacting with the submap poses
   bool setSubMapPose(const SubmapID submap_id, const Transformation &pose);
