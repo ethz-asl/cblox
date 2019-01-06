@@ -171,7 +171,7 @@ TsdfSubmap::ConstPtr TsdfSubmapCollection::getTsdfSubmapConstPtrById(
   } else {
     // std::cout << "Cant find the requested submap_id: " << submap_id
     //          << " associated with any submap" << std::endl;
-    return nullptr;
+    return TsdfSubmap::ConstPtr();
   }
 }
 

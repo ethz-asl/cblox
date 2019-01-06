@@ -121,7 +121,7 @@ class TsdfSubmapCollection {
   // Interacting with the submap poses
   bool setSubMapPose(const SubmapID submap_id, const Transformation &pose);
   void setSubMapPoses(const TransformationVector &transforms);
-  bool getSubMapPose(const SubmapID submap_id, Transformation *pose) const;
+  bool getSubMapPose(const SubmapID submap_id, Transformation *pose_ptr) const;
   void getSubMapPoses(AlignedVector<Transformation> *submap_poses) const;
 
   // Clears the collection, leaving an empty map
