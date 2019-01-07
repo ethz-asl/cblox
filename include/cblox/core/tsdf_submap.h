@@ -39,7 +39,7 @@ class TsdfSubmap {
     }
   }
 
-  // Returns the underlying map pointers
+  // Returns the underlying TSDF map pointers
   TsdfMap::Ptr getTsdfMapPtr() { return tsdf_map_; }
   const TsdfMap &getTsdfMap() const { return *tsdf_map_; }
 
@@ -68,13 +68,14 @@ class TsdfSubmap {
   // Save the submap to file
   bool saveToStream(std::fstream *outfile_ptr) const;
 
+ protected:
+  SubmapID submap_id_;
+
  private:
   // The pose of this submap in the global map frame
   mutable std::mutex transformation_mutex;
   Transformation T_M_S_;
-  // Submap ID
-  SubmapID submap_id_;
-  // Maps
+
   TsdfMap::Ptr tsdf_map_;
 
  public:
@@ -83,4 +84,4 @@ class TsdfSubmap {
 
 }  // namespace cblox
 
-#endif /* CBLOX_CORE_TSDF_SUBMAP_H_ */
+#endif  // CBLOX_CORE_TSDF_SUBMAP_H_

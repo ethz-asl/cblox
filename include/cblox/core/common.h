@@ -10,6 +10,7 @@
 #include <kindr/minimal/rotation-quaternion.h>
 
 #include <voxblox/core/common.h>
+#include <voxblox/core/esdf_map.h>
 #include <voxblox/core/tsdf_map.h>
 #include <voxblox/utils/timing.h>
 
@@ -40,6 +41,7 @@ typedef AlignedVector<Transformation> TransformationVector;
 using voxblox::Pointcloud;
 using voxblox::Colors;
 using voxblox::TsdfMap;
+using voxblox::EsdfMap;
 using voxblox::Layer;
 using voxblox::Block;
 using voxblox::TsdfVoxel;
@@ -57,4 +59,4 @@ namespace Eigen {
 typedef Matrix<cblox::FloatingPoint, 3, 1> Vector3;
 }  // namespace Eigen
 
-#endif /* CBLOX_CORE_COMMON_H_ */
+#endif  // CBLOX_CORE_COMMON_H_
