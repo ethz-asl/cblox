@@ -33,8 +33,8 @@ bool LoadTsdfSubmapFromStream(
 
   // Getting the header for this submap
   TsdfSubmapProto tsdf_sub_map_proto;
-  if (!utils::readProtoMsgFromStream(proto_file_ptr, &tsdf_sub_map_proto,
-                                     tmp_byte_offset_ptr)) {
+  if (!voxblox::utils::readProtoMsgFromStream(
+          proto_file_ptr, &tsdf_sub_map_proto, tmp_byte_offset_ptr)) {
     LOG(ERROR) << "Could not read tsdf sub map protobuf message.";
     return false;
   }
@@ -85,8 +85,8 @@ bool LoadTsdfSubmapCollection(
   uint32_t tmp_byte_offset = 0;
   // Loading the header
   TsdfSubmapCollectionProto tsdf_submap_collection_proto;
-  if (!utils::readProtoMsgFromStream(&proto_file, &tsdf_submap_collection_proto,
-                                     &tmp_byte_offset)) {
+  if (!voxblox::utils::readProtoMsgFromStream(
+          &proto_file, &tsdf_submap_collection_proto, &tmp_byte_offset)) {
     LOG(ERROR) << "Could not read tsdf submap collection map protobuf message.";
     return false;
   }

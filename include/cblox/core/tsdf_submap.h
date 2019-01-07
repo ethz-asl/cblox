@@ -15,8 +15,6 @@
 
 namespace cblox {
 
-using namespace voxblox;
-
 // Class representing TSDF submap
 class TsdfSubmap {
  public:

@@ -10,6 +10,7 @@
 #include <kindr/minimal/rotation-quaternion.h>
 
 #include <voxblox/core/common.h>
+#include <voxblox/core/tsdf_map.h>
 #include <voxblox/utils/timing.h>
 
 namespace cblox {
@@ -34,6 +35,14 @@ using AlignedDeque = std::deque<Type, Eigen::aligned_allocator<Type>>;
 
 // Containers of transforms
 typedef AlignedVector<Transformation> TransformationVector;
+
+// Taking some voxblox datatypes
+using voxblox::Pointcloud;
+using voxblox::Colors;
+using voxblox::TsdfMap;
+using voxblox::Layer;
+using voxblox::Block;
+using voxblox::TsdfVoxel;
 
 // TODO(alexmillane): Put this back in when transitioning the integrator.
 // Taking timing from voxblox
