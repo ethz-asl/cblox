@@ -6,11 +6,7 @@
 
 #include <Eigen/Geometry>
 
-#include <voxblox/core/tsdf_map.h>
-#include <voxblox/mesh/mesh_layer.h>
-
 #include "./TsdfSubmap.pb.h"
-
 #include "cblox/core/common.h"
 
 namespace cblox {
@@ -20,10 +16,10 @@ class TsdfSubmap {
  public:
   typedef std::shared_ptr<TsdfSubmap> Ptr;
   typedef std::shared_ptr<const TsdfSubmap> ConstPtr;
+  typedef TsdfMap::Config Config;
 
   // Constructor
-  TsdfSubmap(const Transformation &T_M_S, SubmapID submap_id,
-             TsdfMap::Config config)
+  TsdfSubmap(const Transformation &T_M_S, SubmapID submap_id, Config config)
       : T_M_S_(T_M_S), submap_id_(submap_id) {
     tsdf_map_.reset(new TsdfMap(config));
   }

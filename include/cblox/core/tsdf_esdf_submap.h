@@ -15,10 +15,14 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   typedef std::shared_ptr<TsdfEsdfSubmap> Ptr;
   typedef std::shared_ptr<const TsdfEsdfSubmap> ConstPtr;
 
-  TsdfEsdfSubmap(const Transformation &T_M_S, SubmapID submap_id,
-                 TsdfMap::Config tsdf_config, EsdfMap::Config esdf_config)
-      : TsdfSubmap(T_M_S, submap_id, tsdf_config) {
-    esdf_map_.reset(new EsdfMap(esdf_config));
+  struct Config {
+    TsdfMap::Config tsdf;
+    EsdfMap::Config esdf;
+  };
+
+  TsdfEsdfSubmap(const Transformation &T_M_S, SubmapID submap_id, Config config)
+      : TsdfSubmap(T_M_S, submap_id, config.tsdf), config_(config) {
+    esdf_map_.reset(new EsdfMap(config.esdf));
   }
 
   ~TsdfEsdfSubmap() {
@@ -46,6 +50,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
    */
 
  private:
+  Config config_;
   EsdfMap::Ptr esdf_map_;
 };
 }  // namespace cblox

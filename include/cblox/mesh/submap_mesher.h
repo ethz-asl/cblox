@@ -1,5 +1,5 @@
-#ifndef CBLOX_MESH_TSDF_SUBMAP_MESHER_H_
-#define CBLOX_MESH_TSDF_SUBMAP_MESHER_H_
+#ifndef CBLOX_MESH_SUBMAP_MESHER_H_
+#define CBLOX_MESH_SUBMAP_MESHER_H_
 
 #include <memory>
 #include <vector>
@@ -12,8 +12,8 @@
 #include <voxblox/mesh/mesh_layer.h>
 
 #include "cblox/core/common.h"
+#include "cblox/core/submap_collection.h"
 #include "cblox/core/tsdf_submap.h"
-#include "cblox/core/tsdf_submap_collection.h"
 
 namespace cblox {
 
@@ -24,40 +24,49 @@ using voxblox::MeshIntegratorConfig;
 using voxblox::Color;
 using voxblox::VertexIndex;
 
-class TsdfSubmapMesher {
+class SubmapMesher {
  public:
-  typedef std::shared_ptr<TsdfSubmapMesher> Ptr;
-  typedef std::shared_ptr<const TsdfSubmapMesher> ConstPtr;
+  typedef std::shared_ptr<SubmapMesher> Ptr;
+  typedef std::shared_ptr<const SubmapMesher> ConstPtr;
 
   // Constructor
-  TsdfSubmapMesher(const TsdfMap::Config &tsdf_map_config,
-                   const MeshIntegratorConfig &mesh_config)
+  SubmapMesher(const TsdfMap::Config &tsdf_map_config,
+               const MeshIntegratorConfig &mesh_config)
       : tsdf_map_config_(tsdf_map_config), mesh_config_(mesh_config) {}
 
   // Generating various meshes
-  void generateSeparatedMesh(const TsdfSubmapCollection &tsdf_submap_collection,
-                             MeshLayer *seperated_mesh_layer_ptr);
-  void generateCombinedMesh(const TsdfSubmapCollection &tsdf_submap_collection,
-                            MeshLayer *combined_mesh_layer_ptr);
-  void generatePatchMeshes(const TsdfSubmapCollection &tsdf_submap_collection,
-                           std::vector<MeshLayer::Ptr> *sub_map_mesh_layers);
+  template <typename SubmapType>
+  void generateSeparatedMesh(
+      const SubmapCollection<SubmapType> &tsdf_submap_collection,
+      MeshLayer *seperated_mesh_layer_ptr);
+  template <typename SubmapType>
+  void generateCombinedMesh(
+      const SubmapCollection<SubmapType> &tsdf_submap_collection,
+      MeshLayer *combined_mesh_layer_ptr);
+  template <typename SubmapType>
+  void generatePatchMeshes(
+      const SubmapCollection<SubmapType> &tsdf_submap_collection,
+      std::vector<MeshLayer::Ptr> *sub_map_mesh_layers);
 
   // NOTE(alex.millane): Generates a mesh to test interpolation methods.
   //                     Transforms the TSDF then generates meshses and combines
   // TODO(alex.millane): Remove once happy with the interpolator performance.
+  template <typename SubmapType>
   void generateInterpolationTestMesh(
-      const TsdfSubmapCollection &tsdf_submap_collection,
+      const SubmapCollection<SubmapType> &tsdf_submap_collection,
       MeshLayer *interpolation_test_mesh_layer_ptr);
 
   // Generates a mesh from submaps which have been trimmed in height
   // TODO(alex.millane): This is kind of filthy, but useful for evaluation.
+  template <typename SubmapType>
   void generateTrimmedCombinedMesh(
-      const TsdfSubmapCollection &tsdf_submap_collection,
+      const SubmapCollection<SubmapType> &tsdf_submap_collection,
       double mesh_trim_height, MeshLayer *combined_mesh_layer_ptr);
 
   // Generates mesh layers from the TSDF submaps
+  template <typename SubmapType>
   void generateSeparatedMeshLayers(
-      const std::vector<TsdfSubmap::Ptr> &tsdf_sub_maps,
+      const std::vector<typename SubmapType::Ptr> &tsdf_sub_maps,
       std::vector<MeshLayer::Ptr> *sub_map_mesh_layers);
 
   // Transforms a vector of mesh layers by a vector of posses
@@ -100,9 +109,10 @@ class TsdfSubmapMesher {
 
   // Functions for interacting with the submap collection
   // TODO(alex.millane): Should be encapsulated into the submap collection
+  template <typename SubmapType>
   void trimSubmapToHeight(const float trim_height,
-                          const TsdfSubmap &tsdf_sub_map,
-                          TsdfSubmap *trimmed_tsdf_sub_map_ptr) const;
+                          const SubmapType &tsdf_sub_map,
+                          SubmapType *trimmed_tsdf_sub_map_ptr) const;
 
  private:
   // The configs
@@ -112,4 +122,6 @@ class TsdfSubmapMesher {
 
 }  // namespace cblox
 
-#endif /* CBLOX_MESH_TSDF_SUBMAP_MESHER_H_ */
+#include "cblox/mesh/submap_mesher_inl.h"
+
+#endif  // CBLOX_MESH_SUBMAP_MESHER_H_

@@ -1,32 +1,29 @@
-#ifndef CBLOX_CORE_TSDF_SUBMAP_COLLECTION_MAP_H_
-#define CBLOX_CORE_TSDF_SUBMAP_COLLECTION_MAP_H_
+#ifndef CBLOX_CORE_SUBMAP_COLLECTION_H_
+#define CBLOX_CORE_SUBMAP_COLLECTION_H_
 
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include <voxblox/core/tsdf_map.h>
-
 #include "./TsdfSubmapCollection.pb.h"
-
 #include "cblox/core/common.h"
-#include "cblox/core/tsdf_submap.h"
 
 namespace cblox {
 
-class TsdfSubmapCollection {
+template <typename SubmapType>
+class SubmapCollection {
  public:
-  typedef std::shared_ptr<TsdfSubmapCollection> Ptr;
-  typedef std::shared_ptr<const TsdfSubmapCollection> ConstPtr;
+  typedef std::shared_ptr<SubmapCollection> Ptr;
+  typedef std::shared_ptr<const SubmapCollection> ConstPtr;
 
   // Constructor. Constructs an empty submap collection map
-  explicit TsdfSubmapCollection(const TsdfMap::Config &tsdf_map_config)
+  explicit SubmapCollection(const typename SubmapType::Config &tsdf_map_config)
       : tsdf_map_config_(tsdf_map_config) {}
 
   // Constructor. Constructs a submap collection from a list of submaps
-  TsdfSubmapCollection(const TsdfMap::Config &tsdf_map_config,
-                       const std::vector<TsdfSubmap::Ptr> &tsdf_sub_maps);
+  SubmapCollection(const typename SubmapType::Config &tsdf_map_config,
+                   const std::vector<typename SubmapType::Ptr> &tsdf_sub_maps);
 
   // Gets a vector of the linked IDs
   std::vector<SubmapID> getIDs() const;
@@ -44,20 +41,22 @@ class TsdfSubmapCollection {
   // NOTE(alexmillane): This function hard fails when the submap doesn't
   // exist... This puts the onus on the caller to call exists() first. I don't
   // like this but I can't see a solution.
-  const TsdfSubmap &getSubMap(const SubmapID submap_id) const;
+  const SubmapType &getSubMap(const SubmapID submap_id) const;
   // Note(alexmillane): Unlike the above this function returns a nullptr when
   // the map doesn't exist. No hard crash.
-  TsdfSubmap::ConstPtr getTsdfSubmapConstPtrById(
+  typename SubmapType::ConstPtr getTsdfSubmapConstPtrById(
       const SubmapID submap_id) const;
   // A list of the submaps
-  const std::vector<TsdfSubmap::Ptr> getSubMaps() const;
+  const std::vector<typename SubmapType::Ptr> getSubMaps() const;
 
   // Interactions with the active submap
-  TsdfMap::Ptr getActiveTsdfMapPtr();
-  const TsdfMap &getActiveTsdfMap() const;
-  const TsdfSubmap &getActiveTsdfSubMap() const;
+  const SubmapType &getActiveTsdfSubMap() const;
   const Transformation &getActiveSubMapPose() const;
   const SubmapID getActiveSubMapID() const;
+
+  // Access the tsdf_map member of the active submap
+  TsdfMap::Ptr getActiveTsdfMapPtr();
+  const TsdfMap &getActiveTsdfMap() const;
 
   // Interacting with the submap poses
   bool setSubMapPose(const SubmapID submap_id, const Transformation &pose);
@@ -78,7 +77,9 @@ class TsdfSubmapCollection {
   size_t getNumberAllocatedBlocks() const;
 
   // Returns the config of the tsdf sub maps
-  const TsdfMap::Config &getConfig() const { return tsdf_map_config_; }
+  const typename SubmapType::Config &getConfig() const {
+    return tsdf_map_config_;
+  }
 
   // Save the collection to file
   bool saveToFile(const std::string &file_path) const;
@@ -88,7 +89,7 @@ class TsdfSubmapCollection {
   void fuseSubmapPair(const SubmapIdPair &submap_id_pair);
 
   // Flattens the collection map down to a normal TSDF map
-  TsdfMap::Ptr getProjectedMap() const;
+  typename SubmapType::Ptr getProjectedMap() const;
 
   // KEYFRAME RELATED FUNCTIONS.
   // COMMENTED OUT FOR NOW, BUT NEED TO BE MOVED TO MANIFOLD MAPPING.
@@ -103,15 +104,17 @@ class TsdfSubmapCollection {
   // TODO(alexmillane): Get some concurrency guards
 
   // The config used for the patches
-  TsdfMap::Config tsdf_map_config_;
+  typename SubmapType::Config tsdf_map_config_;
 
   // The active SubmapID
   SubmapID active_submap_id_;
 
   // Submap storage and access
-  std::map<SubmapID, TsdfSubmap::Ptr> id_to_submap_;
+  std::map<SubmapID, typename SubmapType::Ptr> id_to_submap_;
 };
 
 }  // namespace cblox
 
-#endif /* CBLOX_CORE_TSDF_SUBMAP_COLLECTION_MAP_H_ */
+#include "cblox/core/submap_collection_inl.h"
+
+#endif  // CBLOX_CORE_SUBMAP_COLLECTION_H_

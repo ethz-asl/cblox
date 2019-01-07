@@ -17,14 +17,14 @@ namespace cblox {
 namespace io {
 
 bool SaveTsdfSubmapCollection(
-    const TsdfSubmapCollection &tsdf_submap_collection,
+    const SubmapCollection<TsdfSubmap> &tsdf_submap_collection,
     const std::string &file_path) {
   return tsdf_submap_collection.saveToFile(file_path);
 }
 
 bool LoadTsdfSubmapFromStream(
     std::fstream *proto_file_ptr,
-    TsdfSubmapCollection::Ptr tsdf_submap_collection_ptr,
+    typename SubmapCollection<TsdfSubmap>::Ptr tsdf_submap_collection_ptr,
     uint32_t *tmp_byte_offset_ptr) {
   // Checks
   CHECK_NOTNULL(proto_file_ptr);
@@ -71,7 +71,7 @@ bool LoadTsdfSubmapFromStream(
 
 bool LoadTsdfSubmapCollection(
     const std::string &file_path,
-    TsdfSubmapCollection::Ptr *tsdf_submap_collection_ptr) {
+    typename SubmapCollection<TsdfSubmap>::Ptr *tsdf_submap_collection_ptr) {
   // Checks
   // CHECK(tsdf_submap_collection_ptr);
   // Open and check the file
@@ -103,7 +103,8 @@ bool LoadTsdfSubmapCollection(
   tsdf_map_config.tsdf_voxel_size = tsdf_submap_collection_proto.voxel_size();
   tsdf_map_config.tsdf_voxels_per_side =
       tsdf_submap_collection_proto.voxels_per_side();
-  tsdf_submap_collection_ptr->reset(new TsdfSubmapCollection(tsdf_map_config));
+  tsdf_submap_collection_ptr->reset(
+      new SubmapCollection<TsdfSubmap>(tsdf_map_config));
 
   // Loading each of the tsdf sub maps
   for (size_t sub_map_index = 0;

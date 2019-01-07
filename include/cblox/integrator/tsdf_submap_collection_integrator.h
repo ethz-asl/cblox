@@ -7,7 +7,8 @@
 #include <voxblox/integrator/tsdf_integrator.h>
 
 #include "cblox/core/common.h"
-#include "cblox/core/tsdf_submap_collection.h"
+#include "cblox/core/submap_collection.h"
+#include "cblox/core/tsdf_submap.h"
 
 namespace cblox {
 
@@ -16,8 +17,10 @@ class TsdfSubmapCollectionIntegrator {
   TsdfSubmapCollectionIntegrator(
       const voxblox::TsdfIntegratorBase::Config& tsdf_integrator_config,
       const voxblox::TsdfIntegratorType& tsdf_integrator_type,
-      const std::shared_ptr<cblox::TsdfSubmapCollection>&
-          tsdf_submap_collection_ptr);
+      const std::shared_ptr<SubmapCollection<TsdfSubmap>>&
+          tsdf_submap_collection_ptr)
+      : tsdf_submap_collection_ptr_(tsdf_submap_collection_ptr),
+        method_(tsdf_integrator_type) {}
 
   // Integrate a pointcloud to the currently active submap.
   void integratePointCloud(const Transformation& T_M_C,
@@ -34,7 +37,8 @@ class TsdfSubmapCollectionIntegrator {
   void updateIntegratorTarget(const TsdfMap::Ptr& tsdf_map_ptr);
 
   // The submap collection
-  std::shared_ptr<cblox::TsdfSubmapCollection> tsdf_submap_collection_ptr_;
+  std::shared_ptr<cblox::SubmapCollection<TsdfSubmap>>
+      tsdf_submap_collection_ptr_;
 
   // The integrator
   const voxblox::TsdfIntegratorBase::Config tsdf_integrator_config_;
@@ -46,4 +50,4 @@ class TsdfSubmapCollectionIntegrator {
 
 }  // namespace cblox
 
-#endif /* CBLOX_INTEGRATOR_TSDF_SUBMAP_COLLECTION_INTEGRATOR_H_ */
+#endif  // CBLOX_INTEGRATOR_TSDF_SUBMAP_COLLECTION_INTEGRATOR_H_

@@ -1,14 +1,6 @@
 #include "cblox/integrator/tsdf_submap_collection_integrator.h"
 
 namespace cblox {
-
-TsdfSubmapCollectionIntegrator::TsdfSubmapCollectionIntegrator(
-    const voxblox::TsdfIntegratorBase::Config& tsdf_integrator_config,
-    const voxblox::TsdfIntegratorType& tsdf_integrator_type,
-    const std::shared_ptr<TsdfSubmapCollection>& tsdf_submap_collection_ptr)
-    : tsdf_submap_collection_ptr_(tsdf_submap_collection_ptr),
-      method_(tsdf_integrator_type) {}
-
 void TsdfSubmapCollectionIntegrator::integratePointCloud(
     const Transformation& T_M_C, const Pointcloud& points_C,
     const Colors& colors) {
