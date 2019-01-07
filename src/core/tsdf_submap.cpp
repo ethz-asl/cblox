@@ -23,7 +23,7 @@ bool TsdfSubmap::saveToStream(std::fstream* outfile_ptr) const {
   // Saving the TSDF submap header
   TsdfSubmapProto tsdf_sub_map_proto;
   getProto(&tsdf_sub_map_proto);
-  if (!utils::writeProtoMsgToStream(tsdf_sub_map_proto, outfile_ptr)) {
+  if (!voxblox::utils::writeProtoMsgToStream(tsdf_sub_map_proto, outfile_ptr)) {
     LOG(ERROR) << "Could not write tsdf sub map message.";
     outfile_ptr->close();
     return false;
@@ -31,8 +31,8 @@ bool TsdfSubmap::saveToStream(std::fstream* outfile_ptr) const {
   // Saving the blocks
   constexpr bool kIncludeAllBlocks = true;
   const Layer<TsdfVoxel>& tsdf_layer = tsdf_map_->getTsdfLayer();
-  if (!tsdf_layer.saveBlocksToStream(kIncludeAllBlocks, BlockIndexList(),
-                                     outfile_ptr)) {
+  if (!tsdf_layer.saveBlocksToStream(kIncludeAllBlocks,
+                                     voxblox::BlockIndexList(), outfile_ptr)) {
     LOG(ERROR) << "Could not write sub map blocks to stream.";
     outfile_ptr->close();
     return false;
@@ -41,4 +41,4 @@ bool TsdfSubmap::saveToStream(std::fstream* outfile_ptr) const {
   return true;
 }
 
-} // namespace cblox
+}  // namespace cblox

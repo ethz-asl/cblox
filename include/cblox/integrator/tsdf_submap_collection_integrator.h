@@ -1,7 +1,7 @@
 #ifndef CBLOX_INTEGRATOR_TSDF_SUBMAP_COLLECTION_INTEGRATOR_H_
 #define CBLOX_INTEGRATOR_TSDF_SUBMAP_COLLECTION_INTEGRATOR_H_
 
-#include <memory.h>
+#include <memory>
 
 #include <voxblox/core/tsdf_map.h>
 #include <voxblox/integrator/tsdf_integrator.h>
@@ -28,10 +28,10 @@ class TsdfSubmapCollectionIntegrator {
 
  private:
   // Initializes the integrator
-  void initializeIntegrator(const voxblox::TsdfMap::Ptr& tsdf_map_ptr);
+  void initializeIntegrator(const TsdfMap::Ptr& tsdf_map_ptr);
 
   // Changes the integration target the latest submap in the collection.
-  void updateIntegratorTarget(const voxblox::TsdfMap::Ptr& tsdf_map_ptr);
+  void updateIntegratorTarget(const TsdfMap::Ptr& tsdf_map_ptr);
 
   // The submap collection
   std::shared_ptr<cblox::TsdfSubmapCollection> tsdf_submap_collection_ptr_;

@@ -28,7 +28,7 @@ void TsdfSubmapCollectionIntegrator::activateLatestSubmap() {
 }
 
 void TsdfSubmapCollectionIntegrator::initializeIntegrator(
-    const voxblox::TsdfMap::Ptr& tsdf_map_ptr) {
+    const TsdfMap::Ptr& tsdf_map_ptr) {
   CHECK(tsdf_map_ptr);
   // Creating with the voxblox provided factory
   tsdf_integrator_ = voxblox::TsdfIntegratorFactory::create(
@@ -36,7 +36,7 @@ void TsdfSubmapCollectionIntegrator::initializeIntegrator(
 }
 
 void TsdfSubmapCollectionIntegrator::updateIntegratorTarget(
-    const voxblox::TsdfMap::Ptr& tsdf_map_ptr) {
+    const TsdfMap::Ptr& tsdf_map_ptr) {
   CHECK(tsdf_map_ptr);
   // Creating the integrator if not yet created.
   // Otherwise, changing the integration target.

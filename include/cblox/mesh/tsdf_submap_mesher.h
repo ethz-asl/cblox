@@ -17,7 +17,12 @@
 
 namespace cblox {
 
-using namespace voxblox;
+using voxblox::Mesh;
+using voxblox::MeshLayer;
+using voxblox::MeshIntegrator;
+using voxblox::MeshIntegratorConfig;
+using voxblox::Color;
+using voxblox::VertexIndex;
 
 class TsdfSubmapMesher {
  public:

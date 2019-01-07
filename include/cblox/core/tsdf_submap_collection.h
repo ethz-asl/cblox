@@ -15,8 +15,6 @@
 
 namespace cblox {
 
-using namespace voxblox;
-
 class TsdfSubmapCollection {
  public:
   typedef std::shared_ptr<TsdfSubmapCollection> Ptr;
@@ -98,9 +96,6 @@ class TsdfSubmapCollection {
   // void associateIDToActiveSubmap(const SubmapID submap_id) {
   //  id_to_submap_[submap_id] = tsdf_sub_maps_.back();
   //}
-  // bool getAssociatedTsdfSubMapID(const SubmapID submap_id,
-  //                               SubmapID *submap_id_ptr) const;
-  //
   // bool getAssociatedTsdfSubMapID(const SubmapID submap_id,
   //                               SubmapID *submap_id_ptr) const;
 

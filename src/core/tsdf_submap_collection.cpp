@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <glog/logging.h>
@@ -36,11 +37,7 @@ std::vector<SubmapID> TsdfSubmapCollection::getIDs() const {
 bool TsdfSubmapCollection::exists(const SubmapID submap_id) const {
   // Searching for the passed submap ID
   const auto it = id_to_submap_.find(submap_id);
-  if (it != id_to_submap_.end()) {
-    return true;
-  } else {
-    return false;
-  }
+  return (it != id_to_submap_.end());
 }
 
 void TsdfSubmapCollection::createNewSubMap(const Transformation& T_M_S,
@@ -100,8 +97,8 @@ const TsdfSubmap& TsdfSubmapCollection::getSubMap(
 
 const std::vector<TsdfSubmap::Ptr> TsdfSubmapCollection::getSubMaps() const {
   std::vector<TsdfSubmap::Ptr> submap_ptrs;
-  for (const auto& blah : id_to_submap_) {
-    submap_ptrs.emplace_back(blah.second);
+  for (const auto& id_submap_pair : id_to_submap_) {
+    submap_ptrs.emplace_back(id_submap_pair.second);
   }
   return submap_ptrs;
 }
@@ -246,7 +243,8 @@ bool TsdfSubmapCollection::saveToFile(const std::string& file_path) const {
   TsdfSubmapCollectionProto tsdf_submap_collection_proto;
   getProto(&tsdf_submap_collection_proto);
   // Write out the layer header.
-  if (!utils::writeProtoMsgToStream(tsdf_submap_collection_proto, &outfile)) {
+  if (!voxblox::utils::writeProtoMsgToStream(tsdf_submap_collection_proto,
+                                             &outfile)) {
     LOG(ERROR) << "Could not write submap collection header message.";
     outfile.close();
     return false;

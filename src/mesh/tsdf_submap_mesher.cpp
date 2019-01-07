@@ -7,6 +7,11 @@
 
 namespace cblox {
 
+using voxblox::IndexElement;
+using voxblox::BlockIndex;
+using voxblox::BlockIndexList;
+using voxblox::Point;
+
 void TsdfSubmapMesher::generateSeparatedMesh(
     const TsdfSubmapCollection& tsdf_submap_collection,
     MeshLayer* seperated_mesh_layer_ptr) {
@@ -40,7 +45,7 @@ void TsdfSubmapMesher::generateCombinedMesh(
   // Getting the Tsdf map which is the projection of the submap collection
   TsdfMap::Ptr combined_tsdf_map_ptr = tsdf_submap_collection.getProjectedMap();
   // Creating a new mesh layer and making it active
-  MeshIntegrator<voxblox::TsdfVoxel> mesh_integrator(
+  MeshIntegrator<TsdfVoxel> mesh_integrator(
       mesh_config_, combined_tsdf_map_ptr->getTsdfLayerPtr(),
       combined_mesh_layer_ptr);
   // Generating the mesh
@@ -101,7 +106,7 @@ void TsdfSubmapMesher::generateInterpolationTestMesh(
     // Creating a new meshlayer
     MeshLayer mesh_layer(block_size);
     // Creating a new mesh layer and making it active
-    MeshIntegrator<voxblox::TsdfVoxel> mesh_integrator(
+    MeshIntegrator<TsdfVoxel> mesh_integrator(
         mesh_config_, transformed_sub_map_ptr->getTsdfLayerPtr(), &mesh_layer);
     // Generating the mesh
     constexpr bool only_mesh_updated_blocks = false;
@@ -119,7 +124,7 @@ void TsdfSubmapMesher::generateInterpolationTestMesh(
     // Generating a color
     double color_map_index = static_cast<double>(sub_map_index) /
                              static_cast<double>(num_sub_maps - 1);
-    Color sub_map_color = rainbowColorMap(color_map_index);
+    Color sub_map_color = voxblox::rainbowColorMap(color_map_index);
     // Coloring this mesh layer
     colorMeshLayer(sub_map_color, &mesh_layer);
   }
@@ -187,7 +192,7 @@ void TsdfSubmapMesher::generateTrimmedCombinedMesh(
   // Getting the pointers to the combined Tsdf Map
   // MeshLayer combined_mesh_layer(combined_tsdf_map_ptr->block_size());
   // Creating a new mesh layer and making it active
-  MeshIntegrator<voxblox::TsdfVoxel> mesh_integrator(
+  MeshIntegrator<TsdfVoxel> mesh_integrator(
       mesh_config_, combined_tsdf_map_ptr->getTsdfLayerPtr(),
       combined_mesh_layer_ptr);
   // Generating the mesh
@@ -218,7 +223,7 @@ void TsdfSubmapMesher::generateSeparatedMeshLayers(
     MeshLayer::Ptr mesh_layer_ptr(
         new MeshLayer(tsdf_sub_map_ptr->getTsdfMap().block_size()));
     // Generating the mesh
-    MeshIntegrator<voxblox::TsdfVoxel> mesh_integrator(
+    MeshIntegrator<TsdfVoxel> mesh_integrator(
         mesh_config_, tsdf_map_ptr->getTsdfLayerPtr(), mesh_layer_ptr.get());
     constexpr bool only_mesh_updated_blocks = false;
     constexpr bool clear_updated_flag = true;
@@ -295,7 +300,7 @@ void TsdfSubmapMesher::colorMeshLayersWithIndex(
     // Generating a color
     double color_map_index = static_cast<double>(sub_map_index) /
                              static_cast<double>(num_sub_maps - 1);
-    Color sub_map_color = rainbowColorMap(color_map_index);
+    Color sub_map_color = voxblox::rainbowColorMap(color_map_index);
     // Coloring this mesh layer
     colorMeshLayer(sub_map_color, mesh_layer_ptr);
   }
