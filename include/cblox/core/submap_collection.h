@@ -8,6 +8,7 @@
 
 #include "./TsdfSubmapCollection.pb.h"
 #include "cblox/core/common.h"
+#include "cblox/core/tsdf_esdf_submap.h"
 
 namespace cblox {
 
@@ -18,11 +19,11 @@ class SubmapCollection {
   typedef std::shared_ptr<const SubmapCollection> ConstPtr;
 
   // Constructor. Constructs an empty submap collection map
-  explicit SubmapCollection(const typename SubmapType::Config &tsdf_map_config)
-      : tsdf_map_config_(tsdf_map_config) {}
+  explicit SubmapCollection(const typename SubmapType::Config &submap_config)
+      : submap_config_(submap_config) {}
 
   // Constructor. Constructs a submap collection from a list of submaps
-  SubmapCollection(const typename SubmapType::Config &tsdf_map_config,
+  SubmapCollection(const typename SubmapType::Config &submap_config,
                    const std::vector<typename SubmapType::Ptr> &tsdf_sub_maps);
 
   // Gets a vector of the linked IDs
@@ -44,13 +45,13 @@ class SubmapCollection {
   const SubmapType &getSubMap(const SubmapID submap_id) const;
   // Note(alexmillane): Unlike the above this function returns a nullptr when
   // the map doesn't exist. No hard crash.
-  typename SubmapType::ConstPtr getTsdfSubmapConstPtrById(
+  typename SubmapType::ConstPtr getSubMapConstPtrById(
       const SubmapID submap_id) const;
   // A list of the submaps
   const std::vector<typename SubmapType::Ptr> getSubMaps() const;
 
   // Interactions with the active submap
-  const SubmapType &getActiveTsdfSubMap() const;
+  const SubmapType &getActiveSubMap() const;
   const Transformation &getActiveSubMapPose() const;
   const SubmapID getActiveSubMapID() const;
 
@@ -64,6 +65,23 @@ class SubmapCollection {
   bool getSubMapPose(const SubmapID submap_id, Transformation *pose_ptr) const;
   void getSubMapPoses(AlignedVector<Transformation> *submap_poses) const;
 
+  // Generate the ESDF for the submap with the given ID. This method is only
+  // available if the SubmapType is equal to or derived from TsdfEsdfSubmap.
+  template <class ST = SubmapType>
+  typename std::enable_if<std::is_base_of<TsdfEsdfSubmap, ST>::value,
+                          bool>::type
+  generateEsdfById(const SubmapID submap_id) {
+    // Find the submap corresponding to the given ID
+    const auto submap_ptr_it = id_to_submap_.find(submap_id);
+    if (submap_ptr_it != id_to_submap_.end()) {
+      // Generate the ESDF from the TSDF
+      submap_ptr_it->second->generateEsdf();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   // Clears the collection, leaving an empty map
   void clear() { id_to_submap_.clear(); }
 
@@ -76,9 +94,9 @@ class SubmapCollection {
   }
   size_t getNumberAllocatedBlocks() const;
 
-  // Returns the config of the tsdf sub maps
+  // Returns the config of the submaps
   const typename SubmapType::Config &getConfig() const {
-    return tsdf_map_config_;
+    return submap_config_;
   }
 
   // Save the collection to file
@@ -89,7 +107,7 @@ class SubmapCollection {
   void fuseSubmapPair(const SubmapIdPair &submap_id_pair);
 
   // Flattens the collection map down to a normal TSDF map
-  typename SubmapType::Ptr getProjectedMap() const;
+  TsdfMap::Ptr getProjectedMap() const;
 
   // KEYFRAME RELATED FUNCTIONS.
   // COMMENTED OUT FOR NOW, BUT NEED TO BE MOVED TO MANIFOLD MAPPING.
@@ -104,7 +122,7 @@ class SubmapCollection {
   // TODO(alexmillane): Get some concurrency guards
 
   // The config used for the patches
-  typename SubmapType::Config tsdf_map_config_;
+  typename SubmapType::Config submap_config_;
 
   // The active SubmapID
   SubmapID active_submap_id_;

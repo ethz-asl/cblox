@@ -14,14 +14,15 @@
 
 #include <voxblox/integrator/merge_integration.h>
 #include <voxblox/utils/protobuf_utils.h>
+#include "cblox/core/tsdf_submap.h"
 
 namespace cblox {
 
 template <typename SubmapType>
 SubmapCollection<SubmapType>::SubmapCollection(
-    const typename SubmapType::Config& tsdf_map_config,
+    const typename SubmapType::Config& submap_config,
     const std::vector<typename SubmapType::Ptr>& tsdf_sub_maps)
-    : tsdf_map_config_(tsdf_map_config) {
+    : submap_config_(submap_config) {
   // Constructing from a list of existing submaps
   // NOTE(alexmillane): assigning arbitrary SubmapIDs
   SubmapID submap_id = 0;
@@ -56,7 +57,7 @@ void SubmapCollection<SubmapType>::createNewSubMap(const Transformation& T_M_S,
   CHECK(it == id_to_submap_.end());
   // Creating the new submap and adding it to the list
   typename SubmapType::Ptr tsdf_sub_map(
-      new SubmapType(T_M_S, submap_id, tsdf_map_config_));
+      new SubmapType(T_M_S, submap_id, submap_config_));
   id_to_submap_.emplace(submap_id, std::move(tsdf_sub_map));
   // Updating the active submap
   active_submap_id_ = submap_id;
@@ -85,7 +86,7 @@ bool SubmapCollection<SubmapType>::duplicateSubMap(
     const Transformation T_M_S = src_submap_ptr->getPose();
     // Creating the new submap and adding it to the list
     typename SubmapType::Ptr new_tsdf_sub_map(
-        new SubmapType(T_M_S, new_submap_id, tsdf_map_config_));
+        new SubmapType(T_M_S, new_submap_id, submap_config_));
     // Reset the TsdfMap based on a copy of the source submap's TSDF layer
     // TODO(victorr): Find a better way to do this, however with .reset(...) as
     // below the new submap appears empty
@@ -133,9 +134,9 @@ const TsdfMap& SubmapCollection<SubmapType>::getActiveTsdfMap() const {
   return (it->second)->getTsdfMap();
 }
 
-// Gets a reference to the active tsdf_map
+// Gets a reference to the active submap
 template <typename SubmapType>
-const SubmapType& SubmapCollection<SubmapType>::getActiveTsdfSubMap() const {
+const SubmapType& SubmapCollection<SubmapType>::getActiveSubMap() const {
   const auto it = id_to_submap_.find(active_submap_id_);
   CHECK(it != id_to_submap_.end());
   return *(it->second);
@@ -144,7 +145,7 @@ const SubmapType& SubmapCollection<SubmapType>::getActiveTsdfSubMap() const {
 template <typename SubmapType>
 const Transformation& SubmapCollection<SubmapType>::getActiveSubMapPose()
     const {
-  return getActiveTsdfSubMap().getPose();
+  return getActiveSubMap().getPose();
 }
 template <typename SubmapType>
 const SubmapID SubmapCollection<SubmapType>::getActiveSubMapID() const {
@@ -152,10 +153,10 @@ const SubmapID SubmapCollection<SubmapType>::getActiveSubMapID() const {
 }
 
 template <typename SubmapType>
-typename SubmapType::Ptr SubmapCollection<SubmapType>::getProjectedMap() const {
+TsdfMap::Ptr SubmapCollection<SubmapType>::getProjectedMap() const {
   // Creating the global tsdf map and getting its tsdf layer
   TsdfMap::Ptr projected_tsdf_map_ptr =
-      TsdfMap::Ptr(new TsdfMap(tsdf_map_config_));
+      TsdfMap::Ptr(new TsdfMap(submap_config_));
   Layer<TsdfVoxel>* combined_tsdf_layer_ptr =
       projected_tsdf_map_ptr->getTsdfLayerPtr();
   // Looping over the current submaps
@@ -246,7 +247,7 @@ void SubmapCollection<SubmapType>::getSubMapPoses(
 
 template <typename SubmapType>
 typename SubmapType::ConstPtr SubmapCollection<
-    SubmapType>::getTsdfSubmapConstPtrById(const SubmapID submap_id) const {
+    SubmapType>::getSubMapConstPtrById(const SubmapID submap_id) const {
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
     return tsdf_submap_ptr_it->second;
@@ -298,8 +299,8 @@ void SubmapCollection<SubmapType>::getProto(
   // Checks
   CHECK_NOTNULL(proto);
   // Filling out the description of the submap collection
-  proto->set_voxel_size(tsdf_map_config_.tsdf_voxel_size);
-  proto->set_voxels_per_side(tsdf_map_config_.tsdf_voxels_per_side);
+  proto->set_voxel_size(submap_config_.tsdf_voxel_size);
+  proto->set_voxels_per_side(submap_config_.tsdf_voxels_per_side);
   proto->set_num_submaps(num_patches());
 }
 

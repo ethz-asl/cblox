@@ -66,13 +66,12 @@ class TsdfSubmap {
 
  protected:
   SubmapID submap_id_;
+  TsdfMap::Ptr tsdf_map_;
 
  private:
   // The pose of this submap in the global map frame
   mutable std::mutex transformation_mutex;
   Transformation T_M_S_;
-
-  TsdfMap::Ptr tsdf_map_;
 
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
