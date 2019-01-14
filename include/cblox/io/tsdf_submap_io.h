@@ -13,16 +13,20 @@ bool SaveTsdfSubmapCollection(
     const SubmapCollection<TsdfSubmap> &tsdf_submap_collection,
     const std::string &file_path);
 
-bool LoadTsdfSubmapFromStream(
+template <typename SubmapType>
+bool LoadSubmapFromStream(
     std::fstream *proto_file_ptr,
-    typename SubmapCollection<TsdfSubmap>::Ptr tsdf_submap_collection_ptr,
+    typename SubmapCollection<SubmapType>::Ptr tsdf_submap_collection_ptr,
     uint32_t *tmp_byte_offset_ptr);
 
-bool LoadTsdfSubmapCollection(
+template <typename SubmapType>
+bool LoadSubmapCollection(
     const std::string &file_path,
-    typename SubmapCollection<TsdfSubmap>::Ptr *tsdf_submap_collection_ptr);
+    typename SubmapCollection<SubmapType>::Ptr *tsdf_submap_collection_ptr);
 
 }  // namespace io
 }  // namespace cblox
+
+#include "cblox/io/tsdf_submap_io_inl.h"
 
 #endif  // CBLOX_IO_TSDF_SUBMAP_IO_H_
