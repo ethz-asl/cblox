@@ -12,28 +12,6 @@ using voxblox::BlockIndex;
 using voxblox::BlockIndexList;
 using voxblox::Point;
 
-void SubmapMesher::generateSeparatedMesh(
-    const SubmapCollection<TsdfSubmap>& tsdf_submap_collection,
-    MeshLayer* seperated_mesh_layer_ptr) {
-  // Checks
-  CHECK_NOTNULL(seperated_mesh_layer_ptr);
-  // Getting the submaps
-  const std::vector<TsdfSubmap::Ptr> tsdf_sub_maps =
-      tsdf_submap_collection.getSubMaps();
-  // Generating the mesh layers
-  std::vector<MeshLayer::Ptr> sub_map_mesh_layers;
-  generateSeparatedMeshLayers(tsdf_sub_maps, &sub_map_mesh_layers);
-
-  // Coloring the mesh layers
-  colorMeshLayersWithIndex(&sub_map_mesh_layers);
-  // Get submap transforms
-  AlignedVector<Transformation> sub_map_poses;
-  tsdf_submap_collection.getSubMapPoses(&sub_map_poses);
-  // Combining the mesh layers
-  combineMeshLayers(sub_map_mesh_layers, sub_map_poses,
-                    seperated_mesh_layer_ptr);
-}
-
 void SubmapMesher::generateCombinedMesh(
     const SubmapCollection<TsdfSubmap>& tsdf_submap_collection,
     MeshLayer* combined_mesh_layer_ptr) {
@@ -63,7 +41,8 @@ void SubmapMesher::generatePatchMeshes(
   const std::vector<TsdfSubmap::Ptr> tsdf_sub_maps =
       tsdf_submap_collection.getSubMaps();
   // Generating the mesh layers
-  generateSeparatedMeshLayers(tsdf_sub_maps, sub_map_mesh_layers_ptr);
+  generateSeparatedMeshLayers<TsdfSubmap>(tsdf_sub_maps,
+                                          sub_map_mesh_layers_ptr);
 }
 
 void SubmapMesher::generateInterpolationTestMesh(
@@ -200,37 +179,6 @@ void SubmapMesher::generateTrimmedCombinedMesh(
   constexpr bool only_mesh_updated_blocks = false;
   constexpr bool clear_updated_flag = true;
   mesh_integrator.generateMesh(only_mesh_updated_blocks, clear_updated_flag);
-}
-
-void SubmapMesher::generateSeparatedMeshLayers(
-    const std::vector<TsdfSubmap::Ptr>& tsdf_sub_maps,
-    std::vector<MeshLayer::Ptr>* sub_map_mesh_layers) {
-  // Checks
-  CHECK_NOTNULL(sub_map_mesh_layers);
-  sub_map_mesh_layers->clear();
-  sub_map_mesh_layers->reserve(tsdf_sub_maps.size());
-  // Looping over the sub maps and generating meshs
-  size_t mesh_index = 0;
-  for (TsdfSubmap::Ptr tsdf_sub_map_ptr : tsdf_sub_maps) {
-    CHECK_NOTNULL(tsdf_sub_map_ptr.get());
-    // DEBUG
-    std::cout << "Generating mesh for submap number #" << mesh_index
-              << std::endl;
-    mesh_index++;
-    // Getting the TSDF data
-    TsdfMap::Ptr tsdf_map_ptr = tsdf_sub_map_ptr->getTsdfMapPtr();
-    // Creating a mesh layer to hold the mesh fragment
-    MeshLayer::Ptr mesh_layer_ptr(
-        new MeshLayer(tsdf_sub_map_ptr->getTsdfMap().block_size()));
-    // Generating the mesh
-    MeshIntegrator<TsdfVoxel> mesh_integrator(
-        mesh_config_, tsdf_map_ptr->getTsdfLayerPtr(), mesh_layer_ptr.get());
-    constexpr bool only_mesh_updated_blocks = false;
-    constexpr bool clear_updated_flag = true;
-    mesh_integrator.generateMesh(only_mesh_updated_blocks, clear_updated_flag);
-    // Pushing this mesh layer to the output
-    sub_map_mesh_layers->push_back(mesh_layer_ptr);
-  }
 }
 
 void SubmapMesher::trimSubmapToHeight(

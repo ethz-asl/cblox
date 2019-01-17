@@ -35,8 +35,9 @@ class SubmapMesher {
       : tsdf_map_config_(submap_config), mesh_config_(mesh_config) {}
 
   // Generating various meshes
+  template <typename SubmapType>
   void generateSeparatedMesh(
-      const SubmapCollection<TsdfSubmap> &tsdf_submap_collection,
+      const SubmapCollection<SubmapType> &submap_collection,
       MeshLayer *seperated_mesh_layer_ptr);
   void generateCombinedMesh(
       const SubmapCollection<TsdfSubmap> &tsdf_submap_collection,
@@ -59,8 +60,9 @@ class SubmapMesher {
       double mesh_trim_height, MeshLayer *combined_mesh_layer_ptr);
 
   // Generates mesh layers from the TSDF submaps
+  template <typename SubmapType>
   void generateSeparatedMeshLayers(
-      const std::vector<TsdfSubmap::Ptr> &tsdf_sub_maps,
+      const std::vector<typename SubmapType::Ptr> &sub_maps,
       std::vector<MeshLayer::Ptr> *sub_map_mesh_layers);
 
   // Transforms a vector of mesh layers by a vector of posses
@@ -114,5 +116,7 @@ class SubmapMesher {
 };
 
 }  // namespace cblox
+
+#include "cblox/mesh/submap_mesher_inl.h"
 
 #endif  // CBLOX_MESH_SUBMAP_MESHER_H_
