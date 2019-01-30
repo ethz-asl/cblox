@@ -37,9 +37,6 @@ void SubmapMesher::generateCombinedMesh(
     MeshLayer* combined_mesh_layer_ptr) {
   // Checks
   CHECK_NOTNULL(combined_mesh_layer_ptr);
-  // Getting the submaps
-  const std::vector<TsdfSubmap::Ptr> tsdf_sub_maps =
-      submap_collection.getSubMaps();
   // Getting the Tsdf map which is the projection of the submap collection
   TsdfMap::Ptr combined_tsdf_map_ptr = submap_collection.getProjectedMap();
   // Creating a new mesh layer and making it active
