@@ -39,8 +39,9 @@ class SubmapMesher {
   void generateSeparatedMesh(
       const SubmapCollection<SubmapType> &submap_collection,
       MeshLayer *seperated_mesh_layer_ptr);
+  template <typename SubmapType>
   void generateCombinedMesh(
-      const SubmapCollection<TsdfSubmap> &tsdf_submap_collection,
+      const SubmapCollection<SubmapType> &submap_collection,
       MeshLayer *combined_mesh_layer_ptr);
   void generatePatchMeshes(
       const SubmapCollection<TsdfSubmap> &tsdf_submap_collection,

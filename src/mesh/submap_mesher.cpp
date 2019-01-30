@@ -12,26 +12,6 @@ using voxblox::BlockIndex;
 using voxblox::BlockIndexList;
 using voxblox::Point;
 
-void SubmapMesher::generateCombinedMesh(
-    const SubmapCollection<TsdfSubmap>& tsdf_submap_collection,
-    MeshLayer* combined_mesh_layer_ptr) {
-  // Checks
-  CHECK_NOTNULL(combined_mesh_layer_ptr);
-  // Getting the submaps
-  const std::vector<TsdfSubmap::Ptr> tsdf_sub_maps =
-      tsdf_submap_collection.getSubMaps();
-  // Getting the Tsdf map which is the projection of the submap collection
-  TsdfMap::Ptr combined_tsdf_map_ptr = tsdf_submap_collection.getProjectedMap();
-  // Creating a new mesh layer and making it active
-  MeshIntegrator<TsdfVoxel> mesh_integrator(
-      mesh_config_, combined_tsdf_map_ptr->getTsdfLayerPtr(),
-      combined_mesh_layer_ptr);
-  // Generating the mesh
-  constexpr bool only_mesh_updated_blocks = false;
-  constexpr bool clear_updated_flag = true;
-  mesh_integrator.generateMesh(only_mesh_updated_blocks, clear_updated_flag);
-}
-
 void SubmapMesher::generatePatchMeshes(
     const SubmapCollection<TsdfSubmap>& tsdf_submap_collection,
     std::vector<MeshLayer::Ptr>* sub_map_mesh_layers_ptr) {

@@ -32,6 +32,27 @@ void SubmapMesher::generateSeparatedMesh(
 }
 
 template <typename SubmapType>
+void SubmapMesher::generateCombinedMesh(
+    const SubmapCollection<SubmapType>& submap_collection,
+    MeshLayer* combined_mesh_layer_ptr) {
+  // Checks
+  CHECK_NOTNULL(combined_mesh_layer_ptr);
+  // Getting the submaps
+  const std::vector<TsdfSubmap::Ptr> tsdf_sub_maps =
+      submap_collection.getSubMaps();
+  // Getting the Tsdf map which is the projection of the submap collection
+  TsdfMap::Ptr combined_tsdf_map_ptr = submap_collection.getProjectedMap();
+  // Creating a new mesh layer and making it active
+  MeshIntegrator<TsdfVoxel> mesh_integrator(
+      mesh_config_, combined_tsdf_map_ptr->getTsdfLayerPtr(),
+      combined_mesh_layer_ptr);
+  // Generating the mesh
+  constexpr bool only_mesh_updated_blocks = false;
+  constexpr bool clear_updated_flag = true;
+  mesh_integrator.generateMesh(only_mesh_updated_blocks, clear_updated_flag);
+}
+
+template <typename SubmapType>
 void SubmapMesher::generateSeparatedMeshLayers(
     const std::vector<typename SubmapType::Ptr>& sub_maps,
     std::vector<MeshLayer::Ptr>* sub_map_mesh_layers) {
