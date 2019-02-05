@@ -64,7 +64,7 @@ void SubmapCollection<SubmapType>::createNewSubMap(const Transformation& T_M_S,
 }
 
 template <typename SubmapType>
-void SubmapCollection<SubmapType>::createNewSubMap(
+SubmapID SubmapCollection<SubmapType>::createNewSubMap(
     const Transformation& T_M_S) {
   // Creating a submap with a generated SubmapID
   // NOTE(alexmillane): rbegin() returns the pair with the highest key.
@@ -73,6 +73,7 @@ void SubmapCollection<SubmapType>::createNewSubMap(
     new_ID = id_to_submap_.rbegin()->first + 1;
   }
   createNewSubMap(T_M_S, new_ID);
+  return new_ID;
 }
 
 template <typename SubmapType>

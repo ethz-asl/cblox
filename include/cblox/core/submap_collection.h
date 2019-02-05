@@ -32,7 +32,7 @@ class SubmapCollection {
 
   // Creates a new submap on the top of the collection
   void createNewSubMap(const Transformation &T_M_S, const SubmapID submap_id);
-  void createNewSubMap(const Transformation &T_M_S);
+  SubmapID createNewSubMap(const Transformation &T_M_S);
 
   // Create a new submap which duplicates an existing source submap
   bool duplicateSubMap(const SubmapID source_submap_id,
