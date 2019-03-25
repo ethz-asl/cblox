@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>cblox_ros</name>
+  <version>0.0.0</version>
+  <description>
+    Contains a ros interface for cblox.
+  </description>
+  <url></url>
+  <author>Alex Millane</author>
+  <maintainer email="alex.millane@gmail.com">Alex Millane</maintainer>
+  <license>New BSD</license>
+
+  <!-- Dependencies which this package needs to build itself. -->
+  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>catkin_simple</buildtool_depend>
+
+  <!-- Dependencies. -->
+  <depend>roscpp</depend>
+  <depend>cmake_modules</depend>
+  <depend>glog_catkin</depend>
+  <depend>voxblox</depend>
+  <depend>voxblox_ros</depend>
+  <depend>cblox</depend>
+  <depend>minkindr</depend>
+  <depend>minkindr_conversions</depend>
+
+</package>
