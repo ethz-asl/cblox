@@ -39,18 +39,19 @@ typedef AlignedVector<Transformation> TransformationVector;
 
 // Taking some voxblox datatypes
 using voxblox::Pointcloud;
+using voxblox::Point;
 using voxblox::Colors;
+using voxblox::Color;
 using voxblox::TsdfMap;
 using voxblox::EsdfMap;
 using voxblox::Layer;
 using voxblox::Block;
 using voxblox::TsdfVoxel;
 
-// TODO(alexmillane): Put this back in when transitioning the integrator.
 // Taking timing from voxblox
-// namespace timing {
-// using namespace voxblox::timing;
-//}  // namespace timing
+namespace timing {
+ using namespace voxblox::timing;
+}  // namespace timing
 
 }  // namespace cblox
 

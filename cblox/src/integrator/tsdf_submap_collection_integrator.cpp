@@ -1,6 +1,7 @@
 #include "cblox/integrator/tsdf_submap_collection_integrator.h"
 
 namespace cblox {
+
 void TsdfSubmapCollectionIntegrator::integratePointCloud(
     const Transformation& T_M_C, const Pointcloud& points_C,
     const Colors& colors) {
