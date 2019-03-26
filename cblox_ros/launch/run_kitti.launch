@@ -5,7 +5,7 @@
 
   <param name="use_sim_time" value="true" />
 
-  <node name="cblox_node" pkg="cblox_ros" type="tsdf_server" output="screen" args="-alsologtostderr" clear_params="true">
+  <node name="cblox" pkg="cblox_ros" type="tsdf_server" output="screen" args="-alsologtostderr" clear_params="true">
     <remap from="pointcloud" to="/velodyne_points" />
     <param name="tsdf_voxel_size" value="$(arg voxel_size)" />
     <param name="truncation_distance" value="$(eval 4. * 0.25)"/>
@@ -23,7 +23,7 @@
     <param name="slice_level" value="1.0" />
     <param name="method" value="fast" />
     <param name="use_const_weight" value="true" />
-    <!-- <param name="mesh_filename" value="$(find voxblox_ros)/mesh_results/$(anon kitti).ply" /> -->
+    <param name="mesh_filename" value="$(find cblox_ros)/mesh_results/$(anon kitti).ply" />
   </node>
 
 </launch>

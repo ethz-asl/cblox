@@ -11,7 +11,7 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
-//#include <std_srvs/Empty.h>
+#include <std_srvs/Empty.h>
 
 #include <voxblox/integrator/tsdf_integrator.h>
 #include <voxblox/mesh/mesh_integrator.h>
@@ -44,6 +44,7 @@
 #include <cblox/core/submap_collection.h>
 #include <cblox/core/tsdf_submap.h>
 #include <cblox/integrator/tsdf_submap_collection_integrator.h>
+#include <cblox/mesh/submap_mesher.h>
 
 namespace cblox {
 
@@ -86,6 +87,12 @@ class TsdfServer {
   // bool loadMapCallback(std_srvs::Empty::Request& request,     // NOLINT
   //                     std_srvs::Empty::Response& response);  // NOLINT
 
+  // Mesh output
+  bool generateSeparatedMeshCallback(std_srvs::Empty::Request& request,
+                                     std_srvs::Empty::Response& response);
+  bool generateCombinedMeshCallback(std_srvs::Empty::Request& request,
+                                    std_srvs::Empty::Response& response);
+
  private:
   // Gets parameters
   void subscribeToTopics();
@@ -116,6 +123,13 @@ class TsdfServer {
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_;
 
+  // Subscribers
+  ros::Subscriber pointcloud_sub_;
+
+  // Services
+  ros::ServiceServer generate_separated_mesh_srv_;
+  ros::ServiceServer generate_combined_mesh_srv_;
+
   bool verbose_;
 
   /**
@@ -124,8 +138,6 @@ class TsdfServer {
    */
   std::string world_frame_;
 
-  // Pointcloud subscriber
-  ros::Subscriber pointcloud_sub_;
 
   // The submap collection
   std::shared_ptr<SubmapCollection<TsdfSubmap>> tsdf_submap_collection_ptr_;
@@ -133,6 +145,10 @@ class TsdfServer {
   // The integrator
   std::shared_ptr<TsdfSubmapCollectionIntegrator>
       tsdf_submap_collection_integrator_ptr_;
+
+  // The mesher
+  std::shared_ptr<SubmapMesher> submap_mesher_ptr_;
+  std::string mesh_filename_;
 
   // Transformer object to keep track of either TF transforms or messages from a
   // transform topic.
@@ -147,6 +163,9 @@ class TsdfServer {
 
   /// Colormap to use for intensity pointclouds.
   std::unique_ptr<voxblox::ColorMap> color_map_;
+
+  // Number of frames integrated to the current submap
+  size_t num_integrated_frames_current_submap_;
 
 };
 
