@@ -8,9 +8,9 @@ namespace cblox {
 
 void TrajectoryVisualizer::getTrajectoryMsg(
     nav_msgs::Path* path_msg_ptr) const {
-  for (const Transformation& T_W_C : T_W_C_array_) {
+  for (const Transformation& T_G_C : T_G_C_array_) {
     geometry_msgs::PoseStamped pose_stamped;
-    tf::poseKindrToMsg(T_W_C.cast<double>(), &pose_stamped.pose);
+    tf::poseKindrToMsg(T_G_C.cast<double>(), &pose_stamped.pose);
     path_msg_ptr->poses.push_back(pose_stamped);
   }
 }

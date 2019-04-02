@@ -5,7 +5,7 @@
 
   <param name="use_sim_time" value="true" />
 
-  <node name="cblox" pkg="cblox_ros" type="tsdf_server" output="screen" args="-alsologtostderr" clear_params="true">
+  <node name="cblox" pkg="cblox_ros" type="tsdf_submap_server" output="screen" args="-alsologtostderr" clear_params="true">
     <remap from="pointcloud" to="/velodyne_points" />
     <param name="tsdf_voxel_size" value="$(arg voxel_size)" />
     <param name="truncation_distance" value="$(eval 4. * 0.25)"/>

@@ -5,40 +5,12 @@
 #include <string>
 #include <vector>
 
-//#include <Eigen/Geometry>
-
-//#include <tf/transform_broadcaster.h>
-
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <std_srvs/Empty.h>
 
-#include <voxblox/integrator/tsdf_integrator.h>
-#include <voxblox/mesh/mesh_integrator.h>
 #include <voxblox/utils/color_maps.h>
-
 #include <voxblox_ros/transformer.h>
-
-//#include <pcl/conversions.h>
-//#include <pcl/point_types.h>
-//#include <pcl_conversions/pcl_conversions.h>
-//#include <pcl_ros/point_cloud.h>
-
-//#include <message_filters/subscriber.h>
-//#include <message_filters/sync_policies/approximate_time.h>
-//#include <message_filters/time_synchronizer.h>
-
-//#include <kindr/minimal/quat-transformation.h>
-
-//#include <cblox/core/tsdf_submap_collection.h>
-//#include <cblox/mesh/tsdf_submap_mesher.h>
-
-//#include "manifold_mapping/core/common.hpp"
-//#include "manifold_mapping/core/frame_integrator.hpp"
-//#include "manifold_mapping/core/manifold_maintainer.hpp"
-//#include "manifold_mapping/core/sparse/sparse_mapper.hpp"
-//#include "manifold_mapping/core/sparse/trackable_frame.hpp"
-//#include "manifold_mapping/core/transformer.hpp"
 
 #include <cblox/core/common.h>
 #include <cblox/core/submap_collection.h>
@@ -59,17 +31,19 @@ constexpr double kDefaultMinTimeBetweenMsgsSec = 0.0;
 // Data queue sizes
 constexpr int kDefaultPointcloudQueueSize = 1;
 
-// Class handling global alignment calculation and publishing
-class TsdfServer {
+// Receives ROS Data and produces a collection of submaps
+class TsdfSubmapServer {
  public:
   // Constructor
-  TsdfServer(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private);
-  TsdfServer(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
-             const TsdfMap::Config& tsdf_map_config,
-             const voxblox::TsdfIntegratorBase::Config& tsdf_integrator_config,
-             const voxblox::TsdfIntegratorType& tsdf_integrator_type,
-             const voxblox::MeshIntegratorConfig& mesh_config);
-  virtual ~TsdfServer() {}
+  TsdfSubmapServer(const ros::NodeHandle& nh,
+                   const ros::NodeHandle& nh_private);
+  TsdfSubmapServer(
+      const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
+      const TsdfMap::Config& tsdf_map_config,
+      const voxblox::TsdfIntegratorBase::Config& tsdf_integrator_config,
+      const voxblox::TsdfIntegratorType& tsdf_integrator_type,
+      const voxblox::MeshIntegratorConfig& mesh_config);
+  virtual ~TsdfSubmapServer() {}
 
   // Pointcloud data subscriber
   virtual void pointcloudCallback(
@@ -119,7 +93,7 @@ class TsdfServer {
   void updateActiveSubmapMesh();
 
   // Visualize submap base frames
-  void visualizeSubMapBaseframes() const; 
+  void visualizeSubMapBaseframes() const;
 
   // Visualize the trajectory
   void visualizeTrajectory() const;
@@ -135,7 +109,7 @@ class TsdfServer {
   ros::Publisher active_submap_mesh_pub_;
   ros::Publisher submap_poses_pub_;
   ros::Publisher trajectory_pub_;
-  
+
   // Services
   ros::ServiceServer generate_separated_mesh_srv_;
   ros::ServiceServer generate_combined_mesh_srv_;
@@ -183,7 +157,6 @@ class TsdfServer {
   size_t num_integrated_frames_current_submap_;
   // The number of frames integrated into a submap before requesting a new one.
   size_t num_integrated_frames_per_submap_;
-
 };
 
 }  // namespace cblox

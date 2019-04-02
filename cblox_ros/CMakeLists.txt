@@ -10,7 +10,7 @@ add_definitions(-std=c++11 -Wall -Wextra)
 # LIBRARIES #
 #############
 cs_add_library(${PROJECT_NAME}
-  src/tsdf_server.cc
+  src/tsdf_submap_server.cc
   src/active_submap_visualizer.cc
   src/trajectory_visualizer.cc
 )
@@ -19,10 +19,10 @@ cs_add_library(${PROJECT_NAME}
 # BINARIES #
 ############
 
-cs_add_executable(tsdf_server
-  src/tsdf_server_node.cc
+cs_add_executable(tsdf_submap_server
+  src/tsdf_submap_server_node.cc
 )
-target_link_libraries(tsdf_server ${PROJECT_NAME})
+target_link_libraries(tsdf_submap_server ${PROJECT_NAME})
 
 ##########
 # EXPORT #

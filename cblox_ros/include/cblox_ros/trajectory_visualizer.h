@@ -16,14 +16,17 @@ class TrajectoryVisualizer {
   TrajectoryVisualizer() {}
 
   // Adds a pose to the trajectory
-  void addPose(const Transformation& T_W_C) { T_W_C_array_.push_back(T_W_C); }
+  // T_G_C - Transformation between Camera (C) and Global tracking frame (G).
+  void addPose(const Transformation& T_G_C) { T_G_C_array_.push_back(T_G_C); }
 
   // Gets the trajectory as a message for visualization
   void getTrajectoryMsg(nav_msgs::Path* path_msg_ptr) const;
 
  private:
   // The vector of trajectory poses
-  TransformationVector T_W_C_array_;
+  // Note(alexmillane): In the future these poses will have to be updated to
+  // reflect changes in the SLAM graph.
+  TransformationVector T_G_C_array_;
 };
 
 }  // namespace cblox

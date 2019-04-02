@@ -1,10 +1,10 @@
-#include "cblox_ros/tsdf_server.h"
+#include "cblox_ros/tsdf_submap_server.h"
 
 #include <iostream>
 
 #include <geometry_msgs/PoseArray.h>
-#include <visualization_msgs/Marker.h>
 #include <nav_msgs/Path.h>
+#include <visualization_msgs/Marker.h>
 
 #include <pcl/conversions.h>
 #include <pcl/point_types.h>
@@ -16,20 +16,20 @@
 #include <voxblox/utils/timing.h>
 #include <voxblox_ros/ros_params.h>
 
-#include "cblox_ros/ros_params.h"
 #include "cblox_ros/pose_vis.h"
+#include "cblox_ros/ros_params.h"
 
 namespace cblox {
 
-TsdfServer::TsdfServer(const ros::NodeHandle& nh,
-                       const ros::NodeHandle& nh_private)
-    : TsdfServer(nh, nh_private,
-                 voxblox::getTsdfMapConfigFromRosParam(nh_private),
-                 voxblox::getTsdfIntegratorConfigFromRosParam(nh_private),
-                 getTsdfIntegratorTypeFromRosParam(nh_private),
-                 voxblox::getMeshIntegratorConfigFromRosParam(nh_private)) {}
+TsdfSubmapServer::TsdfSubmapServer(const ros::NodeHandle& nh,
+                                   const ros::NodeHandle& nh_private)
+    : TsdfSubmapServer(
+          nh, nh_private, voxblox::getTsdfMapConfigFromRosParam(nh_private),
+          voxblox::getTsdfIntegratorConfigFromRosParam(nh_private),
+          getTsdfIntegratorTypeFromRosParam(nh_private),
+          voxblox::getMeshIntegratorConfigFromRosParam(nh_private)) {}
 
-TsdfServer::TsdfServer(
+TsdfSubmapServer::TsdfSubmapServer(
     const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
     const TsdfMap::Config& tsdf_map_config,
     const voxblox::TsdfIntegratorBase::Config& tsdf_integrator_config,
@@ -44,6 +44,7 @@ TsdfServer::TsdfServer(
       color_map_(new voxblox::GrayscaleColorMap()),
       transformer_(nh, nh_private) {
   ROS_DEBUG("Creating a TSDF Server");
+
   // Initial interaction with ROS
   getParametersFromRos();
   subscribeToTopics();
@@ -59,31 +60,31 @@ TsdfServer::TsdfServer(
                                          tsdf_integrator_type,
                                          tsdf_submap_collection_ptr_));
 
-  // Creates an object to mesh the submaps
+  // An object to visualize the submaps
   submap_mesher_ptr_.reset(new SubmapMesher(tsdf_map_config, mesh_config));
   active_submap_visualizer_ptr_.reset(
       new ActiveSubmapVisualizer(mesh_config, tsdf_submap_collection_ptr_));
 
-  // Helps visualize the trajectory
+  // An object to visualize the trajectory
   trajectory_visualizer_ptr_.reset(new TrajectoryVisualizer);
 }
 
-void TsdfServer::subscribeToTopics() {
+void TsdfSubmapServer::subscribeToTopics() {
   // Subscribing to the input pointcloud
   int pointcloud_queue_size = kDefaultPointcloudQueueSize;
   nh_private_.param("pointcloud_queue_size", pointcloud_queue_size,
                     pointcloud_queue_size);
   pointcloud_sub_ = nh_.subscribe("pointcloud", pointcloud_queue_size,
-                                  &TsdfServer::pointcloudCallback, this);
+                                  &TsdfSubmapServer::pointcloudCallback, this);
 }
 
-void TsdfServer::advertiseTopics() {
+void TsdfSubmapServer::advertiseTopics() {
   // Services for saving meshes to file
   generate_separated_mesh_srv_ = nh_private_.advertiseService(
-      "generate_separated_mesh", &TsdfServer::generateSeparatedMeshCallback,
-      this);
+      "generate_separated_mesh",
+      &TsdfSubmapServer::generateSeparatedMeshCallback, this);
   generate_combined_mesh_srv_ = nh_private_.advertiseService(
-      "generate_combined_mesh", &TsdfServer::generateCombinedMeshCallback,
+      "generate_combined_mesh", &TsdfSubmapServer::generateCombinedMeshCallback,
       this);
   // Real-time publishing for rviz
   active_submap_mesh_pub_ =
@@ -93,7 +94,7 @@ void TsdfServer::advertiseTopics() {
   trajectory_pub_ = nh_private_.advertise<nav_msgs::Path>("trajectory", 1);
 }
 
-void TsdfServer::getParametersFromRos() {
+void TsdfSubmapServer::getParametersFromRos() {
   ROS_DEBUG("Getting params from ROS");
   nh_private_.param("verbose", verbose_, verbose_);
   nh_private_.param("world_frame", world_frame_, world_frame_);
@@ -110,13 +111,14 @@ void TsdfServer::getParametersFromRos() {
   if (update_mesh_every_n_sec > 0.0) {
     update_mesh_timer_ =
         nh_private_.createTimer(ros::Duration(update_mesh_every_n_sec),
-                                &TsdfServer::updateMeshEvent, this);
+                                &TsdfSubmapServer::updateMeshEvent, this);
   }
 }
 
-void TsdfServer::pointcloudCallback(
+void TsdfSubmapServer::pointcloudCallback(
     const sensor_msgs::PointCloud2::Ptr& pointcloud_msg_in) {
-  // Pushing this message onto the queue for processing if
+  
+  // Pushing this message onto the queue for processing
   if (pointcloud_msg_in->header.stamp - last_msg_time_ptcloud_ >
       min_time_between_msgs_) {
     last_msg_time_ptcloud_ = pointcloud_msg_in->header.stamp;
@@ -161,7 +163,7 @@ void TsdfServer::pointcloudCallback(
   }
 }
 
-bool TsdfServer::getNextPointcloudFromQueue(
+bool TsdfSubmapServer::getNextPointcloudFromQueue(
     std::queue<sensor_msgs::PointCloud2::Ptr>* queue,
     sensor_msgs::PointCloud2::Ptr* pointcloud_msg, Transformation* T_G_C) {
   const size_t kMaxQueueSize = 10;
@@ -188,7 +190,7 @@ bool TsdfServer::getNextPointcloudFromQueue(
   return false;
 }
 
-void TsdfServer::processPointCloudMessageAndInsert(
+void TsdfSubmapServer::processPointCloudMessageAndInsert(
     const sensor_msgs::PointCloud2::Ptr& pointcloud_msg,
     const Transformation& T_G_C, const bool is_freespace_pointcloud) {
   // Convert the PCL pointcloud into our awesome format.
@@ -271,27 +273,27 @@ void TsdfServer::processPointCloudMessageAndInsert(
   }
 }
 
-void TsdfServer::integratePointcloud(const Transformation& T_G_C,
-                                     const Pointcloud& ptcloud_C,
-                                     const Colors& colors,
-                                     const bool is_freespace_pointcloud) {
+void TsdfSubmapServer::integratePointcloud(const Transformation& T_G_C,
+                                           const Pointcloud& ptcloud_C,
+                                           const Colors& colors,
+                                           const bool is_freespace_pointcloud) {
   // Note(alexmillane): Freespace pointcloud option left out for now.
   CHECK_EQ(ptcloud_C.size(), colors.size());
   tsdf_submap_collection_integrator_ptr_->integratePointCloud(T_G_C, ptcloud_C,
                                                               colors);
 }
 
-void TsdfServer::intializeMap(const Transformation& T_G_C) {
+void TsdfSubmapServer::intializeMap(const Transformation& T_G_C) {
   // Just creates the first submap
   createNewSubMap(T_G_C);
 }
 
-bool TsdfServer::newSubmapRequired() const {
+bool TsdfSubmapServer::newSubmapRequired() const {
   return (num_integrated_frames_current_submap_ >
           num_integrated_frames_per_submap_);
 }
 
-void TsdfServer::createNewSubMap(const Transformation& T_G_C) {
+void TsdfSubmapServer::createNewSubMap(const Transformation& T_G_C) {
   // Creating the submap
   const SubmapID submap_id =
       tsdf_submap_collection_ptr_->createNewSubMap(T_G_C);
@@ -313,7 +315,7 @@ void TsdfServer::createNewSubMap(const Transformation& T_G_C) {
   }
 }
 
-void TsdfServer::updateActiveSubmapMesh() {
+void TsdfSubmapServer::updateActiveSubmapMesh() {
   // NOTE(alexmillane): For the time being only the mesh from the currently
   // active submap is updated. This breaks down when the pose of past submaps is
   // changed. We will need to handle this separately later.
@@ -326,7 +328,7 @@ void TsdfServer::updateActiveSubmapMesh() {
   active_submap_mesh_pub_.publish(marker);
 }
 
-bool TsdfServer::generateSeparatedMeshCallback(
+bool TsdfSubmapServer::generateSeparatedMeshCallback(
     std_srvs::Empty::Request& request, std_srvs::Empty::Response& response) {
   // Saving mesh to file if required
   if (!mesh_filename_.empty()) {
@@ -348,7 +350,7 @@ bool TsdfServer::generateSeparatedMeshCallback(
   return false;
 }
 
-bool TsdfServer::generateCombinedMeshCallback(
+bool TsdfSubmapServer::generateCombinedMeshCallback(
     std_srvs::Empty::Request& request, std_srvs::Empty::Response& response) {
   // Saving mesh to file if required
   if (!mesh_filename_.empty()) {
@@ -370,13 +372,13 @@ bool TsdfServer::generateCombinedMeshCallback(
   return false;
 }
 
-void TsdfServer::updateMeshEvent(const ros::TimerEvent& /*event*/) {
+void TsdfSubmapServer::updateMeshEvent(const ros::TimerEvent& /*event*/) {
   if (mapIntialized()) {
     updateActiveSubmapMesh();
   }
 }
 
-void TsdfServer::visualizeSubMapBaseframes() const {
+void TsdfSubmapServer::visualizeSubMapBaseframes() const {
   // Get poses
   TransformationVector submap_poses;
   tsdf_submap_collection_ptr_->getSubMapPoses(&submap_poses);
@@ -388,7 +390,7 @@ void TsdfServer::visualizeSubMapBaseframes() const {
   submap_poses_pub_.publish(pose_array_msg);
 }
 
-void TsdfServer::visualizeTrajectory() const {
+void TsdfSubmapServer::visualizeTrajectory() const {
   nav_msgs::Path path_msg;
   trajectory_visualizer_ptr_->getTrajectoryMsg(&path_msg);
   path_msg.header.frame_id = world_frame_;
