@@ -19,7 +19,6 @@
   <depend>cmake_modules</depend>
   <depend>glog_catkin</depend>
   <depend>voxblox</depend>
-  <depend>protobuf_catkin</depend>
   <depend>minkindr</depend>
   <depend>minkindr_conversions</depend>
 
