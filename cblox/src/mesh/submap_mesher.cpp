@@ -161,9 +161,9 @@ void SubmapMesher::generateTrimmedCombinedMesh(
   mesh_integrator.generateMesh(only_mesh_updated_blocks, clear_updated_flag);
 }
 
-void SubmapMesher::trimSubmapToHeight(
-    const float trim_height, const TsdfSubmap& tsdf_sub_map,
-    TsdfSubmap* trimmed_tsdf_sub_map_ptr) const {
+void SubmapMesher::trimSubmapToHeight(const float trim_height,
+                                      const TsdfSubmap& tsdf_sub_map,
+                                      TsdfSubmap* trimmed_tsdf_sub_map_ptr) {
   // Checks
   CHECK_NOTNULL(trimmed_tsdf_sub_map_ptr);
   // Getting the Tsdf layer from the trimmed map
@@ -267,7 +267,7 @@ MeshLayer::Ptr SubmapMesher::transformMeshLayer(
 }
 
 void SubmapMesher::colorMeshLayersWithIndex(
-    std::vector<MeshLayer::Ptr>* sub_map_mesh_layers) const {
+    std::vector<MeshLayer::Ptr>* sub_map_mesh_layers) {
   // Looping over submaps and coloring
   size_t num_sub_maps = sub_map_mesh_layers->size();
   for (size_t sub_map_index = 0; sub_map_index < num_sub_maps;
@@ -284,7 +284,7 @@ void SubmapMesher::colorMeshLayersWithIndex(
 }
 
 void SubmapMesher::colorMeshLayer(const Color& color_in,
-                                  MeshLayer* mesh_layer_ptr) const {
+                                  MeshLayer* mesh_layer_ptr) {
   // Looping over all the blocks on this layer
   BlockIndexList meshes_block_index_list;
   mesh_layer_ptr->getAllAllocatedMeshes(&meshes_block_index_list);

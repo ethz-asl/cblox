@@ -67,48 +67,50 @@ class SubmapMesher {
       std::vector<MeshLayer::Ptr> *sub_map_mesh_layers);
 
   // Transforms a vector of mesh layers by a vector of posses
-  void transformMeshLayers(
+  static void transformMeshLayers(
       const std::vector<MeshLayer::Ptr> &sub_map_mesh_layers,
       const AlignedVector<Transformation> &sub_map_poses,
       std::vector<MeshLayer::Ptr> *transformed_sub_map_mesh_layers);
   // Transforms a single mesh layer
-  MeshLayer::Ptr transformMeshLayer(const MeshLayer &mesh_layer,
-                                    const Transformation &transformation);
+  static MeshLayer::Ptr transformMeshLayer(
+      const MeshLayer &mesh_layer, const Transformation &transformation);
 
   // Combine the mesh layers
-  void combineMeshLayers(const std::vector<MeshLayer::Ptr> &sub_map_mesh_layers,
-                         const AlignedVector<Transformation> &submap_poses,
-                         MeshLayer *combined_mesh_layer_ptr);
+  static void combineMeshLayers(
+      const std::vector<MeshLayer::Ptr> &sub_map_mesh_layers,
+      const AlignedVector<Transformation> &submap_poses,
+      MeshLayer *combined_mesh_layer_ptr);
 
   // Transform and add funcions
   // TODO(alex.millane): There's a lot of code duplication in the
   //                     implementation. Clean up.
-  void transformAndAddTrianglesToLayer(const MeshLayer &input_mesh_layer,
-                                       const Transformation &T_B_A,
-                                       MeshLayer *output_mesh_layer);
-  void transformAndAddTriangleToMesh(const Mesh &input_mesh,
-                                     const VertexIndex start_index,
-                                     const Transformation &T_B_A,
-                                     Mesh *output_mesh);
+  static void transformAndAddTrianglesToLayer(const MeshLayer &input_mesh_layer,
+                                              const Transformation &T_B_A,
+                                              MeshLayer *output_mesh_layer);
+  static void transformAndAddTriangleToMesh(const Mesh &input_mesh,
+                                            const VertexIndex start_index,
+                                            const Transformation &T_B_A,
+                                            Mesh *output_mesh);
 
   // Add without transforming functions
   // TODO(alex.millane): There's a lot of code duplication in the
   //                     implementation. Clean up.
-  void addTrianglesToLayer(const MeshLayer &input_mesh_layer,
-                           MeshLayer *output_mesh_layer);
-  void addTriangleToMesh(const Mesh &input_mesh, const VertexIndex start_index,
-                         Mesh *output_mesh);
+  static void addTrianglesToLayer(const MeshLayer &input_mesh_layer,
+                                  MeshLayer *output_mesh_layer);
+  static void addTriangleToMesh(const Mesh &input_mesh,
+                                const VertexIndex start_index,
+                                Mesh *output_mesh);
 
   // Functions for coloring meshes
-  void colorMeshLayersWithIndex(
-      std::vector<MeshLayer::Ptr> *sub_map_mesh_layers) const;
-  void colorMeshLayer(const Color &color_in, MeshLayer *mesh_layer_ptr) const;
+  static void colorMeshLayersWithIndex(
+      std::vector<MeshLayer::Ptr> *sub_map_mesh_layers);
+  static void colorMeshLayer(const Color &color_in, MeshLayer *mesh_layer_ptr);
 
   // Functions for interacting with the submap collection
   // TODO(alex.millane): Should be encapsulated into the submap collection
-  void trimSubmapToHeight(const float trim_height,
-                          const TsdfSubmap &tsdf_sub_map,
-                          TsdfSubmap *trimmed_tsdf_sub_map_ptr) const;
+  static void trimSubmapToHeight(const float trim_height,
+                                 const TsdfSubmap &tsdf_sub_map,
+                                 TsdfSubmap *trimmed_tsdf_sub_map_ptr);
 
  private:
   // The configs

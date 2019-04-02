@@ -46,26 +46,17 @@
 #include <cblox/integrator/tsdf_submap_collection_integrator.h>
 #include <cblox/mesh/submap_mesher.h>
 
-#include "cblox_ros/active_submap_mesher.h"
+#include "cblox_ros/active_submap_visualizer.h"
 
 namespace cblox {
 
 // Default values for parameters
 constexpr bool kDefaultVerbose = true;
 constexpr size_t kDefaultNumFramesPerSubmap = 20;
-//constexpr size_t kDefaultNumKeyFramesPerSubmap = 10;
 constexpr double kDefaultMinTimeBetweenMsgsSec = 0.0;
 
 // Data queue sizes
 constexpr int kDefaultPointcloudQueueSize = 1;
-// constexpr int kDefaultFrameQueueSize = 1;
-// constexpr int kDefaultStereoImageSynchronizerQueueSize = 10;
-// constexpr int kDefaultRGBDImageSynchronizerQueueSize = 10;
-
-// The synchronization policy used by the interface to sync stereo images
-// typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,
-//                                                        sensor_msgs::Image>
-//    sync_pol;
 
 // Class handling global alignment calculation and publishing
 class TsdfServer {
@@ -126,6 +117,9 @@ class TsdfServer {
   void updateMeshEvent(const ros::TimerEvent& /*event*/);
   void updateActiveSubmapMesh();
 
+  // Visualize submap base frames
+  void visualizeSubMapBaseframes() const; 
+
   // Node handles
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_;
@@ -133,8 +127,9 @@ class TsdfServer {
   // Subscribers
   ros::Subscriber pointcloud_sub_;
 
-  // Subscribers
+  // Publishers
   ros::Publisher active_submap_mesh_pub_;
+  ros::Publisher submap_poses_pub_;
 
   // Services
   ros::ServiceServer generate_separated_mesh_srv_;
@@ -145,12 +140,8 @@ class TsdfServer {
 
   bool verbose_;
 
-  /**
-   * Global/map coordinate frame. Will always look up TF transforms to this
-   * frame.
-   */
+  // Global/map coordinate frame. Will always look up TF transforms to this
   std::string world_frame_;
-
 
   // The submap collection
   std::shared_ptr<SubmapCollection<TsdfSubmap>> tsdf_submap_collection_ptr_;
@@ -159,11 +150,12 @@ class TsdfServer {
   std::shared_ptr<TsdfSubmapCollectionIntegrator>
       tsdf_submap_collection_integrator_ptr_;
 
-  // For meshing the entire collection
+  // For meshing the entire collection to file
   std::shared_ptr<SubmapMesher> submap_mesher_ptr_;
   std::string mesh_filename_;
+
   // For meshing the active layer
-  std::shared_ptr<ActiveSubmapMesher> active_submap_mesher_ptr_;
+  std::shared_ptr<ActiveSubmapVisualizer> active_submap_visualizer_ptr_;
 
   // Transformer object to keep track of either TF transforms or messages from a
   // transform topic.

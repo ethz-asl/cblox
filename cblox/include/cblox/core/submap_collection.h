@@ -63,7 +63,7 @@ class SubmapCollection {
   bool setSubMapPose(const SubmapID submap_id, const Transformation &pose);
   void setSubMapPoses(const TransformationVector &transforms);
   bool getSubMapPose(const SubmapID submap_id, Transformation *pose_ptr) const;
-  void getSubMapPoses(AlignedVector<Transformation> *submap_poses) const;
+  void getSubMapPoses(TransformationVector* submap_poses) const;
 
   // Generate the ESDF for the submap with the given ID. This method is only
   // available if the SubmapType is equal to or derived from TsdfEsdfSubmap.

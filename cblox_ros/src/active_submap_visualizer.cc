@@ -1,10 +1,10 @@
-#include "cblox_ros/active_submap_mesher.h"
+#include "cblox_ros/active_submap_visualizer.h"
 
 #include <cblox/mesh/submap_mesher.h>
 
 namespace cblox {
 
-void ActiveSubmapMesher::activateLatestSubmap() {
+void ActiveSubmapVisualizer::activateLatestSubmap() {
   // New mesh
   active_submap_mesh_layer_ptr_.reset(
       new voxblox::MeshLayer(tsdf_submap_collection_ptr_->block_size()));
@@ -18,7 +18,7 @@ void ActiveSubmapMesher::activateLatestSubmap() {
   current_color_idx_ = (current_color_idx_ + 1) % color_cycle_length_;
 }
 
-void ActiveSubmapMesher::updateMeshLayer() {
+void ActiveSubmapVisualizer::updateMeshLayer() {
   // Updating the mesh layer
   constexpr bool only_mesh_updated_blocks = true;
   constexpr bool clear_updated_flag = true;
@@ -26,7 +26,7 @@ void ActiveSubmapMesher::updateMeshLayer() {
                                                    clear_updated_flag);
 }
 
-void ActiveSubmapMesher::transformMeshLayerToGlobalFrame(
+void ActiveSubmapVisualizer::transformMeshLayerToGlobalFrame(
     const MeshLayer& mesh_layer_S, MeshLayer* mesh_layer_G_ptr) const {
   CHECK_NOTNULL(mesh_layer_G_ptr);
   // Transforming all triangles in the mesh and adding to the combined layer
@@ -36,7 +36,7 @@ void ActiveSubmapMesher::transformMeshLayerToGlobalFrame(
                                                 mesh_layer_G_ptr);
 }
 
-void ActiveSubmapMesher::colorMeshWithCurrentIndex(
+void ActiveSubmapVisualizer::colorMeshWithCurrentIndex(
     MeshLayer* mesh_layer_ptr) const {
   CHECK_NOTNULL(mesh_layer_ptr);
   // Coloring
@@ -46,7 +46,7 @@ void ActiveSubmapMesher::colorMeshWithCurrentIndex(
   SubmapMesher::colorMeshLayer(color, mesh_layer_ptr);
 }
 
-const std::shared_ptr<MeshLayer> ActiveSubmapMesher::getDisplayMesh() {
+const std::shared_ptr<MeshLayer> ActiveSubmapVisualizer::getDisplayMeshLayer() {
   // Transforming the mesh layer into G.
   auto mesh_layer_G_ptr =
       std::make_shared<MeshLayer>(tsdf_submap_collection_ptr_->block_size());
@@ -57,4 +57,15 @@ const std::shared_ptr<MeshLayer> ActiveSubmapMesher::getDisplayMesh() {
   return mesh_layer_G_ptr;
 }
 
-}  // namespace cbloxa
+void ActiveSubmapVisualizer::getDisplayMesh(
+    visualization_msgs::Marker* marker_ptr) {
+  CHECK_NOTNULL(marker_ptr);
+  // Getting the mesh layer
+  std::shared_ptr<MeshLayer> mesh_layer_ptr = getDisplayMeshLayer();
+  // Filling the marker
+  const voxblox::ColorMode color_mode = voxblox::ColorMode::kLambertColor;
+  voxblox::fillMarkerWithMesh(mesh_layer_ptr, color_mode, marker_ptr);
+  marker_ptr->id = tsdf_submap_collection_ptr_->getActiveSubMapID();
+}
+
+}  // namespace cblox

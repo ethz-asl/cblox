@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include <geometry_msgs/PoseArray.h>
 #include <visualization_msgs/Marker.h>
 
 #include <pcl/conversions.h>
@@ -9,12 +10,13 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/point_cloud.h>
 
-#include <voxblox/utils/timing.h>
+#include <minkindr_conversions/kindr_msg.h>
 
-#include <voxblox_ros/mesh_vis.h>
+#include <voxblox/utils/timing.h>
 #include <voxblox_ros/ros_params.h>
 
 #include "cblox_ros/ros_params.h"
+#include "cblox_ros/pose_vis.h"
 
 namespace cblox {
 
@@ -58,8 +60,8 @@ TsdfServer::TsdfServer(
 
   // Creates an object to mesh the submaps
   submap_mesher_ptr_.reset(new SubmapMesher(tsdf_map_config, mesh_config));
-  active_submap_mesher_ptr_.reset(
-      new ActiveSubmapMesher(mesh_config, tsdf_submap_collection_ptr_));
+  active_submap_visualizer_ptr_.reset(
+      new ActiveSubmapVisualizer(mesh_config, tsdf_submap_collection_ptr_));
 }
 
 void TsdfServer::subscribeToTopics() {
@@ -82,6 +84,8 @@ void TsdfServer::advertiseTopics() {
   // Real-time publishing for rviz
   active_submap_mesh_pub_ =
       nh_private_.advertise<visualization_msgs::Marker>("separated_mesh", 1);
+  submap_poses_pub_ =
+      nh_private_.advertise<geometry_msgs::PoseArray>("submap_baseframes", 1);
 }
 
 void TsdfServer::getParametersFromRos() {
@@ -289,7 +293,10 @@ void TsdfServer::createNewSubMap(const Transformation& T_G_C) {
   num_integrated_frames_current_submap_ = 0;
 
   // Updating the active submap mesher
-  active_submap_mesher_ptr_->activateLatestSubmap();
+  active_submap_visualizer_ptr_->activateLatestSubmap();
+
+  // Publish the baseframes
+  visualizeSubMapBaseframes();
 
   if (verbose_) {
     ROS_INFO_STREAM("Created a new submap with id: "
@@ -302,15 +309,12 @@ void TsdfServer::updateActiveSubmapMesh() {
   // NOTE(alexmillane): For the time being only the mesh from the currently
   // active submap is updated. This breaks down when the pose of past submaps is
   // changed. We will need to handle this separately later.
-  active_submap_mesher_ptr_->updateMeshLayer();
+  active_submap_visualizer_ptr_->updateMeshLayer();
   // Getting the display mesh
   visualization_msgs::Marker marker;
-  voxblox::ColorMode color_mode = voxblox::ColorMode::kLambertColor;
-  voxblox::fillMarkerWithMesh(active_submap_mesher_ptr_->getDisplayMesh(),
-                              color_mode, &marker);
+  active_submap_visualizer_ptr_->getDisplayMesh(&marker);
   marker.header.frame_id = world_frame_;
-  marker.id = tsdf_submap_collection_ptr_->getActiveSubMapID();
-
+  // Publishing
   active_submap_mesh_pub_.publish(marker);
 }
 
@@ -362,6 +366,18 @@ void TsdfServer::updateMeshEvent(const ros::TimerEvent& /*event*/) {
   if (mapIntialized()) {
     updateActiveSubmapMesh();
   }
+}
+
+void TsdfServer::visualizeSubMapBaseframes() const {
+  // Get poses
+  TransformationVector submap_poses;
+  tsdf_submap_collection_ptr_->getSubMapPoses(&submap_poses);
+  // Transform to message
+  geometry_msgs::PoseArray pose_array_msg;
+  posesToMsg(submap_poses, &pose_array_msg);
+  pose_array_msg.header.frame_id = world_frame_;
+  // Publish
+  submap_poses_pub_.publish(pose_array_msg);
 }
 
 }  // namespace cblox

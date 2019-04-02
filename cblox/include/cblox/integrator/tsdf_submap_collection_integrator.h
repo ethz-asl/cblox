@@ -37,9 +37,17 @@ class TsdfSubmapCollectionIntegrator {
   // Changes the integration target the latest submap in the collection.
   void updateIntegratorTarget(const TsdfMap::Ptr& tsdf_map_ptr);
 
+  // Gets the submap relative pose
+  Transformation getSubmapRelativePose(const Transformation& T_M_C) const;
+
   // The submap collection
   std::shared_ptr<cblox::SubmapCollection<TsdfSubmap>>
       tsdf_submap_collection_ptr_;
+
+  // Transform to the currently targeted submap
+  // NOTE(alexmilane): T_M_S - Transformation between Submap base frame (S) and
+  //                           the global tracking frame (M).
+  Transformation T_M_S_active_;
 
   // The integrator
   const voxblox::TsdfIntegratorBase::Config tsdf_integrator_config_;

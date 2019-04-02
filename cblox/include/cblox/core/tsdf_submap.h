@@ -19,7 +19,7 @@ class TsdfSubmap {
   typedef TsdfMap::Config Config;
 
   // Constructor
-  TsdfSubmap(const Transformation &T_M_S, SubmapID submap_id, Config config)
+  TsdfSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config)
       : submap_id_(submap_id), T_M_S_(T_M_S) {
     tsdf_map_.reset(new TsdfMap(config));
   }
@@ -37,10 +37,10 @@ class TsdfSubmap {
 
   // Returns the underlying TSDF map pointers
   TsdfMap::Ptr getTsdfMapPtr() { return tsdf_map_; }
-  const TsdfMap &getTsdfMap() const { return *tsdf_map_; }
+  const TsdfMap& getTsdfMap() const { return *tsdf_map_; }
 
   // Submap pose interaction
-  const Transformation &getPose() const {
+  const Transformation& getPose() const {
     std::unique_lock<std::mutex> lock(transformation_mutex);
     return T_M_S_;
   }
