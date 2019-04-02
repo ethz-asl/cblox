@@ -22,4 +22,15 @@ Alexander Millane, Zachary Taylor, Helen Oleynikova, Juan Nieto, Roland Siegwart
 
 # Installation
 
-...
+C-blox extends the voxblox library and runs on ROS. The first step of installation is to setup a catkin workspace and install voxblox as per the instructions [here](https://voxblox.readthedocs.io/en/latest/pages/Installation.html).
+
+Then Navigate to the catkin src space and clone c-blox; if you've installed in the default location and are using [ssh keys for github](https://help.github.com/en/articles/connecting-to-github-with-ssh):
+```
+cd ~/catkin_ws/src/
+git clone git@github.com:ethz-asl/c-blox.git
+```
+Compile:
+```
+catkin build cblox_ros
+```
+You're done!
