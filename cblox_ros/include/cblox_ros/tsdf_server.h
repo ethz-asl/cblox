@@ -46,12 +46,14 @@
 #include <cblox/integrator/tsdf_submap_collection_integrator.h>
 #include <cblox/mesh/submap_mesher.h>
 
+#include "cblox_ros/active_submap_mesher.h"
+
 namespace cblox {
 
 // Default values for parameters
 constexpr bool kDefaultVerbose = true;
 constexpr size_t kDefaultNumFramesPerSubmap = 20;
-constexpr size_t kDefaultNumKeyFramesPerSubmap = 10;
+//constexpr size_t kDefaultNumKeyFramesPerSubmap = 10;
 constexpr double kDefaultMinTimeBetweenMsgsSec = 0.0;
 
 // Data queue sizes
@@ -117,7 +119,12 @@ class TsdfServer {
   void intializeMap(const Transformation& T_G_C);
 
   // Submap creation
+  bool newSubmapRequired() const;
   void createNewSubMap(const Transformation& T_G_C);
+
+  // Update the mesh and publish for visualization
+  void updateMeshEvent(const ros::TimerEvent& /*event*/);
+  void updateActiveSubmapMesh();
 
   // Node handles
   ros::NodeHandle nh_;
@@ -126,9 +133,15 @@ class TsdfServer {
   // Subscribers
   ros::Subscriber pointcloud_sub_;
 
+  // Subscribers
+  ros::Publisher active_submap_mesh_pub_;
+
   // Services
   ros::ServiceServer generate_separated_mesh_srv_;
   ros::ServiceServer generate_combined_mesh_srv_;
+
+  // Timers.
+  ros::Timer update_mesh_timer_;
 
   bool verbose_;
 
@@ -146,9 +159,11 @@ class TsdfServer {
   std::shared_ptr<TsdfSubmapCollectionIntegrator>
       tsdf_submap_collection_integrator_ptr_;
 
-  // The mesher
+  // For meshing the entire collection
   std::shared_ptr<SubmapMesher> submap_mesher_ptr_;
   std::string mesh_filename_;
+  // For meshing the active layer
+  std::shared_ptr<ActiveSubmapMesher> active_submap_mesher_ptr_;
 
   // Transformer object to keep track of either TF transforms or messages from a
   // transform topic.
@@ -166,6 +181,8 @@ class TsdfServer {
 
   // Number of frames integrated to the current submap
   size_t num_integrated_frames_current_submap_;
+  // The number of frames integrated into a submap before requesting a new one.
+  size_t num_integrated_frames_per_submap_;
 
 };
 

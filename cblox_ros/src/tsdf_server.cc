@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <visualization_msgs/Marker.h>
+
 #include <pcl/conversions.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -9,6 +11,7 @@
 
 #include <voxblox/utils/timing.h>
 
+#include <voxblox_ros/mesh_vis.h>
 #include <voxblox_ros/ros_params.h>
 
 #include "cblox_ros/ros_params.h"
@@ -34,6 +37,7 @@ TsdfServer::TsdfServer(
       verbose_(true),
       world_frame_("world"),
       num_integrated_frames_current_submap_(0),
+      num_integrated_frames_per_submap_(kDefaultNumFramesPerSubmap),
       color_map_(new voxblox::GrayscaleColorMap()),
       transformer_(nh, nh_private) {
   ROS_DEBUG("Creating a TSDF Server");
@@ -46,9 +50,6 @@ TsdfServer::TsdfServer(
   tsdf_submap_collection_ptr_.reset(
       new SubmapCollection<TsdfSubmap>(tsdf_map_config));
 
-  // DEBUG
-  std::cout << "max_ray_length_m: " << tsdf_integrator_config.max_ray_length_m << std::endl;
-
   // Creating an integrator and targetting the collection
   tsdf_submap_collection_integrator_ptr_.reset(
       new TsdfSubmapCollectionIntegrator(tsdf_integrator_config,
@@ -57,6 +58,8 @@ TsdfServer::TsdfServer(
 
   // Creates an object to mesh the submaps
   submap_mesher_ptr_.reset(new SubmapMesher(tsdf_map_config, mesh_config));
+  active_submap_mesher_ptr_.reset(
+      new ActiveSubmapMesher(mesh_config, tsdf_submap_collection_ptr_));
 }
 
 void TsdfServer::subscribeToTopics() {
@@ -76,17 +79,30 @@ void TsdfServer::advertiseTopics() {
   generate_combined_mesh_srv_ = nh_private_.advertiseService(
       "generate_combined_mesh", &TsdfServer::generateCombinedMeshCallback,
       this);
+  // Real-time publishing for rviz
+  active_submap_mesh_pub_ =
+      nh_private_.advertise<visualization_msgs::Marker>("separated_mesh", 1);
 }
 
 void TsdfServer::getParametersFromRos() {
   ROS_DEBUG("Getting params from ROS");
   nh_private_.param("verbose", verbose_, verbose_);
   nh_private_.param("world_frame", world_frame_, world_frame_);
+  // Throttle frame integration
   double min_time_between_msgs_sec = 0.0;
   nh_private_.param("min_time_between_msgs_sec", min_time_between_msgs_sec,
                     min_time_between_msgs_sec);
   min_time_between_msgs_.fromSec(min_time_between_msgs_sec);
   nh_private_.param("mesh_filename", mesh_filename_, mesh_filename_);
+  // Timed updates for submap mesh publishing.
+  double update_mesh_every_n_sec = 0.0;
+  nh_private_.param("update_mesh_every_n_sec", update_mesh_every_n_sec,
+                    update_mesh_every_n_sec);
+  if (update_mesh_every_n_sec > 0.0) {
+    update_mesh_timer_ =
+        nh_private_.createTimer(ros::Duration(update_mesh_every_n_sec),
+                                &TsdfServer::updateMeshEvent, this);
+  }
 }
 
 void TsdfServer::pointcloudCallback(
@@ -99,14 +115,22 @@ void TsdfServer::pointcloudCallback(
   }
 
   // Processing the queue
+  // NOTE(alexmilane): T_G_C - Transformation between Camera frame (C) and
+  //                           global tracking frame (G).
   Transformation T_G_C;
   sensor_msgs::PointCloud2::Ptr pointcloud_msg;
   bool processed_any = false;
   while (
       getNextPointcloudFromQueue(&pointcloud_queue_, &pointcloud_msg, &T_G_C)) {
     constexpr bool is_freespace_pointcloud = false;
+
     processPointCloudMessageAndInsert(pointcloud_msg, T_G_C,
                                       is_freespace_pointcloud);
+
+    if (newSubmapRequired()) {
+      createNewSubMap(T_G_C);
+    }
+
     processed_any = true;
   }
 
@@ -114,7 +138,7 @@ void TsdfServer::pointcloudCallback(
     return;
   }
 
-  if (verbose_) {
+  if (false) {
     ROS_INFO_STREAM("Timings: " << std::endl << timing::Timing::Print());
     // NOTE(alexmillane): This prints the current submap memory. Should update
     // to print full collection memory.
@@ -250,24 +274,44 @@ void TsdfServer::intializeMap(const Transformation& T_G_C) {
   createNewSubMap(T_G_C);
 }
 
+bool TsdfServer::newSubmapRequired() const {
+  return (num_integrated_frames_current_submap_ >
+          num_integrated_frames_per_submap_);
+}
+
 void TsdfServer::createNewSubMap(const Transformation& T_G_C) {
   // Creating the submap
   const SubmapID submap_id =
       tsdf_submap_collection_ptr_->createNewSubMap(T_G_C);
-
-  // Resetting current submap counters
-  // TODO(alexmillane): Put this back in.
-  // num_keyframes_current_submap_ = 0;
-  num_integrated_frames_current_submap_ = 0;
-
   // Activating the submap in the frame integrator
   tsdf_submap_collection_integrator_ptr_->activateLatestSubmap();
+  // Resetting current submap counters
+  num_integrated_frames_current_submap_ = 0;
+
+  // Updating the active submap mesher
+  active_submap_mesher_ptr_->activateLatestSubmap();
 
   if (verbose_) {
     ROS_INFO_STREAM("Created a new submap with id: "
                     << submap_id << ". Total submap number: "
                     << tsdf_submap_collection_ptr_->size());
   }
+}
+
+void TsdfServer::updateActiveSubmapMesh() {
+  // NOTE(alexmillane): For the time being only the mesh from the currently
+  // active submap is updated. This breaks down when the pose of past submaps is
+  // changed. We will need to handle this separately later.
+  active_submap_mesher_ptr_->updateMeshLayer();
+  // Getting the display mesh
+  visualization_msgs::Marker marker;
+  voxblox::ColorMode color_mode = voxblox::ColorMode::kLambertColor;
+  voxblox::fillMarkerWithMesh(active_submap_mesher_ptr_->getDisplayMesh(),
+                              color_mode, &marker);
+  marker.header.frame_id = world_frame_;
+  marker.id = tsdf_submap_collection_ptr_->getActiveSubMapID();
+
+  active_submap_mesh_pub_.publish(marker);
 }
 
 bool TsdfServer::generateSeparatedMeshCallback(
@@ -278,7 +322,7 @@ bool TsdfServer::generateSeparatedMeshCallback(
     voxblox::MeshLayer seperated_mesh_layer(
         tsdf_submap_collection_ptr_->block_size());
     submap_mesher_ptr_->generateSeparatedMesh(*tsdf_submap_collection_ptr_,
-                                            &seperated_mesh_layer);
+                                              &seperated_mesh_layer);
     bool success = outputMeshLayerAsPly(mesh_filename_, seperated_mesh_layer);
     if (success) {
       ROS_INFO("Output file as PLY: %s", mesh_filename_.c_str());
@@ -300,7 +344,7 @@ bool TsdfServer::generateCombinedMeshCallback(
     voxblox::MeshLayer combined_mesh_layer(
         tsdf_submap_collection_ptr_->block_size());
     submap_mesher_ptr_->generateCombinedMesh(*tsdf_submap_collection_ptr_,
-                                           &combined_mesh_layer);
+                                             &combined_mesh_layer);
     bool success = outputMeshLayerAsPly(mesh_filename_, combined_mesh_layer);
     if (success) {
       ROS_INFO("Output file as PLY: %s", mesh_filename_.c_str());
@@ -312,6 +356,12 @@ bool TsdfServer::generateCombinedMeshCallback(
     ROS_ERROR("No path to mesh specified in ros_params.");
   }
   return false;
+}
+
+void TsdfServer::updateMeshEvent(const ros::TimerEvent& /*event*/) {
+  if (mapIntialized()) {
+    updateActiveSubmapMesh();
+  }
 }
 
 }  // namespace cblox

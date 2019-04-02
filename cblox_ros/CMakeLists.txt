@@ -11,6 +11,7 @@ add_definitions(-std=c++11 -Wall -Wextra)
 #############
 cs_add_library(${PROJECT_NAME}
   src/tsdf_server.cc
+  src/active_submap_mesher.cc
 )
 
 ############
