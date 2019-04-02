@@ -1,5 +1,5 @@
 # c-blox
-![c_blox_new_small](https://user-images.githubusercontent.com/5616392/43275997-ab8f3af2-9103-11e8-89d6-36759ad1c3eb.png)
+![c_blox_new_small](https://user-images.githubusercontent.com/671701/55418812-b94de280-5573-11e9-9574-c83660fe3354.png)
 
 A TSDF-based mapping library based on [Voxblox](https://github.com/ethz-asl/voxblox). Adds features for large-scale mapping through the use of sub-mapping.
 
