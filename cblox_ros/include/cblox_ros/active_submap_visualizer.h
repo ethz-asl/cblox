@@ -1,5 +1,5 @@
-#ifndef CBLOX_ROS_ACTIVE_SUBMAP_MESHER_H_
-#define CBLOX_ROS_ACTIVE_SUBMAP_MESHER_H_
+#ifndef CBLOX_ROS_ACTIVE_SUBMAP_VISUALIZER_H_
+#define CBLOX_ROS_ACTIVE_SUBMAP_VISUALIZER_H_
 
 #include <memory>
 
@@ -9,7 +9,7 @@
 #include <voxblox/mesh/mesh_layer.h>
 #include <voxblox_ros/mesh_vis.h>
 
-#include "cblox/core/submap_collection.h"
+#include <cblox/core/submap_collection.h>
 
 namespace cblox {
 
@@ -68,4 +68,4 @@ class ActiveSubmapVisualizer {
 
 }  // namespace cblox
 
-#endif  // CBLOX_ROS_ACTIVE_SUBMAP_MESHER_H_
+#endif  // CBLOX_ROS_ACTIVE_SUBMAP_VISUALIZER_H_

@@ -4,6 +4,7 @@
 
 #include <geometry_msgs/PoseArray.h>
 #include <visualization_msgs/Marker.h>
+#include <nav_msgs/Path.h>
 
 #include <pcl/conversions.h>
 #include <pcl/point_types.h>
@@ -62,6 +63,9 @@ TsdfServer::TsdfServer(
   submap_mesher_ptr_.reset(new SubmapMesher(tsdf_map_config, mesh_config));
   active_submap_visualizer_ptr_.reset(
       new ActiveSubmapVisualizer(mesh_config, tsdf_submap_collection_ptr_));
+
+  // Helps visualize the trajectory
+  trajectory_visualizer_ptr_.reset(new TrajectoryVisualizer);
 }
 
 void TsdfServer::subscribeToTopics() {
@@ -86,6 +90,7 @@ void TsdfServer::advertiseTopics() {
       nh_private_.advertise<visualization_msgs::Marker>("separated_mesh", 1);
   submap_poses_pub_ =
       nh_private_.advertise<geometry_msgs::PoseArray>("submap_baseframes", 1);
+  trajectory_pub_ = nh_private_.advertise<nav_msgs::Path>("trajectory", 1);
 }
 
 void TsdfServer::getParametersFromRos() {
@@ -134,6 +139,9 @@ void TsdfServer::pointcloudCallback(
     if (newSubmapRequired()) {
       createNewSubMap(T_G_C);
     }
+
+    trajectory_visualizer_ptr_->addPose(T_G_C);
+    visualizeTrajectory();
 
     processed_any = true;
   }
@@ -378,6 +386,13 @@ void TsdfServer::visualizeSubMapBaseframes() const {
   pose_array_msg.header.frame_id = world_frame_;
   // Publish
   submap_poses_pub_.publish(pose_array_msg);
+}
+
+void TsdfServer::visualizeTrajectory() const {
+  nav_msgs::Path path_msg;
+  trajectory_visualizer_ptr_->getTrajectoryMsg(&path_msg);
+  path_msg.header.frame_id = world_frame_;
+  trajectory_pub_.publish(path_msg);
 }
 
 }  // namespace cblox

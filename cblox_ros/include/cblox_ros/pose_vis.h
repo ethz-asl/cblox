@@ -3,6 +3,8 @@
 
 #include <geometry_msgs/PoseArray.h>
 
+#include <minkindr_conversions/kindr_msg.h>
+
 #include <cblox/core/common.h>
 
 namespace cblox {

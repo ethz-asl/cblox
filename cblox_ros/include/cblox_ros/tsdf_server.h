@@ -47,6 +47,7 @@
 #include <cblox/mesh/submap_mesher.h>
 
 #include "cblox_ros/active_submap_visualizer.h"
+#include "cblox_ros/trajectory_visualizer.h"
 
 namespace cblox {
 
@@ -120,6 +121,9 @@ class TsdfServer {
   // Visualize submap base frames
   void visualizeSubMapBaseframes() const; 
 
+  // Visualize the trajectory
+  void visualizeTrajectory() const;
+
   // Node handles
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_;
@@ -130,7 +134,8 @@ class TsdfServer {
   // Publishers
   ros::Publisher active_submap_mesh_pub_;
   ros::Publisher submap_poses_pub_;
-
+  ros::Publisher trajectory_pub_;
+  
   // Services
   ros::ServiceServer generate_separated_mesh_srv_;
   ros::ServiceServer generate_combined_mesh_srv_;
@@ -156,6 +161,9 @@ class TsdfServer {
 
   // For meshing the active layer
   std::shared_ptr<ActiveSubmapVisualizer> active_submap_visualizer_ptr_;
+
+  // For visualizing the trajectory
+  std::shared_ptr<TrajectoryVisualizer> trajectory_visualizer_ptr_;
 
   // Transformer object to keep track of either TF transforms or messages from a
   // transform topic.
