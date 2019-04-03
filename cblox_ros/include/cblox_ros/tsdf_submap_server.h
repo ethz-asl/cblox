@@ -25,7 +25,7 @@ namespace cblox {
 
 // Default values for parameters
 constexpr bool kDefaultVerbose = true;
-constexpr size_t kDefaultNumFramesPerSubmap = 20;
+constexpr int kDefaultNumFramesPerSubmap = 20;
 constexpr double kDefaultMinTimeBetweenMsgsSec = 0.0;
 
 // Data queue sizes
@@ -154,9 +154,9 @@ class TsdfSubmapServer {
   std::unique_ptr<voxblox::ColorMap> color_map_;
 
   // Number of frames integrated to the current submap
-  size_t num_integrated_frames_current_submap_;
+  int num_integrated_frames_current_submap_;
   // The number of frames integrated into a submap before requesting a new one.
-  size_t num_integrated_frames_per_submap_;
+  int num_integrated_frames_per_submap_;
 };
 
 }  // namespace cblox

@@ -113,6 +113,10 @@ void TsdfSubmapServer::getParametersFromRos() {
         nh_private_.createTimer(ros::Duration(update_mesh_every_n_sec),
                                 &TsdfSubmapServer::updateMeshEvent, this);
   }
+  // Frequency of submap creation
+  nh_private_.param("num_integrated_frames_per_submap",
+                    num_integrated_frames_per_submap_,
+                    num_integrated_frames_per_submap_);
 }
 
 void TsdfSubmapServer::pointcloudCallback(

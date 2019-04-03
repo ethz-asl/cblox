@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="ISO-8859-15"?>
 <launch>
 
+  <!-- Path to dataset -->
+  <arg name="dataset_path" default="$(env HOME)/trunk/datasets/kitti/2011_09_30_drive_18/bags/sync.bag" />
+
+  <!-- Parameters -->
   <arg name="voxel_size" default="0.25" />
+  <arg name="truncation_distance_vox" default="4.0" />
+  <arg name="num_integrated_frames_per_submap" default="50" />
 
   <param name="use_sim_time" value="true" />
 
   <node name="cblox" pkg="cblox_ros" type="tsdf_submap_server" output="screen" args="-alsologtostderr" clear_params="true">
+
+    <!-- Topics -->
     <remap from="pointcloud" to="/velodyne_points" />
+    
+    <!-- Voxblox params -->
     <param name="tsdf_voxel_size" value="$(arg voxel_size)" />
-    <param name="truncation_distance" value="$(eval 4. * 0.25)"/>
+    <param name="truncation_distance" value="$(eval arg('truncation_distance_vox') * arg('voxel_size'))"/>
     <param name="tsdf_voxels_per_side" value="16" />
     <param name="voxel_carving_enabled" value="true" />
     <param name="use_tf_transforms" value="true" />
@@ -20,7 +30,16 @@
     <param name="min_time_between_msgs_sec" value="0.0" />
     <param name="method" value="fast" />
     <param name="use_const_weight" value="true" />
+
+    <!-- Cblox params -->
+    <param name="num_integrated_frames_per_submap" value="$(arg num_integrated_frames_per_submap)" />
+    
+    <!-- Output -->
     <param name="mesh_filename" value="$(find cblox_ros)/mesh_results/$(anon kitti).ply" />
   </node>
+
+  <node name="rviz" pkg="rviz" type="rviz" required="true" args="-d $(find cblox_ros)/cfg/kitti_demo.rviz" />
+
+  <node name="rosbag" pkg="rosbag" type="play" args="--clock $(arg dataset_path)" />
 
 </launch>
