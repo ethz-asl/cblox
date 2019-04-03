@@ -1,9 +1,7 @@
 # c-blox
 ![c_blox_new_small](https://user-images.githubusercontent.com/671701/55418812-b94de280-5573-11e9-9574-c83660fe3354.png)
 
-A TSDF-based mapping library based on [Voxblox](https://github.com/ethz-asl/voxblox). Adds features for large-scale mapping through the use of sub-mapping.
-
-Contact: Alexander Millane alexander.millane@mavt.ethz.ch
+A TSDF-based mapping library based on [Voxblox](https://github.com/ethz-asl/voxblox). C-blox Adds sub-mapping features to voxblox to allow large-scale mapping in the presence of imperfect pose estimates.
 
 # Paper
 
@@ -34,3 +32,14 @@ Compile:
 catkin build cblox_ros
 ```
 You're done!
+
+# Example Usage
+
+We include (at the moment) two examples with the c-blox package:
+* Kitti Dataset (ground truth localization)
+* ~~Machine Hall (orb-slam localization)~~ (in production)
+
+## Kitti Dataset
+
+This simple example demonstrates the *creation* and display of submaps using c-blox. We use ground-truth pose estimates, rather than a SLAM system; no submap correction is required/used. The produced map, viewed in Rviz in [rviz](http://wiki.ros.org/rviz):
+
