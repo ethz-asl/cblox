@@ -1,9 +1,7 @@
 # c-blox
-![c_blox_new_small](https://user-images.githubusercontent.com/5616392/43275997-ab8f3af2-9103-11e8-89d6-36759ad1c3eb.png)
+![c_blox_new_small](https://user-images.githubusercontent.com/671701/55418812-b94de280-5573-11e9-9574-c83660fe3354.png)
 
-A TSDF-based mapping library based on [Voxblox](https://github.com/ethz-asl/voxblox). Adds features for large-scale mapping through the use of sub-mapping.
-
-Contact: Alexander Millane alexander.millane@mavt.ethz.ch
+A TSDF-based mapping library based on [Voxblox](https://github.com/ethz-asl/voxblox). C-blox Adds sub-mapping features to voxblox to allow large-scale mapping in the presence of imperfect pose estimates.
 
 # Paper
 
@@ -22,4 +20,26 @@ Alexander Millane, Zachary Taylor, Helen Oleynikova, Juan Nieto, Roland Siegwart
 
 # Installation
 
-...
+C-blox extends the voxblox library and runs on ROS. The first step of installation is to setup a catkin workspace and install voxblox as per the instructions [here](https://voxblox.readthedocs.io/en/latest/pages/Installation.html).
+
+Then Navigate to the catkin src space and clone c-blox; if you've installed in the default location and are using [ssh keys for github](https://help.github.com/en/articles/connecting-to-github-with-ssh):
+```
+cd ~/catkin_ws/src/
+git clone git@github.com:ethz-asl/c-blox.git
+```
+Compile:
+```
+catkin build cblox_ros
+```
+You're done!
+
+# Example Usage
+
+We include (at the moment) two examples with the c-blox package:
+* Kitti Dataset (ground truth localization)
+* ~~Machine Hall (orb-slam localization)~~ (in production)
+
+## Kitti Dataset
+
+This simple example demonstrates the *creation* and display of submaps using c-blox. We use ground-truth pose estimates, rather than a SLAM system; no submap correction is required/used. The produced map, viewed in Rviz in [rviz](http://wiki.ros.org/rviz):
+
