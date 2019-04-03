@@ -43,3 +43,4 @@ We include (at the moment) two examples with the c-blox package:
 
 This simple example demonstrates the *creation* and display of submaps using c-blox. We use ground-truth pose estimates, rather than a SLAM system; no submap correction is required/used. The produced map, viewed in [rviz](http://wiki.ros.org/rviz):
 
+![c_blox_new_small](https://user-images.githubusercontent.com/671701/55502193-50866900-564c-11e9-999e-b78bf71dd3d4.png)
