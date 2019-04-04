@@ -1,7 +1,7 @@
 # c-blox
 ![c_blox_new_small](https://user-images.githubusercontent.com/671701/55418812-b94de280-5573-11e9-9574-c83660fe3354.png)
 
-A TSDF-based mapping library based on [Voxblox](https://github.com/ethz-asl/voxblox). C-blox Adds sub-mapping features to voxblox to allow large-scale mapping in the presence of imperfect pose estimates.
+A TSDF-based mapping library based on [Voxblox](https://github.com/ethz-asl/voxblox). C-blox Adds sub-mapping to voxblox to allow large-scale mapping in the presence of imperfect pose estimates.
 
 # Paper
 
@@ -41,5 +41,20 @@ We include (at the moment) two examples with the c-blox package:
 
 ## Kitti Dataset
 
-This simple example demonstrates the *creation* and display of submaps using c-blox. We use ground-truth pose estimates, rather than a SLAM system; no submap correction is required/used. The produced map, viewed in Rviz in [rviz](http://wiki.ros.org/rviz):
+In this example we create a cblox map using the lidar data and "ground-truth" pose estimates from the [kitti dataset](http://www.cvlibs.net/datasets/kitti/). This simple example demonstrates the *creation* and *display* of submaps using c-blox - because we use drift-free pose estimates (rather than a SLAM system), no submap correction is required/used.
 
+The produced map, viewed in [rviz](http://wiki.ros.org/rviz):
+
+![c_blox_new_small](https://user-images.githubusercontent.com/671701/55502193-50866900-564c-11e9-999e-b78bf71dd3d4.png)
+
+And under construction
+
+![c_blox_new_small](https://user-images.githubusercontent.com/671701/55502987-04d4bf00-564e-11e9-964c-11e7ba7ea754.gif)
+
+To run the example download a [kitti raw dataset](http://www.cvlibs.net/datasets/kitti/raw_data.php). To produce the map above, we ran the "2011_09_30_drive_0018" dataset under the catagory "residential". Convert the data to a rosbag using [kitti_to_rosbag](https://github.com/ethz-asl/kitti_to_rosbag).
+
+Then, with cblox_ros built and your workspace sourced, run cblox:
+```
+roslaunch cblox_ros run_kitti.launch dataset_path:=PATH_TO_YOUR_BAG
+```
+Rviz should start up and you should see the submaps start to appear, as in the animation above.
