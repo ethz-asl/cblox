@@ -18,8 +18,8 @@ void SubmapMesher::generatePatchMeshes(
   // Checks
   CHECK_NOTNULL(sub_map_mesh_layers_ptr);
   // Getting the submaps
-  const std::vector<TsdfSubmap::Ptr> tsdf_sub_maps =
-      tsdf_submap_collection.getSubMaps();
+  const std::vector<TsdfSubmap::ConstPtr> tsdf_sub_maps =
+      tsdf_submap_collection.getSubMapConstPtrs();
   // Generating the mesh layers
   generateSeparatedMeshLayers<TsdfSubmap>(tsdf_sub_maps,
                                           sub_map_mesh_layers_ptr);
@@ -37,8 +37,8 @@ void SubmapMesher::generateInterpolationTestMesh(
   size_t num_sub_maps = tsdf_submap_collection.size();
 
   // Getting the submaps
-  const std::vector<TsdfSubmap::Ptr> tsdf_sub_maps =
-      tsdf_submap_collection.getSubMaps();
+  const std::vector<TsdfSubmap::ConstPtr> tsdf_sub_maps =
+      tsdf_submap_collection.getSubMapConstPtrs();
 
   // A vector containing the transformed tsdf layers
   std::vector<TsdfMap::Ptr> transformed_sub_maps;
@@ -124,8 +124,8 @@ void SubmapMesher::generateTrimmedCombinedMesh(
   CHECK_NOTNULL(combined_mesh_layer_ptr);
   std::cout << "Starting map trimming." << std::endl;
   // Getting the submaps
-  const std::vector<TsdfSubmap::Ptr> tsdf_sub_maps =
-      tsdf_submap_collection.getSubMaps();
+  const std::vector<TsdfSubmap::ConstPtr> tsdf_sub_maps =
+      tsdf_submap_collection.getSubMapConstPtrs();
   // The new trimmed TSDF submaps
   std::vector<TsdfSubmap::Ptr> trimmed_tsdf_sub_maps;
   trimmed_tsdf_sub_maps.reserve(tsdf_sub_maps.size());

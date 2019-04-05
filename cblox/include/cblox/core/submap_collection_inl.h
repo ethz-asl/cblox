@@ -53,6 +53,10 @@ template <typename SubmapType>
 void SubmapCollection<SubmapType>::createNewSubMap(const Transformation& T_M_S,
                                                    const SubmapID submap_id) {
   // Checking if the submap already exists
+  // NOTE(alexmillane): This hard fails the program if the submap already
+  // exists. This is fairly brittle behaviour and we may want to change it at a
+  // later date. Currently the onus is put in the caller to exists() before
+  // creating a submap.
   const auto it = id_to_submap_.find(submap_id);
   CHECK(it == id_to_submap_.end());
   // Creating the new submap and adding it to the list
@@ -112,8 +116,18 @@ const SubmapType& SubmapCollection<SubmapType>::getSubMap(
 
 template <typename SubmapType>
 const std::vector<typename SubmapType::Ptr>
-SubmapCollection<SubmapType>::getSubMaps() const {
+SubmapCollection<SubmapType>::getSubMapPtrs() const {
   std::vector<typename SubmapType::Ptr> submap_ptrs;
+  for (const auto& id_submap_pair : id_to_submap_) {
+    submap_ptrs.emplace_back(id_submap_pair.second);
+  }
+  return submap_ptrs;
+}
+
+template <typename SubmapType>
+const std::vector<typename SubmapType::ConstPtr>
+SubmapCollection<SubmapType>::getSubMapConstPtrs() const {
+  std::vector<typename SubmapType::ConstPtr> submap_ptrs;
   for (const auto& id_submap_pair : id_to_submap_) {
     submap_ptrs.emplace_back(id_submap_pair.second);
   }

@@ -48,7 +48,8 @@ class SubmapCollection {
   typename SubmapType::ConstPtr getSubMapConstPtrById(
       const SubmapID submap_id) const;
   // A list of the submaps
-  const std::vector<typename SubmapType::Ptr> getSubMaps() const;
+  const std::vector<typename SubmapType::Ptr> getSubMapPtrs() const;
+  const std::vector<typename SubmapType::ConstPtr> getSubMapConstPtrs() const;
 
   // Interactions with the active submap
   const SubmapType &getActiveSubMap() const;

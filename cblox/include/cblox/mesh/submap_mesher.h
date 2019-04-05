@@ -63,7 +63,7 @@ class SubmapMesher {
   // Generates mesh layers from the TSDF submaps
   template <typename SubmapType>
   void generateSeparatedMeshLayers(
-      const std::vector<typename SubmapType::Ptr> &sub_maps,
+      const std::vector<typename SubmapType::ConstPtr> &sub_maps,
       std::vector<MeshLayer::Ptr> *sub_map_mesh_layers);
 
   // Transforms a vector of mesh layers by a vector of posses
