@@ -1,7 +1,7 @@
 # c-blox
 ![c_blox_new_small](https://user-images.githubusercontent.com/671701/55418812-b94de280-5573-11e9-9574-c83660fe3354.png)
 
-A TSDF-based mapping library based on [Voxblox](https://github.com/ethz-asl/voxblox). C-blox Adds sub-mapping to voxblox to allow large-scale mapping in the presence of imperfect pose estimates.
+A TSDF-based mapping library based on [Voxblox](https://github.com/ethz-asl/voxblox). C-blox adds sub-mapping to voxblox with the aim of allowing large(r)-scale mapping in the presence of imperfect pose estimates.
 
 # Paper
 
