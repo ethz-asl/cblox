@@ -66,23 +66,6 @@ class SubmapCollection {
   bool getSubMapPose(const SubmapID submap_id, Transformation *pose_ptr) const;
   void getSubMapPoses(TransformationVector* submap_poses) const;
 
-  // Generate the ESDF for the submap with the given ID. This method is only
-  // available if the SubmapType is equal to or derived from TsdfEsdfSubmap.
-  template <class ST = SubmapType>
-  typename std::enable_if<std::is_base_of<TsdfEsdfSubmap, ST>::value,
-                          bool>::type
-  generateEsdfById(const SubmapID submap_id) {
-    // Find the submap corresponding to the given ID
-    const auto submap_ptr_it = id_to_submap_.find(submap_id);
-    if (submap_ptr_it != id_to_submap_.end()) {
-      // Generate the ESDF from the TSDF
-      submap_ptr_it->second->generateEsdf();
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   // Clears the collection, leaving an empty map
   void clear() { id_to_submap_.clear(); }
 
@@ -109,15 +92,6 @@ class SubmapCollection {
 
   // Flattens the collection map down to a normal TSDF map
   TsdfMap::Ptr getProjectedMap() const;
-
-  // KEYFRAME RELATED FUNCTIONS.
-  // COMMENTED OUT FOR NOW, BUT NEED TO BE MOVED TO MANIFOLD MAPPING.
-  // Associates a to the active submap
-  // void associateIDToActiveSubmap(const SubmapID submap_id) {
-  //  id_to_submap_[submap_id] = tsdf_sub_maps_.back();
-  //}
-  // bool getAssociatedTsdfSubMapID(const SubmapID submap_id,
-  //                               SubmapID *submap_id_ptr) const;
 
  private:
   // TODO(alexmillane): Get some concurrency guards

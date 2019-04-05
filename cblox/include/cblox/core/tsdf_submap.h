@@ -6,6 +6,8 @@
 
 #include <Eigen/Geometry>
 
+#include <glog/logging.h>
+
 #include "./TsdfSubmap.pb.h"
 #include "cblox/core/common.h"
 
@@ -26,12 +28,10 @@ class TsdfSubmap {
 
   ~TsdfSubmap() {
     if (!tsdf_map_.unique()) {
-      std::cout << "Underlying tsdf map from SubmapID: " << submap_id_
-                << " is NOT unique. Therefore its memory may leak."
-                << std::endl;
+      LOG(WARNING) << "Underlying tsdf map from SubmapID: " << submap_id_
+                   << " is NOT unique. Therefore its memory may leak.";
     } else {
-      std::cout << "TsdfSubmap " << submap_id_ << " is being deleted."
-                << std::endl;
+      LOG(INFO) << "TsdfSubmap " << submap_id_ << " is being deleted.";
     }
   }
 
@@ -45,7 +45,7 @@ class TsdfSubmap {
     return T_M_S_;
   }
 
-  void setPose(const Transformation &T_M_S) {
+  void setPose(const Transformation& T_M_S) {
     std::unique_lock<std::mutex> lock(transformation_mutex);
     T_M_S_ = T_M_S;
   }
@@ -59,10 +59,10 @@ class TsdfSubmap {
   }
 
   // Getting the proto for this submap
-  void getProto(TsdfSubmapProto *proto) const;
+  void getProto(TsdfSubmapProto* proto) const;
 
   // Save the submap to file
-  bool saveToStream(std::fstream *outfile_ptr) const;
+  bool saveToStream(std::fstream* outfile_ptr) const;
 
  protected:
   SubmapID submap_id_;

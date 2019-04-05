@@ -1,12 +1,11 @@
-//
-// Created by victor on 14.01.19.
-//
-
 #ifndef CBLOX_IO_TSDF_SUBMAP_IO_INL_H_
 #define CBLOX_IO_TSDF_SUBMAP_IO_INL_H_
 
-#include <voxblox/io/layer_io.h>
 #include <string>
+
+#include <voxblox/io/layer_io.h>
+
+#include <glog/logging.h>
 
 #include "./QuatTransformation.pb.h"
 #include "./TsdfSubmap.pb.h"
@@ -40,14 +39,13 @@ bool LoadSubmapFromStream(
   QuatTransformationProto transformation_proto = tsdf_sub_map_proto.transform();
   conversions::transformProtoToKindr(transformation_proto, &T_M_S);
 
-  // DEBUG
-  std::cout << "Tsdf submap id: " << tsdf_sub_map_proto.id() << std::endl;
-  std::cout << "Tsdf number of allocated blocks: "
-            << tsdf_sub_map_proto.num_blocks() << std::endl;
+  LOG(INFO) << "Tsdf submap id: " << tsdf_sub_map_proto.id();
+  LOG(INFO) << "Tsdf number of allocated blocks: "
+            << tsdf_sub_map_proto.num_blocks();
   Eigen::Vector3 t = T_M_S.getPosition();
   Quaternion q = T_M_S.getRotation();
-  std::cout << "[ " << t.x() << ", " << t.y() << ", " << t.z() << ", " << q.w()
-            << q.x() << ", " << q.y() << ", " << q.z() << " ]" << std::endl;
+  LOG(INFO) << "[ " << t.x() << ", " << t.y() << ", " << t.z() << ", " << q.w()
+            << q.x() << ", " << q.y() << ", " << q.z() << " ]";
 
   // Creating a new submap to hold the data
   tsdf_submap_collection_ptr->createNewSubMap(T_M_S, tsdf_sub_map_proto.id());
@@ -69,8 +67,7 @@ template <typename SubmapType>
 bool LoadSubmapCollection(
     const std::string &file_path,
     typename SubmapCollection<SubmapType>::Ptr *tsdf_submap_collection_ptr) {
-  // Checks
-  // CHECK(tsdf_submap_collection_ptr);
+  CHECK_NOTNULL(tsdf_submap_collection_ptr);
   // Open and check the file
   std::fstream proto_file;
   proto_file.open(file_path, std::fstream::in);
@@ -87,13 +84,13 @@ bool LoadSubmapCollection(
     LOG(ERROR) << "Could not read tsdf submap collection map protobuf message.";
     return false;
   }
-  // DEBUG
-  std::cout << "tsdf_submap_collection_proto.voxel_size(): "
-            << tsdf_submap_collection_proto.voxel_size() << std::endl;
-  std::cout << "tsdf_submap_collection_proto.voxels_per_side(): "
-            << tsdf_submap_collection_proto.voxels_per_side() << std::endl;
-  std::cout << "tsdf_submap_collection_proto.num_submaps(): "
-            << tsdf_submap_collection_proto.num_submaps() << std::endl;
+
+  LOG(INFO) << "tsdf_submap_collection_proto.voxel_size(): "
+            << tsdf_submap_collection_proto.voxel_size();
+  LOG(INFO) << "tsdf_submap_collection_proto.voxels_per_side(): "
+            << tsdf_submap_collection_proto.voxels_per_side();
+  LOG(INFO) << "tsdf_submap_collection_proto.num_submaps(): "
+            << tsdf_submap_collection_proto.num_submaps();
 
   // Creating the new submap collection based on the loaded parameters
   typename SubmapType::Config tsdf_map_config;
@@ -107,8 +104,7 @@ bool LoadSubmapCollection(
   for (size_t sub_map_index = 0;
        sub_map_index < tsdf_submap_collection_proto.num_submaps();
        sub_map_index++) {
-    // DEBUG
-    std::cout << "Loading tsdf sub map number: " << sub_map_index << std::endl;
+    LOG(INFO) << "Loading tsdf sub map number: " << sub_map_index;
     // Loading the submaps
     if (!LoadSubmapFromStream<SubmapType>(
             &proto_file, *tsdf_submap_collection_ptr, &tmp_byte_offset)) {

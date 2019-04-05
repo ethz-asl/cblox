@@ -58,8 +58,7 @@ void SubmapMesher::generateSeparatedMeshLayers(
   for (typename SubmapType::ConstPtr sub_map_ptr : sub_maps) {
     CHECK_NOTNULL(sub_map_ptr.get());
     // DEBUG
-    std::cout << "Generating mesh for submap number #" << mesh_index
-              << std::endl;
+    LOG(INFO) << "Generating mesh for submap number #" << mesh_index;
     mesh_index++;
     // Getting the TSDF data
     const TsdfMap& tsdf_map = sub_map_ptr->getTsdfMap();

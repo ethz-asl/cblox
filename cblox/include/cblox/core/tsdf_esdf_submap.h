@@ -1,11 +1,8 @@
-//
-// Created by victor on 07.01.19.
-//
-
 #ifndef CBLOX_CORE_TSDF_ESDF_SUBMAP_H_
 #define CBLOX_CORE_TSDF_ESDF_SUBMAP_H_
 
 #include <memory>
+
 #include "cblox/core/tsdf_submap.h"
 
 namespace cblox {
@@ -24,12 +21,10 @@ class TsdfEsdfSubmap : public TsdfSubmap {
 
   ~TsdfEsdfSubmap() {
     if (!esdf_map_.unique()) {
-      std::cout << "Underlying esdf map from SubmapID: " << submap_id_
-                << " is NOT unique. Therefore its memory may leak."
-                << std::endl;
+      LOG(WARNING) << "Underlying esdf map from SubmapID: " << submap_id_
+                   << " is NOT unique. Therefore its memory may leak.";
     } else {
-      std::cout << "EsdfSubmap " << submap_id_ << " is being deleted."
-                << std::endl;
+      LOG(INFO) << "EsdfSubmap " << submap_id_ << " is being deleted.";
     }
   }
 

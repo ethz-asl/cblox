@@ -197,9 +197,8 @@ bool SubmapCollection<SubmapType>::setSubMapPose(const SubmapID submap_id,
     submap_ptr->setPose(pose);
     return true;
   } else {
-    std::cout << "Tried to set the pose of the submap with submap_id: "
-              << submap_id << " and could not find the linked submap."
-              << std::endl;
+    LOG(WARNING) << "Tried to set the pose of the submap with submap_id: "
+                 << submap_id << " and could not find the linked submap.";
     return false;
   }
 }
@@ -227,9 +226,8 @@ bool SubmapCollection<SubmapType>::getSubMapPose(
     *pose_ptr = submap_ptr->getPose();
     return true;
   } else {
-    std::cout << "Tried to get the pose of the submap with submap_id: "
-              << submap_id << " and could not find the linked submap."
-              << std::endl;
+    LOG(INFO) << "Tried to get the pose of the submap with submap_id: "
+              << submap_id << " and could not find the linked submap.";
     return false;
   }
 }
@@ -247,19 +245,6 @@ void SubmapCollection<SubmapType>::getSubMapPoses(
   }
 }
 
-/*bool SubmapCollection::getAssociatedTsdfSubMapID(
-    const SubmapID submap_id, SubmapID* submap_id_ptr) const {
-  const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
-  if (tsdf_submap_ptr_it != id_to_submap_.end()) {
-    *submap_id_ptr = tsdf_submap_ptr_it->second->getID();
-    return true;
-  } else {
-    // std::cout << "Cant find the requested submap_id: " << submap_id
-    //          << " associated with any submap" << std::endl;
-    return false;
-  }
-}*/
-
 template <typename SubmapType>
 typename SubmapType::ConstPtr SubmapCollection<
     SubmapType>::getSubMapConstPtrById(const SubmapID submap_id) const {
@@ -267,9 +252,6 @@ typename SubmapType::ConstPtr SubmapCollection<
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
     return tsdf_submap_ptr_it->second;
   } else {
-    // std::cout << "Cant find the requested submap_id: " << submap_id
-    //          << " associated with any submap" << std::endl;
-    // TODO(Alex.Millane): Why not return a nullptr here?
     return typename SubmapType::ConstPtr();
   }
 }
@@ -297,9 +279,7 @@ bool SubmapCollection<SubmapType>::saveToFile(
   }
   // Saving the tsdf submaps
   for (const auto& id_submap_pair : id_to_submap_) {
-    // DEBUG
-    std::cout << "Saving tsdf_submap with ID: " << id_submap_pair.first
-              << std::endl;
+    LOG(INFO) << "Saving tsdf_submap with ID: " << id_submap_pair.first;
     // Saving the submap
     (id_submap_pair.second)->saveToStream(&outfile);
   }
@@ -326,9 +306,8 @@ void SubmapCollection<SubmapType>::fuseSubmapPair(
   // Extracting the submap IDs
   SubmapID submap_id_1 = submap_id_pair.first;
   SubmapID submap_id_2 = submap_id_pair.second;
-  // DEBUG
-  std::cout << "Fusing submap pair: (" << submap_id_1 << ", " << submap_id_2
-            << ")" << std::endl;
+  LOG(INFO) << "Fusing submap pair: (" << submap_id_1 << ", " << submap_id_2
+            << ")";
   // Getting the requested submaps
   auto id_submap_pair_1_it = id_to_submap_.find(submap_id_1);
   auto id_submap_pair_2_it = id_to_submap_.find(submap_id_2);
@@ -341,7 +320,6 @@ void SubmapCollection<SubmapType>::fuseSubmapPair(
     // Checking that we're not trying to fuse a submap into itself. This can
     // occur due to fusing submap pairs in a triangle.
     if (submap_ptr_1->getID() == submap_ptr_2->getID()) {
-      std::cout << "Avoided fusing submap into itself." << std::endl;
       return;
     }
     // Getting the tsdf submap and its pose
@@ -351,27 +329,15 @@ void SubmapCollection<SubmapType>::fuseSubmapPair(
     // Merging the submap layers
     mergeLayerAintoLayerB(submap_ptr_2->getTsdfMap().getTsdfLayer(), T_S1_S2,
                           submap_ptr_1->getTsdfMapPtr()->getTsdfLayerPtr());
-    // Transfering KeyFrames to the new submap
-    // TODO(alexmillane): NEEDED FOR MANIFOLD MAPPING.
-    /*    // Searching for ids associated with submap 2
-        for (auto& id_submap_pair : id_to_submap_) {
-          if (id_submap_pair.second == submap_ptr_2) {
-            id_submap_pair.second = submap_ptr_1;
-            // std::cout << "Moved submap ID: " << id_submap_pair.first
-            //          << " from submap ID: " << submap_ptr_2->getID()
-            //          << " to submap ID: " << submap_ptr_1->getID()
-            //          << std::endl;
-          }
-        }*/
+
     // Deleting Submap #2
     const size_t num_erased = id_to_submap_.erase(submap_id_2);
     CHECK_EQ(num_erased, 1);
-    std::cout << "Erased the submap: " << submap_ptr_2->getID()
-              << " from the submap collection" << std::endl;
+    LOG(INFO) << "Erased the submap: " << submap_ptr_2->getID()
+              << " from the submap collection";
 
   } else {
-    std::cout << "Could not find the requested submap pair during fusion."
-              << std::endl;
+    LOG(WARNING) << "Could not find the requested submap pair during fusion.";
   }
 }
 
