@@ -52,6 +52,7 @@ class SubmapCollection {
 
   // Interactions with the active submap
   const SubmapType &getActiveSubMap() const;
+  typename SubmapType::Ptr getActiveSubMapPtr();
   const Transformation &getActiveSubMapPose() const;
   const SubmapID getActiveSubMapID() const;
 

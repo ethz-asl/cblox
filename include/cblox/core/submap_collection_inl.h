@@ -143,6 +143,14 @@ const SubmapType& SubmapCollection<SubmapType>::getActiveSubMap() const {
   return *(it->second);
 }
 
+// Gets a pointer to the active submap
+template <typename SubmapType>
+typename SubmapType::Ptr SubmapCollection<SubmapType>::getActiveSubMapPtr() {
+  const auto it = id_to_submap_.find(active_submap_id_);
+  CHECK(it != id_to_submap_.end());
+  return it->second;
+}
+
 template <typename SubmapType>
 const Transformation& SubmapCollection<SubmapType>::getActiveSubMapPose()
     const {
