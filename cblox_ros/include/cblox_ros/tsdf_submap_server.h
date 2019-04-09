@@ -170,4 +170,4 @@ class TsdfSubmapServer {
 
 }  // namespace cblox
 
-#endif /* CBLOX_ROS_TSDF_SUBMAP_SERVER_H_ */
+#endif  // CBLOX_ROS_TSDF_SUBMAP_SERVER_H_
