@@ -4,7 +4,6 @@
 namespace cblox {
 
 void TsdfSubmap::getProto(TsdfSubmapProto* proto) const {
-  // Checks
   CHECK_NOTNULL(proto);
   // Getting the relevant data
   size_t num_blocks = tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks();
@@ -18,7 +17,6 @@ void TsdfSubmap::getProto(TsdfSubmapProto* proto) const {
 }
 
 bool TsdfSubmap::saveToStream(std::fstream* outfile_ptr) const {
-  // Checks
   CHECK_NOTNULL(outfile_ptr);
   // Saving the TSDF submap header
   TsdfSubmapProto tsdf_sub_map_proto;

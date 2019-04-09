@@ -1,4 +1,3 @@
-#include <iostream>
 #include <string>
 
 #include <voxblox/utils/protobuf_utils.h>
@@ -55,7 +54,6 @@ bool SaveTransformationArray(
 bool LoadTransformationArray(
     const std::string &file_path,
     AlignedVector<Transformation> *transformation_array_ptr) {
-  // Checks
   CHECK_NOTNULL(transformation_array_ptr);
 
   // Opening the file

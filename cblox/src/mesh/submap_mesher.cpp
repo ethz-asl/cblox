@@ -1,4 +1,3 @@
-#include <iostream>
 #include <vector>
 
 #include <glog/logging.h>
@@ -29,11 +28,11 @@ void SubmapMesher::combineMeshLayers(
     const AlignedVector<Transformation>& sub_map_poses,
     MeshLayer* combined_mesh_layer_ptr) {
   CHECK_NOTNULL(combined_mesh_layer_ptr);
-  // DEBUG
-  LOG(INFO) << "Starting combining mesh layers.";
   // Looping over all the mesh layers for the submaps
+  LOG(INFO) << "Starting combining mesh layers.";
   for (size_t sub_map_index = 0; sub_map_index < sub_map_mesh_layers.size();
        sub_map_index++) {
+    LOG(INFO) << "Adding layer: " << sub_map_index;
     // Getting the mesh layer and the transform
     const Transformation& T_M_S = sub_map_poses[sub_map_index];
     MeshLayer::ConstPtr mesh_layer_ptr = sub_map_mesh_layers[sub_map_index];
@@ -50,9 +49,8 @@ void SubmapMesher::transformMeshLayers(
   CHECK_NOTNULL(transformed_sub_map_mesh_layers);
   transformed_sub_map_mesh_layers->clear();
   transformed_sub_map_mesh_layers->reserve(sub_map_mesh_layers.size());
-  // DEBUG
-  LOG(INFO) << "Starting Transforming mesh layers.";
   // Looping over all the mesh layers for the submaps
+  LOG(INFO) << "Starting Transforming mesh layers.";
   for (size_t sub_map_index = 0; sub_map_index < sub_map_mesh_layers.size();
        sub_map_index++) {
     // Getting the mesh layer and the transform

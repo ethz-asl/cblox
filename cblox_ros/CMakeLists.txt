@@ -14,6 +14,7 @@ cs_add_library(${PROJECT_NAME}
   src/active_submap_visualizer.cc
   src/trajectory_visualizer.cc
 )
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
 ############
 # BINARIES #

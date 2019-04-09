@@ -40,13 +40,13 @@ void ActiveSubmapVisualizer::colorMeshWithCurrentIndex(
     MeshLayer* mesh_layer_ptr) const {
   CHECK_NOTNULL(mesh_layer_ptr);
   // Coloring
-  double color_map_idx = static_cast<double>(current_color_idx_) /
-                         static_cast<double>(color_cycle_length_ - 1);
-  const Color color = voxblox::rainbowColorMap(color_map_idx);
+  double color_map_float = static_cast<double>(current_color_idx_) /
+                           static_cast<double>(color_cycle_length_ - 1);
+  const Color color = voxblox::rainbowColorMap(color_map_float);
   SubmapMesher::colorMeshLayer(color, mesh_layer_ptr);
 }
 
-const std::shared_ptr<MeshLayer> ActiveSubmapVisualizer::getDisplayMeshLayer() {
+MeshLayer::Ptr ActiveSubmapVisualizer::getDisplayMeshLayer() {
   // Transforming the mesh layer into G.
   auto mesh_layer_G_ptr =
       std::make_shared<MeshLayer>(tsdf_submap_collection_ptr_->block_size());

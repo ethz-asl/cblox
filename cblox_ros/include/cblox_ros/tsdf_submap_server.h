@@ -51,9 +51,9 @@ class TsdfSubmapServer {
 
   // Saving and Loading callbacks
   // bool saveMapCallback(std_srvs::Empty::Request& request,     // NOLINT
-  //                     std_srvs::Empty::Response& response);  // NOLINT
+  //                      std_srvs::Empty::Response& response);  // NOLINT
   // bool loadMapCallback(std_srvs::Empty::Request& request,     // NOLINT
-  //                     std_srvs::Empty::Response& response);  // NOLINT
+  //                      std_srvs::Empty::Response& response);  // NOLINT
 
   // Mesh output
   bool generateSeparatedMeshCallback(std_srvs::Empty::Request& request,
@@ -66,6 +66,12 @@ class TsdfSubmapServer {
   void subscribeToTopics();
   void advertiseTopics();
   void getParametersFromRos();
+
+  // The two actions on pointcloud callback; add message to queue for
+  // processing, and process messages in the queue.
+  void addMesageToPointcloudQueue(
+      const sensor_msgs::PointCloud2::Ptr &pointcloud_msg_in);
+  void servicePointcloudQueue();
 
   // Checks if we can get the next message from queue.
   bool getNextPointcloudFromQueue(

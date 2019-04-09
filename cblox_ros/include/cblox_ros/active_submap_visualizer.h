@@ -38,11 +38,10 @@ class ActiveSubmapVisualizer {
 
   void updateMeshLayer();
 
-  // Note(alexmillane): Return by const ptr for voxblox vis
-  const std::shared_ptr<MeshLayer> getDisplayMeshLayer();
   void getDisplayMesh(visualization_msgs::Marker* marker_ptr);
+  MeshLayer::Ptr getDisplayMeshLayer();
 
- private:
+private:
   // The active mesh is produced in the submap frame (S), and is transformed
   // into the global frame (G).
   void transformMeshLayerToGlobalFrame(const MeshLayer& mesh_layer_S,

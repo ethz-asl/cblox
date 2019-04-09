@@ -21,7 +21,6 @@ bool LoadSubmapFromStream(
     std::fstream *proto_file_ptr,
     typename SubmapCollection<SubmapType>::Ptr tsdf_submap_collection_ptr,
     uint32_t *tmp_byte_offset_ptr) {
-  // Checks
   CHECK_NOTNULL(proto_file_ptr);
   CHECK(tsdf_submap_collection_ptr);
   CHECK_NOTNULL(tmp_byte_offset_ptr);

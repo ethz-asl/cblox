@@ -1,7 +1,6 @@
 #ifndef CBLOX_CORE_SUBMAP_COLLECTION_INL_H_
 #define CBLOX_CORE_SUBMAP_COLLECTION_INL_H_
 
-#include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -228,7 +227,6 @@ bool SubmapCollection<SubmapType>::getSubMapPose(
 template <typename SubmapType>
 void SubmapCollection<SubmapType>::getSubMapPoses(
     AlignedVector<Transformation>* submap_poses_ptr) const {
-  // Checks
   CHECK_NOTNULL(submap_poses_ptr);
   // Extracting transforms
   submap_poses_ptr->clear();
@@ -284,7 +282,6 @@ bool SubmapCollection<SubmapType>::saveToFile(
 template <typename SubmapType>
 void SubmapCollection<SubmapType>::getProto(
     TsdfSubmapCollectionProto* proto) const {
-  // Checks
   CHECK_NOTNULL(proto);
   // Filling out the description of the submap collection
   proto->set_voxel_size(submap_config_.tsdf_voxel_size);

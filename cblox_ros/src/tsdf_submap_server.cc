@@ -1,7 +1,5 @@
 #include "cblox_ros/tsdf_submap_server.h"
 
-#include <iostream>
-
 #include <geometry_msgs/PoseArray.h>
 #include <nav_msgs/Path.h>
 #include <visualization_msgs/Marker.h>
@@ -16,6 +14,7 @@
 #include <voxblox/utils/timing.h>
 #include <voxblox_ros/ros_params.h>
 
+#include "cblox_ros/pointcloud_conversions.h"
 #include "cblox_ros/pose_vis.h"
 #include "cblox_ros/ros_params.h"
 
@@ -121,15 +120,23 @@ void TsdfSubmapServer::getParametersFromRos() {
 
 void TsdfSubmapServer::pointcloudCallback(
     const sensor_msgs::PointCloud2::Ptr& pointcloud_msg_in) {
-  
+  // Pushing this message onto the queue for processing
+  addMesageToPointcloudQueue(pointcloud_msg_in);
+  // Processing messages in the queue
+  servicePointcloudQueue();
+}
+
+void TsdfSubmapServer::addMesageToPointcloudQueue(
+    const sensor_msgs::PointCloud2::Ptr &pointcloud_msg_in) {
   // Pushing this message onto the queue for processing
   if (pointcloud_msg_in->header.stamp - last_msg_time_ptcloud_ >
       min_time_between_msgs_) {
     last_msg_time_ptcloud_ = pointcloud_msg_in->header.stamp;
     pointcloud_queue_.push(pointcloud_msg_in);
   }
+}
 
-  // Processing the queue
+void TsdfSubmapServer::servicePointcloudQueue() {
   // NOTE(alexmilane): T_G_C - Transformation between Camera frame (C) and
   //                           global tracking frame (G).
   Transformation T_G_C;
@@ -152,18 +159,13 @@ void TsdfSubmapServer::pointcloudCallback(
     processed_any = true;
   }
 
-  if (!processed_any) {
-    return;
-  }
-
-  if (false) {
-    ROS_INFO_STREAM("Timings: " << std::endl << timing::Timing::Print());
-    // NOTE(alexmillane): This prints the current submap memory. Should update
-    // to print full collection memory.
-    ROS_INFO_STREAM("Active submap memory: " << tsdf_submap_collection_ptr_
-                                                    ->getActiveTsdfMap()
-                                                    .getTsdfLayer()
-                                                    .getMemorySize());
+  // Note(alex.millane): Currently the timings aren't printing. Outputs too much
+  // to the console. But it is occassionally useful so I'm leaving this here.
+  constexpr bool kPrintTimings = false;
+  if (kPrintTimings) {
+    if (processed_any) {
+      ROS_INFO_STREAM("Timings: " << std::endl << timing::Timing::Print());
+    }
   }
 }
 
@@ -198,60 +200,9 @@ void TsdfSubmapServer::processPointCloudMessageAndInsert(
     const sensor_msgs::PointCloud2::Ptr& pointcloud_msg,
     const Transformation& T_G_C, const bool is_freespace_pointcloud) {
   // Convert the PCL pointcloud into our awesome format.
-
-  // Horrible hack fix to fix color parsing colors in PCL.
-  bool color_pointcloud = false;
-  for (size_t d = 0; d < pointcloud_msg->fields.size(); ++d) {
-    if (pointcloud_msg->fields[d].name == std::string("rgb")) {
-      pointcloud_msg->fields[d].datatype = sensor_msgs::PointField::FLOAT32;
-      color_pointcloud = true;
-    }
-  }
-
   Pointcloud points_C;
   Colors colors;
-  timing::Timer ptcloud_timer("ptcloud_preprocess");
-
-  // Convert differently depending on RGB or I type.
-  if (color_pointcloud) {
-    pcl::PointCloud<pcl::PointXYZRGB> pointcloud_pcl;
-    // pointcloud_pcl is modified below:
-    pcl::fromROSMsg(*pointcloud_msg, pointcloud_pcl);
-    points_C.reserve(pointcloud_pcl.size());
-    colors.reserve(pointcloud_pcl.size());
-    for (size_t i = 0; i < pointcloud_pcl.points.size(); ++i) {
-      if (!std::isfinite(pointcloud_pcl.points[i].x) ||
-          !std::isfinite(pointcloud_pcl.points[i].y) ||
-          !std::isfinite(pointcloud_pcl.points[i].z)) {
-        continue;
-      }
-      points_C.push_back(Point(pointcloud_pcl.points[i].x,
-                               pointcloud_pcl.points[i].y,
-                               pointcloud_pcl.points[i].z));
-      colors.push_back(
-          Color(pointcloud_pcl.points[i].r, pointcloud_pcl.points[i].g,
-                pointcloud_pcl.points[i].b, pointcloud_pcl.points[i].a));
-    }
-  } else {
-    pcl::PointCloud<pcl::PointXYZI> pointcloud_pcl;
-    // pointcloud_pcl is modified below:
-    pcl::fromROSMsg(*pointcloud_msg, pointcloud_pcl);
-    points_C.reserve(pointcloud_pcl.size());
-    colors.reserve(pointcloud_pcl.size());
-    for (size_t i = 0; i < pointcloud_pcl.points.size(); ++i) {
-      if (!std::isfinite(pointcloud_pcl.points[i].x) ||
-          !std::isfinite(pointcloud_pcl.points[i].y) ||
-          !std::isfinite(pointcloud_pcl.points[i].z)) {
-        continue;
-      }
-      points_C.push_back(Point(pointcloud_pcl.points[i].x,
-                               pointcloud_pcl.points[i].y,
-                               pointcloud_pcl.points[i].z));
-      colors.push_back(
-          color_map_->colorLookup(pointcloud_pcl.points[i].intensity));
-    }
-  }
-  ptcloud_timer.Stop();
+  convertPointcloudMsg(*color_map_, pointcloud_msg, &points_C, &colors);
 
   if (verbose_) {
     ROS_INFO("Integrating a pointcloud with %lu points.", points_C.size());

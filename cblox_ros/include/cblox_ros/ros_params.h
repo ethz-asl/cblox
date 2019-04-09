@@ -9,8 +9,8 @@ namespace cblox {
 
 inline voxblox::TsdfIntegratorType getTsdfIntegratorTypeFromRosParam(
     const ros::NodeHandle& nh_private) {
-  voxblox::TsdfIntegratorType tsdf_integrator_type;
 
+  voxblox::TsdfIntegratorType tsdf_integrator_type;
   std::string integrator_type_str("merged");
   nh_private.param("method", integrator_type_str, integrator_type_str);
   int integrator_type_idx = 1;
