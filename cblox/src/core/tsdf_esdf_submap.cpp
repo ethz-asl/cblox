@@ -1,7 +1,3 @@
-//
-// Created by victor on 07.01.19.
-//
-
 #include "cblox/core/tsdf_esdf_submap.h"
 #include <voxblox/integrator/esdf_integrator.h>
 
@@ -13,8 +9,7 @@ void TsdfEsdfSubmap::generateEsdf() {
                                           tsdf_map_->getTsdfLayerPtr(),
                                           esdf_map_->getEsdfLayerPtr());
   // Generate the ESDF
-  std::cout << "Generating ESDF from TSDF for submap with ID: " << submap_id_
-            << std::endl;
+  LOG(INFO) << "Generating ESDF from TSDF for submap with ID: " << submap_id_;
   esdf_integrator.updateFromTsdfLayerBatch();
 }
 }  // namespace cblox

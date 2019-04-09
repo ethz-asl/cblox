@@ -24,7 +24,9 @@ class TsdfSubmapCollectionIntegrator {
         method_(tsdf_integrator_type) {}
 
   // Integrate a pointcloud to the currently active submap.
-  void integratePointCloud(const Transformation& T_M_C,
+  // NOTE(alexmilane): T_G_S - Transformation between camera frame (C) and
+  //                           the global tracking frame (G).
+  void integratePointCloud(const Transformation& T_G_C,
                            const Pointcloud& points_C, const Colors& colors);
 
   // Changes the active submap to the last one on the collection
@@ -38,16 +40,18 @@ class TsdfSubmapCollectionIntegrator {
   void updateIntegratorTarget(const TsdfMap::Ptr& tsdf_map_ptr);
 
   // Gets the submap relative pose
-  Transformation getSubmapRelativePose(const Transformation& T_M_C) const;
+  // NOTE(alexmilane): T_G_S - Transformation between camera frame (C) and
+  //                           the global tracking frame (G).
+  Transformation getSubmapRelativePose(const Transformation& T_G_C) const;
 
   // The submap collection
   std::shared_ptr<cblox::SubmapCollection<TsdfSubmap>>
       tsdf_submap_collection_ptr_;
 
   // Transform to the currently targeted submap
-  // NOTE(alexmilane): T_M_S - Transformation between Submap base frame (S) and
-  //                           the global tracking frame (M).
-  Transformation T_M_S_active_;
+  // NOTE(alexmilane): T_G_S - Transformation between Submap base frame (S) and
+  //                           the global tracking frame (G).
+  Transformation T_G_S_active_;
 
   // The integrator
   const voxblox::TsdfIntegratorBase::Config tsdf_integrator_config_;

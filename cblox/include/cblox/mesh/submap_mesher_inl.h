@@ -8,7 +8,6 @@ template <typename SubmapType>
 void SubmapMesher::generateSeparatedMesh(
     const SubmapCollection<SubmapType>& submap_collection,
     MeshLayer* seperated_mesh_layer_ptr) {
-  // Checks
   CHECK_NOTNULL(seperated_mesh_layer_ptr);
   // Getting the submaps
   const std::vector<typename SubmapType::ConstPtr> sub_maps =
@@ -16,22 +15,22 @@ void SubmapMesher::generateSeparatedMesh(
   // Generating the mesh layers
   std::vector<MeshLayer::Ptr> sub_map_mesh_layers;
   generateSeparatedMeshLayers<SubmapType>(sub_maps, &sub_map_mesh_layers);
-
   // Coloring the mesh layers
   colorMeshLayersWithIndex(&sub_map_mesh_layers);
   // Get submap transforms
   AlignedVector<Transformation> sub_map_poses;
   submap_collection.getSubMapPoses(&sub_map_poses);
   // Combining the mesh layers
-  combineMeshLayers(sub_map_mesh_layers, sub_map_poses,
-                    seperated_mesh_layer_ptr);
+  // NOTE(alexmillane): Have to construct a vector of pointers to const...
+  combineMeshLayers(std::vector<MeshLayer::ConstPtr>(
+                        sub_map_mesh_layers.begin(), sub_map_mesh_layers.end()),
+                    sub_map_poses, seperated_mesh_layer_ptr);
 }
 
 template <typename SubmapType>
 void SubmapMesher::generateCombinedMesh(
     const SubmapCollection<SubmapType>& submap_collection,
     MeshLayer* combined_mesh_layer_ptr) {
-  // Checks
   CHECK_NOTNULL(combined_mesh_layer_ptr);
   // Getting the Tsdf map which is the projection of the submap collection
   TsdfMap::Ptr combined_tsdf_map_ptr = submap_collection.getProjectedMap();
@@ -49,7 +48,6 @@ template <typename SubmapType>
 void SubmapMesher::generateSeparatedMeshLayers(
     const std::vector<typename SubmapType::ConstPtr>& sub_maps,
     std::vector<MeshLayer::Ptr>* sub_map_mesh_layers) {
-  // Checks
   CHECK_NOTNULL(sub_map_mesh_layers);
   sub_map_mesh_layers->clear();
   sub_map_mesh_layers->reserve(sub_maps.size());
@@ -57,7 +55,6 @@ void SubmapMesher::generateSeparatedMeshLayers(
   size_t mesh_index = 0;
   for (typename SubmapType::ConstPtr sub_map_ptr : sub_maps) {
     CHECK_NOTNULL(sub_map_ptr.get());
-    // DEBUG
     LOG(INFO) << "Generating mesh for submap number #" << mesh_index;
     mesh_index++;
     // Getting the TSDF data

@@ -33,11 +33,8 @@ bool SaveTransformationArray(
   // Looping over the transforms and saving them to an array
   size_t transform_index = 0;
   for (const Transformation &transform : transformation_array) {
-    // DEUBG
-    std::cout << "Saving the transform number: " << transform_index
-              << std::endl;
+    LOG(INFO) << "Saving the transform number: " << transform_index;
     transform_index++;
-
     // Getting the proto
     QuatTransformationProto transformation_proto;
     conversions::transformKindrToProto(transform, &transformation_proto);
@@ -85,16 +82,12 @@ bool LoadTransformationArray(
     return false;
   }
 
-  // DEBUG
-  std::cout << "num_protos: " << num_protos << std::endl;
-
   // Reading all the transforms
   transformation_array_ptr->clear();
   transformation_array_ptr->reserve(num_protos);
   for (size_t transform_index = 0; transform_index < num_protos;
        transform_index++) {
-    // DEBUG
-    std::cout << "transform_index: " << transform_index << std::endl;
+    LOG(INFO) << "Loading transformation: " << transform_index;
 
     // Getting the transformation proto
     QuatTransformationProto transformation_proto;

@@ -1,7 +1,3 @@
-//
-// Created by victor on 07.01.19.
-//
-
 #ifndef CBLOX_CORE_SUBMAP_COLLECTION_INL_H_
 #define CBLOX_CORE_SUBMAP_COLLECTION_INL_H_
 
@@ -50,7 +46,7 @@ bool SubmapCollection<SubmapType>::exists(const SubmapID submap_id) const {
 }
 
 template <typename SubmapType>
-void SubmapCollection<SubmapType>::createNewSubMap(const Transformation& T_M_S,
+void SubmapCollection<SubmapType>::createNewSubMap(const Transformation& T_G_S,
                                                    const SubmapID submap_id) {
   // Checking if the submap already exists
   // NOTE(alexmillane): This hard fails the program if the submap already
@@ -61,7 +57,7 @@ void SubmapCollection<SubmapType>::createNewSubMap(const Transformation& T_M_S,
   CHECK(it == id_to_submap_.end());
   // Creating the new submap and adding it to the list
   typename SubmapType::Ptr tsdf_sub_map(
-      new SubmapType(T_M_S, submap_id, submap_config_));
+      new SubmapType(T_G_S, submap_id, submap_config_));
   id_to_submap_.emplace(submap_id, std::move(tsdf_sub_map));
   // Updating the active submap
   active_submap_id_ = submap_id;
@@ -69,14 +65,14 @@ void SubmapCollection<SubmapType>::createNewSubMap(const Transformation& T_M_S,
 
 template <typename SubmapType>
 SubmapID SubmapCollection<SubmapType>::createNewSubMap(
-    const Transformation& T_M_S) {
+    const Transformation& T_G_S) {
   // Creating a submap with a generated SubmapID
   // NOTE(alexmillane): rbegin() returns the pair with the highest key.
   SubmapID new_ID = 0;
   if (!id_to_submap_.empty()) {
     new_ID = id_to_submap_.rbegin()->first + 1;
   }
-  createNewSubMap(T_M_S, new_ID);
+  createNewSubMap(T_G_S, new_ID);
   return new_ID;
 }
 
@@ -88,10 +84,10 @@ bool SubmapCollection<SubmapType>::duplicateSubMap(
   if (src_submap_ptr_it != id_to_submap_.end()) {
     typename SubmapType::Ptr src_submap_ptr = src_submap_ptr_it->second;
     // Create a new submap with the same pose and get its pointer
-    const Transformation T_M_S = src_submap_ptr->getPose();
+    const Transformation T_G_S = src_submap_ptr->getPose();
     // Creating the new submap and adding it to the list
     typename SubmapType::Ptr new_tsdf_sub_map(
-        new SubmapType(T_M_S, new_submap_id, submap_config_));
+        new SubmapType(T_G_S, new_submap_id, submap_config_));
     // Reset the TsdfMap based on a copy of the source submap's TSDF layer
     // TODO(victorr): Find a better way to do this, however with .reset(...) as
     // below the new submap appears empty
@@ -105,7 +101,6 @@ bool SubmapCollection<SubmapType>::duplicateSubMap(
   return false;
 }
 
-// Gets a const pointer to a raw submap
 template <typename SubmapType>
 const SubmapType& SubmapCollection<SubmapType>::getSubMap(
     const SubmapID submap_id) const {
@@ -134,14 +129,12 @@ SubmapCollection<SubmapType>::getSubMapConstPtrs() const {
   return submap_ptrs;
 }
 
-// Gets a pointer to the tsdf_map member of the active submap
 template <typename SubmapType>
 TsdfMap::Ptr SubmapCollection<SubmapType>::getActiveTsdfMapPtr() {
   const auto it = id_to_submap_.find(active_submap_id_);
   CHECK(it != id_to_submap_.end());
   return (it->second)->getTsdfMapPtr();
 }
-// Gets a reference to tsdf_map member of the active submap
 template <typename SubmapType>
 const TsdfMap& SubmapCollection<SubmapType>::getActiveTsdfMap() const {
   const auto it = id_to_submap_.find(active_submap_id_);
@@ -149,7 +142,6 @@ const TsdfMap& SubmapCollection<SubmapType>::getActiveTsdfMap() const {
   return (it->second)->getTsdfMap();
 }
 
-// Gets a reference to the active submap
 template <typename SubmapType>
 const SubmapType& SubmapCollection<SubmapType>::getActiveSubMap() const {
   const auto it = id_to_submap_.find(active_submap_id_);
@@ -178,9 +170,9 @@ TsdfMap::Ptr SubmapCollection<SubmapType>::getProjectedMap() const {
   for (const auto& id_submap_pair : id_to_submap_) {
     // Getting the tsdf submap and its pose
     const TsdfMap& tsdf_map = (id_submap_pair.second)->getTsdfMap();
-    const Transformation& T_M_S = (id_submap_pair.second)->getPose();
+    const Transformation& T_G_S = (id_submap_pair.second)->getPose();
     // Merging layers the submap into the global layer
-    mergeLayerAintoLayerB(tsdf_map.getTsdfLayer(), T_M_S,
+    mergeLayerAintoLayerB(tsdf_map.getTsdfLayer(), T_G_S,
                           combined_tsdf_layer_ptr);
   }
   // Returning the new map
@@ -209,6 +201,7 @@ void SubmapCollection<SubmapType>::setSubMapPoses(
   CHECK_EQ(transforms.size(), id_to_submap_.size());
   // NOTE(alexmillane): This assumes that the order of transforms matches the
   //                    submap order.
+  // NOTE(alexmillane): Should really be passing a map of ids to transforms.
   size_t sub_map_index = 0;
   for (const auto& id_submap_pair : id_to_submap_) {
     (id_submap_pair.second)->setPose(transforms[sub_map_index]);
@@ -299,7 +292,6 @@ void SubmapCollection<SubmapType>::getProto(
   proto->set_num_submaps(num_patches());
 }
 
-// Fusing the submap pairs
 template <typename SubmapType>
 void SubmapCollection<SubmapType>::fuseSubmapPair(
     const SubmapIdPair& submap_id_pair) {
@@ -309,8 +301,8 @@ void SubmapCollection<SubmapType>::fuseSubmapPair(
   LOG(INFO) << "Fusing submap pair: (" << submap_id_1 << ", " << submap_id_2
             << ")";
   // Getting the requested submaps
-  auto id_submap_pair_1_it = id_to_submap_.find(submap_id_1);
-  auto id_submap_pair_2_it = id_to_submap_.find(submap_id_2);
+  const auto id_submap_pair_1_it = id_to_submap_.find(submap_id_1);
+  const auto id_submap_pair_2_it = id_to_submap_.find(submap_id_2);
   // If the submaps are found
   if ((id_submap_pair_1_it != id_to_submap_.end()) &&
       (id_submap_pair_2_it != id_to_submap_.end())) {
@@ -323,9 +315,9 @@ void SubmapCollection<SubmapType>::fuseSubmapPair(
       return;
     }
     // Getting the tsdf submap and its pose
-    const Transformation& T_M_S1 = submap_ptr_1->getPose();
-    const Transformation& T_M_S2 = submap_ptr_2->getPose();
-    const Transformation& T_S1_S2 = T_M_S1.inverse() * T_M_S2;
+    const Transformation& T_G_S1 = submap_ptr_1->getPose();
+    const Transformation& T_G_S2 = submap_ptr_2->getPose();
+    const Transformation T_S1_S2 = T_G_S1.inverse() * T_G_S2;
     // Merging the submap layers
     mergeLayerAintoLayerB(submap_ptr_2->getTsdfMap().getTsdfLayer(), T_S1_S2,
                           submap_ptr_1->getTsdfMapPtr()->getTsdfLayerPtr());

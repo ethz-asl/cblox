@@ -31,8 +31,10 @@ class SubmapCollection {
   bool exists(const SubmapID submap_id) const;
 
   // Creates a new submap on the top of the collection
-  void createNewSubMap(const Transformation &T_M_S, const SubmapID submap_id);
-  SubmapID createNewSubMap(const Transformation &T_M_S);
+  // NOTE(alexmilane): T_G_S - Transformation between submap frame (S) and
+  //                           the global tracking frame (G).
+  void createNewSubMap(const Transformation &T_G_S, const SubmapID submap_id);
+  SubmapID createNewSubMap(const Transformation &T_G_S);
 
   // Create a new submap which duplicates an existing source submap
   bool duplicateSubMap(const SubmapID source_submap_id,
