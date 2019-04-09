@@ -127,7 +127,7 @@ void TsdfSubmapServer::pointcloudCallback(
 }
 
 void TsdfSubmapServer::addMesageToPointcloudQueue(
-    const sensor_msgs::PointCloud2::Ptr &pointcloud_msg_in) {
+    const sensor_msgs::PointCloud2::Ptr& pointcloud_msg_in) {
   // Pushing this message onto the queue for processing
   if (pointcloud_msg_in->header.stamp - last_msg_time_ptcloud_ >
       min_time_between_msgs_) {
@@ -284,7 +284,8 @@ void TsdfSubmapServer::updateActiveSubmapMesh() {
 }
 
 bool TsdfSubmapServer::generateSeparatedMeshCallback(
-    std_srvs::Empty::Request& request, std_srvs::Empty::Response& response) {
+    std_srvs::Empty::Request& request,
+    std_srvs::Empty::Response& /*response*/) {  // NO LINT
   // Saving mesh to file if required
   if (!mesh_filename_.empty()) {
     // Getting the requested mesh type from the mesher
@@ -306,7 +307,8 @@ bool TsdfSubmapServer::generateSeparatedMeshCallback(
 }
 
 bool TsdfSubmapServer::generateCombinedMeshCallback(
-    std_srvs::Empty::Request& request, std_srvs::Empty::Response& response) {
+    std_srvs::Empty::Request& request,
+    std_srvs::Empty::Response& /*response*/) {  // NO LINT
   // Saving mesh to file if required
   if (!mesh_filename_.empty()) {
     // Getting the requested mesh type from the mesher

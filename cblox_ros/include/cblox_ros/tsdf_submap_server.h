@@ -1,7 +1,8 @@
-#ifndef CBLOX_ROS_TSDF_SERVER_H_
-#define CBLOX_ROS_TSDF_SERVER_H_
+#ifndef CBLOX_ROS_TSDF_SUBMAP_SERVER_H_
+#define CBLOX_ROS_TSDF_SUBMAP_SERVER_H_
 
 #include <memory>
+#include <queue>
 #include <string>
 #include <vector>
 
@@ -56,10 +57,12 @@ class TsdfSubmapServer {
   //                      std_srvs::Empty::Response& response);  // NOLINT
 
   // Mesh output
-  bool generateSeparatedMeshCallback(std_srvs::Empty::Request& request,
-                                     std_srvs::Empty::Response& response);
-  bool generateCombinedMeshCallback(std_srvs::Empty::Request& request,
-                                    std_srvs::Empty::Response& response);
+  bool generateSeparatedMeshCallback(
+      std_srvs::Empty::Request& request,     // NOLINT
+      std_srvs::Empty::Response& response);  // NOLINT
+  bool generateCombinedMeshCallback(
+      std_srvs::Empty::Request& request,     // NOLINT
+      std_srvs::Empty::Response& response);  // NOLINT
 
  private:
   // Gets parameters
@@ -70,7 +73,7 @@ class TsdfSubmapServer {
   // The two actions on pointcloud callback; add message to queue for
   // processing, and process messages in the queue.
   void addMesageToPointcloudQueue(
-      const sensor_msgs::PointCloud2::Ptr &pointcloud_msg_in);
+      const sensor_msgs::PointCloud2::Ptr& pointcloud_msg_in);
   void servicePointcloudQueue();
 
   // Checks if we can get the next message from queue.
@@ -167,4 +170,4 @@ class TsdfSubmapServer {
 
 }  // namespace cblox
 
-#endif /* CBLOX_ROS_TSDF_SERVER_H_ */
+#endif /* CBLOX_ROS_TSDF_SUBMAP_SERVER_H_ */
