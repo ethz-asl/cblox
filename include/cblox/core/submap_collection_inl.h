@@ -255,16 +255,28 @@ void SubmapCollection<SubmapType>::getSubMapPoses(
 }*/
 
 template <typename SubmapType>
-typename SubmapType::ConstPtr SubmapCollection<
-    SubmapType>::getSubMapConstPtrById(const SubmapID submap_id) const {
-  const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
-  if (tsdf_submap_ptr_it != id_to_submap_.end()) {
-    return tsdf_submap_ptr_it->second;
+typename SubmapType::Ptr SubmapCollection<SubmapType>::getSubMapPtrById(
+    const SubmapID submap_id) const {
+  const auto submap_ptr_it = id_to_submap_.find(submap_id);
+  if (submap_ptr_it != id_to_submap_.end()) {
+    return submap_ptr_it->second;
   } else {
     // std::cout << "Cant find the requested submap_id: " << submap_id
     //          << " associated with any submap" << std::endl;
-    // TODO(Alex.Millane): Why not return a nullptr here?
-    return typename SubmapType::ConstPtr();
+    return nullptr;
+  }
+}
+
+template <typename SubmapType>
+typename SubmapType::ConstPtr SubmapCollection<
+    SubmapType>::getSubMapConstPtrById(const SubmapID submap_id) const {
+  const auto submap_ptr_it = id_to_submap_.find(submap_id);
+  if (submap_ptr_it != id_to_submap_.end()) {
+    return submap_ptr_it->second;
+  } else {
+    // std::cout << "Cant find the requested submap_id: " << submap_id
+    //          << " associated with any submap" << std::endl;
+    return nullptr;
   }
 }
 

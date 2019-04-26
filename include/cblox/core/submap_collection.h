@@ -45,8 +45,10 @@ class SubmapCollection {
   const SubmapType &getSubMap(const SubmapID submap_id) const;
   // Note(alexmillane): Unlike the above this function returns a nullptr when
   // the map doesn't exist. No hard crash.
+  typename SubmapType::Ptr getSubMapPtrById(const SubmapID submap_id) const;
   typename SubmapType::ConstPtr getSubMapConstPtrById(
       const SubmapID submap_id) const;
+
   // A list of the submaps
   const std::vector<typename SubmapType::Ptr> getSubMaps() const;
 
