@@ -5,6 +5,10 @@ namespace cblox {
 void TsdfSubmapCollectionIntegrator::integratePointCloud(
     const Transformation& T_G_C, const Pointcloud& points_C,
     const Colors& colors) {
+  CHECK(!tsdf_submap_collection_ptr_->empty())
+      << "Can't integrate. No submaps in collection.";
+  CHECK(tsdf_integrator_)
+      << "Can't integrate. Need to update integration target.";
   // Getting the submap relative transform
   // NOTE(alexmilane): T_S_C - Transformation between Camera frame (C) and
   //                           the submap base frame (S).
