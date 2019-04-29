@@ -167,6 +167,13 @@ const SubmapID SubmapCollection<SubmapType>::getActiveSubMapID() const {
 }
 
 template <typename SubmapType>
+void SubmapCollection<SubmapType>::activateSubMap(const SubmapID submap_id) {
+  const auto it = id_to_submap_.find(submap_id);
+  CHECK(it != id_to_submap_.end());
+  active_submap_id_ = submap_id;
+}
+
+template <typename SubmapType>
 TsdfMap::Ptr SubmapCollection<SubmapType>::getProjectedMap() const {
   // Creating the global tsdf map and getting its tsdf layer
   TsdfMap::Ptr projected_tsdf_map_ptr =

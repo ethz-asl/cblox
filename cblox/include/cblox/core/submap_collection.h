@@ -31,8 +31,9 @@ class SubmapCollection {
   bool exists(const SubmapID submap_id) const;
 
   // Creates a new submap on the top of the collection
-  // NOTE(alexmilane): T_G_S - Transformation between submap frame (S) and
+  // NOTE(alexmillane): T_G_S - Transformation between submap frame (S) and
   //                           the global tracking frame (G).
+  // NOTE(alexmillane): Creating a new submap automatically makes it active.
   void createNewSubMap(const Transformation &T_G_S, const SubmapID submap_id);
   SubmapID createNewSubMap(const Transformation &T_G_S);
 
@@ -62,6 +63,10 @@ class SubmapCollection {
   // Access the tsdf_map member of the active submap
   TsdfMap::Ptr getActiveTsdfMapPtr();
   const TsdfMap &getActiveTsdfMap() const;
+
+  // Activate a submap
+  // NOTE(alexmillane): Note that creating a new submap automatically activates it.
+  void activateSubMap(const SubmapID submap_id);
 
   // Interacting with the submap poses
   bool setSubMapPose(const SubmapID submap_id, const Transformation &pose);

@@ -4,18 +4,52 @@
 
 namespace cblox {
 
-void ActiveSubmapVisualizer::activateLatestSubmap() {
-  // New mesh
+void ActiveSubmapVisualizer::switchToActiveSubmap() {
+  // Getting the active submap ID
+  const SubmapID submap_id = tsdf_submap_collection_ptr_->getActiveSubMapID();
+  if (mesh_layers_.find(submap_id) == mesh_layers_.end()) {
+    ROS_INFO("Creating new mesh layer");
+    createMeshLayer();
+    updateIntegrator();
+  } else {
+    ROS_INFO("Recovering old mesh layer");
+    recoverMeshLayer();
+    updateIntegrator();
+  }
+}
+
+void ActiveSubmapVisualizer::createMeshLayer() {
+  // Active layer stuff
   active_submap_mesh_layer_ptr_.reset(
       new voxblox::MeshLayer(tsdf_submap_collection_ptr_->block_size()));
+  active_submap_color_idx_ = current_color_idx_;
+  // Saving mesh layer and color for later recovery
+  const SubmapID submap_id = tsdf_submap_collection_ptr_->getActiveSubMapID();
+  mesh_layers_[submap_id] = active_submap_mesh_layer_ptr_;
+  mesh_color_indices_[submap_id] = active_submap_color_idx_;
+  // Updating the color index for the next map.
+  current_color_idx_ = (current_color_idx_ + 1) % color_cycle_length_;
+}
+
+void ActiveSubmapVisualizer::recoverMeshLayer() {
+  const SubmapID submap_id = tsdf_submap_collection_ptr_->getActiveSubMapID();
+  auto mesh_it = mesh_layers_.find(submap_id);
+  auto color_it = mesh_color_indices_.find(submap_id);
+  CHECK(mesh_it != mesh_layers_.end())
+      << "Tried to recover layer not already created";
+  CHECK(color_it != mesh_color_indices_.end())
+      << "Tried to recover layer not already created";
+  active_submap_mesh_layer_ptr_ = mesh_it->second;
+  active_submap_color_idx_ = color_it->second;
+}
+
+void ActiveSubmapVisualizer::updateIntegrator() {
   // New integrator operating on the mesh.
   active_submap_mesh_integrator_ptr_.reset(
       new voxblox::MeshIntegrator<TsdfVoxel>(
           mesh_config_,
           tsdf_submap_collection_ptr_->getActiveTsdfMapPtr()->getTsdfLayerPtr(),
           active_submap_mesh_layer_ptr_.get()));
-  // New color for this map
-  current_color_idx_ = (current_color_idx_ + 1) % color_cycle_length_;
 }
 
 void ActiveSubmapVisualizer::updateMeshLayer() {
@@ -40,7 +74,7 @@ void ActiveSubmapVisualizer::colorMeshWithCurrentIndex(
     MeshLayer* mesh_layer_ptr) const {
   CHECK_NOTNULL(mesh_layer_ptr);
   // Coloring
-  double color_map_float = static_cast<double>(current_color_idx_) /
+  double color_map_float = static_cast<double>(active_submap_color_idx_) /
                            static_cast<double>(color_cycle_length_ - 1);
   const Color color = voxblox::rainbowColorMap(color_map_float);
   SubmapMesher::colorMeshLayer(color, mesh_layer_ptr);

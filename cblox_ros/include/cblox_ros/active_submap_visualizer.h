@@ -32,9 +32,9 @@ class ActiveSubmapVisualizer {
       : mesh_config_(mesh_config),
         tsdf_submap_collection_ptr_(tsdf_submap_collection_ptr),
         color_cycle_length_(kDefaultColorCycleLength),
-        current_color_idx_(-1) {}
+        current_color_idx_(0) {}
 
-  void activateLatestSubmap();
+  void switchToActiveSubmap();
 
   void updateMeshLayer();
 
@@ -42,6 +42,11 @@ class ActiveSubmapVisualizer {
   MeshLayer::Ptr getDisplayMeshLayer();
 
 private:
+  // Functions called when swapping active submaps
+  void createMeshLayer();
+  void recoverMeshLayer();
+  void updateIntegrator();
+
   // The active mesh is produced in the submap frame (S), and is transformed
   // into the global frame (G).
   void transformMeshLayerToGlobalFrame(const MeshLayer& mesh_layer_S,
@@ -53,12 +58,17 @@ private:
 
   // The mesh layer for the active submap
   std::shared_ptr<MeshLayer> active_submap_mesh_layer_ptr_;
+  int active_submap_color_idx_;
 
   // The integrator
   std::unique_ptr<MeshIntegrator<TsdfVoxel>> active_submap_mesh_integrator_ptr_;
 
   // The submap collection
   std::shared_ptr<SubmapCollection<TsdfSubmap>> tsdf_submap_collection_ptr_;
+
+  // Storing the mesh layers
+  std::map<SubmapID, std::shared_ptr<MeshLayer>> mesh_layers_;
+  std::map<SubmapID, int> mesh_color_indices_;
 
   // Color stuff
   const int color_cycle_length_;

@@ -258,7 +258,7 @@ void TsdfSubmapServer::createNewSubMap(const Transformation& T_G_C) {
   num_integrated_frames_current_submap_ = 0;
 
   // Updating the active submap mesher
-  active_submap_visualizer_ptr_->activateLatestSubmap();
+  active_submap_visualizer_ptr_->switchToActiveSubmap();
 
   // Publish the baseframes
   visualizeSubMapBaseframes();
