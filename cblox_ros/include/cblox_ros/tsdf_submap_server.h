@@ -12,6 +12,7 @@
 
 #include <voxblox/utils/color_maps.h>
 #include <voxblox_ros/transformer.h>
+#include <voxblox_msgs/FilePath.h>
 
 #include <cblox/core/common.h>
 #include <cblox/core/submap_collection.h>
@@ -51,10 +52,12 @@ class TsdfSubmapServer {
       const sensor_msgs::PointCloud2::Ptr& pointcloud_msg);
 
   // Saving and Loading callbacks
-  // bool saveMapCallback(std_srvs::Empty::Request& request,     // NOLINT
-  //                      std_srvs::Empty::Response& response);  // NOLINT
-  // bool loadMapCallback(std_srvs::Empty::Request& request,     // NOLINT
-  //                      std_srvs::Empty::Response& response);  // NOLINT
+  bool saveMap(const std::string& file_path);
+  bool loadMap(const std::string& file_path);
+  bool saveMapCallback(voxblox_msgs::FilePath::Request& request,     // NOLINT
+                       voxblox_msgs::FilePath::Response& response);  // NOLINT
+  bool loadMapCallback(voxblox_msgs::FilePath::Request& request,     // NOLINT
+                       voxblox_msgs::FilePath::Response& response);  // NOLINT
 
   // Mesh output
   bool generateSeparatedMeshCallback(
@@ -122,6 +125,8 @@ class TsdfSubmapServer {
   // Services
   ros::ServiceServer generate_separated_mesh_srv_;
   ros::ServiceServer generate_combined_mesh_srv_;
+  ros::ServiceServer save_map_srv_;
+  ros::ServiceServer load_map_srv_;
 
   // Timers.
   ros::Timer update_mesh_timer_;
