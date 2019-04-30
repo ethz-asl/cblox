@@ -17,7 +17,7 @@ void TsdfSubmapCollectionIntegrator::integratePointCloud(
   tsdf_integrator_->integratePointCloud(T_S_C, points_C, colors);
 }
 
-void TsdfSubmapCollectionIntegrator::activateLatestSubmap() {
+void TsdfSubmapCollectionIntegrator::switchToActiveSubmap() {
   // Setting the server members to point to this submap
   // NOTE(alexmillane): This is slightly confusing because the collection is
   //                    increased in size elsewhere but we change the
