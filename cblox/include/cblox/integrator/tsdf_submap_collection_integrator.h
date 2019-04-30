@@ -30,7 +30,7 @@ class TsdfSubmapCollectionIntegrator {
                            const Pointcloud& points_C, const Colors& colors);
 
   // Changes the active submap to the last one on the collection
-  void activateLatestSubmap();
+  void switchToActiveSubmap();
 
  private:
   // Initializes the integrator

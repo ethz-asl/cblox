@@ -253,7 +253,7 @@ void TsdfSubmapServer::createNewSubMap(const Transformation& T_G_C) {
   const SubmapID submap_id =
       tsdf_submap_collection_ptr_->createNewSubMap(T_G_C);
   // Activating the submap in the frame integrator
-  tsdf_submap_collection_integrator_ptr_->activateLatestSubmap();
+  tsdf_submap_collection_integrator_ptr_->switchToActiveSubmap();
   // Resetting current submap counters
   num_integrated_frames_current_submap_ = 0;
 
