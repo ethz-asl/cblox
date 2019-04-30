@@ -1,10 +1,5 @@
 package cblox;
 
 message TsdfSubmapCollectionProto {
-
-  optional double voxel_size = 1;
-
-  optional uint32 voxels_per_side = 2;
-
   optional uint32 num_submaps = 3;
 }

@@ -14,6 +14,7 @@
 #include <voxblox/utils/timing.h>
 #include <voxblox_ros/ros_params.h>
 
+#include "cblox/io/tsdf_submap_io.h"
 #include "cblox_ros/pointcloud_conversions.h"
 #include "cblox_ros/pose_vis.h"
 #include "cblox_ros/ros_params.h"
@@ -85,6 +86,11 @@ void TsdfSubmapServer::advertiseTopics() {
   generate_combined_mesh_srv_ = nh_private_.advertiseService(
       "generate_combined_mesh", &TsdfSubmapServer::generateCombinedMeshCallback,
       this);
+  // Services for loading and saving
+  save_map_srv_ = nh_private_.advertiseService(
+      "save_map", &TsdfSubmapServer::saveMapCallback, this);
+  load_map_srv_ = nh_private_.advertiseService(
+      "load_map", &TsdfSubmapServer::loadMapCallback, this);
   // Real-time publishing for rviz
   active_submap_mesh_pub_ =
       nh_private_.advertise<visualization_msgs::Marker>("separated_mesh", 1);
@@ -270,7 +276,7 @@ void TsdfSubmapServer::createNewSubMap(const Transformation& T_G_C) {
   }
 }
 
-void TsdfSubmapServer::updateActiveSubmapMesh() {
+void TsdfSubmapServer::visualizeActiveSubmapMesh() {
   // NOTE(alexmillane): For the time being only the mesh from the currently
   // active submap is updated. This breaks down when the pose of past submaps is
   // changed. We will need to handle this separately later.
@@ -281,6 +287,15 @@ void TsdfSubmapServer::updateActiveSubmapMesh() {
   marker.header.frame_id = world_frame_;
   // Publishing
   active_submap_mesh_pub_.publish(marker);
+}
+
+void TsdfSubmapServer::visualizeWholeMap() {
+  // Looping through the whole map, meshing and publishing.
+  for (const SubmapID submap_id : tsdf_submap_collection_ptr_->getIDs()) {
+    tsdf_submap_collection_ptr_->activateSubMap(submap_id);
+    active_submap_visualizer_ptr_->switchToActiveSubmap();
+    visualizeActiveSubmapMesh();
+  }
 }
 
 bool TsdfSubmapServer::generateSeparatedMeshCallback(
@@ -331,7 +346,7 @@ bool TsdfSubmapServer::generateCombinedMeshCallback(
 
 void TsdfSubmapServer::updateMeshEvent(const ros::TimerEvent& /*event*/) {
   if (mapIntialized()) {
-    updateActiveSubmapMesh();
+    visualizeActiveSubmapMesh();
   }
 }
 
@@ -352,6 +367,37 @@ void TsdfSubmapServer::visualizeTrajectory() const {
   trajectory_visualizer_ptr_->getTrajectoryMsg(&path_msg);
   path_msg.header.frame_id = world_frame_;
   trajectory_pub_.publish(path_msg);
+}
+
+bool TsdfSubmapServer::saveMap(const std::string& file_path) {
+  return cblox::io::SaveTsdfSubmapCollection(*tsdf_submap_collection_ptr_,
+                                             file_path);
+}
+bool TsdfSubmapServer::loadMap(const std::string& file_path) {
+  bool success = io::LoadSubmapCollection<TsdfSubmap>(
+      file_path, &tsdf_submap_collection_ptr_);
+  if (success) {
+    ROS_INFO("Successfully loaded TSDFSubmapCollection.");
+    constexpr bool kVisualizeMapOnLoad = true;
+    if (kVisualizeMapOnLoad) {
+      ROS_INFO("Publishing loaded map's mesh.");
+      visualizeWholeMap();
+    }
+  }
+  return success;
+}
+
+bool TsdfSubmapServer::saveMapCallback(voxblox_msgs::FilePath::Request& request,
+                                       voxblox_msgs::FilePath::Response&
+                                       /*response*/) {
+  return saveMap(request.file_path);
+}
+
+bool TsdfSubmapServer::loadMapCallback(voxblox_msgs::FilePath::Request& request,
+                                       voxblox_msgs::FilePath::Response&
+                                       /*response*/) {
+  bool success = loadMap(request.file_path);
+  return success;
 }
 
 }  // namespace cblox

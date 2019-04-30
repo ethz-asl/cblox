@@ -6,6 +6,8 @@
 int main(int argc, char** argv) {
   ros::init(argc, argv, "cblox");
   google::InitGoogleLogging(argv[0]);
+  google::ParseCommandLineFlags(&argc, &argv, false);
+  google::InstallFailureSignalHandler();
   ros::NodeHandle nh;
   ros::NodeHandle nh_private("~");
 
