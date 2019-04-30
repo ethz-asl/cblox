@@ -84,20 +84,8 @@ bool LoadSubmapCollection(
     return false;
   }
 
-  LOG(INFO) << "tsdf_submap_collection_proto.voxel_size(): "
-            << tsdf_submap_collection_proto.voxel_size();
-  LOG(INFO) << "tsdf_submap_collection_proto.voxels_per_side(): "
-            << tsdf_submap_collection_proto.voxels_per_side();
   LOG(INFO) << "tsdf_submap_collection_proto.num_submaps(): "
             << tsdf_submap_collection_proto.num_submaps();
-
-  // Creating the new submap collection based on the loaded parameters
-  typename SubmapType::Config tsdf_map_config;
-  tsdf_map_config.tsdf_voxel_size = tsdf_submap_collection_proto.voxel_size();
-  tsdf_map_config.tsdf_voxels_per_side =
-      tsdf_submap_collection_proto.voxels_per_side();
-  tsdf_submap_collection_ptr->reset(
-      new SubmapCollection<SubmapType>(tsdf_map_config));
 
   // Loading each of the tsdf sub maps
   for (size_t sub_map_index = 0;

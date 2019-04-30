@@ -299,8 +299,6 @@ void SubmapCollection<SubmapType>::getProto(
     TsdfSubmapCollectionProto* proto) const {
   CHECK_NOTNULL(proto);
   // Filling out the description of the submap collection
-  proto->set_voxel_size(submap_config_.tsdf_voxel_size);
-  proto->set_voxels_per_side(submap_config_.tsdf_voxels_per_side);
   proto->set_num_submaps(num_patches());
 }
 

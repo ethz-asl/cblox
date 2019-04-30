@@ -276,7 +276,7 @@ void TsdfSubmapServer::createNewSubMap(const Transformation& T_G_C) {
   }
 }
 
-void TsdfSubmapServer::updateActiveSubmapMesh() {
+void TsdfSubmapServer::visualizeActiveSubmapMesh() {
   // NOTE(alexmillane): For the time being only the mesh from the currently
   // active submap is updated. This breaks down when the pose of past submaps is
   // changed. We will need to handle this separately later.
@@ -287,6 +287,15 @@ void TsdfSubmapServer::updateActiveSubmapMesh() {
   marker.header.frame_id = world_frame_;
   // Publishing
   active_submap_mesh_pub_.publish(marker);
+}
+
+void TsdfSubmapServer::visualizeWholeMap() {
+  // Looping through the whole map, meshing and publishing.
+  for (const SubmapID submap_id : tsdf_submap_collection_ptr_->getIDs()) {
+    tsdf_submap_collection_ptr_->activateSubMap(submap_id);
+    active_submap_visualizer_ptr_->switchToActiveSubmap();
+    visualizeActiveSubmapMesh();
+  }
 }
 
 bool TsdfSubmapServer::generateSeparatedMeshCallback(
@@ -337,7 +346,7 @@ bool TsdfSubmapServer::generateCombinedMeshCallback(
 
 void TsdfSubmapServer::updateMeshEvent(const ros::TimerEvent& /*event*/) {
   if (mapIntialized()) {
-    updateActiveSubmapMesh();
+    visualizeActiveSubmapMesh();
   }
 }
 
@@ -369,6 +378,11 @@ bool TsdfSubmapServer::loadMap(const std::string& file_path) {
       file_path, &tsdf_submap_collection_ptr_);
   if (success) {
     ROS_INFO("Successfully loaded TSDFSubmapCollection.");
+    constexpr bool kVisualizeMapOnLoad = true;
+    if (kVisualizeMapOnLoad) {
+      ROS_INFO("Publishing loaded map's mesh.");
+      visualizeWholeMap();
+    }
   }
   return success;
 }

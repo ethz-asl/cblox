@@ -59,6 +59,15 @@ class TsdfSubmapServer {
   bool loadMapCallback(voxblox_msgs::FilePath::Request& request,     // NOLINT
                        voxblox_msgs::FilePath::Response& response);  // NOLINT
 
+  // Update the mesh and publish for visualization
+  void updateMeshEvent(const ros::TimerEvent& /*event*/);
+  void visualizeActiveSubmapMesh();
+  void visualizeWholeMap();
+
+  // Visualize trajectory
+  void visualizeSubMapBaseframes() const;
+  void visualizeTrajectory() const;
+
   // Mesh output
   bool generateSeparatedMeshCallback(
       std_srvs::Empty::Request& request,     // NOLINT
@@ -100,15 +109,6 @@ class TsdfSubmapServer {
   bool newSubmapRequired() const;
   void createNewSubMap(const Transformation& T_G_C);
 
-  // Update the mesh and publish for visualization
-  void updateMeshEvent(const ros::TimerEvent& /*event*/);
-  void updateActiveSubmapMesh();
-
-  // Visualize submap base frames
-  void visualizeSubMapBaseframes() const;
-
-  // Visualize the trajectory
-  void visualizeTrajectory() const;
 
   // Node handles
   ros::NodeHandle nh_;

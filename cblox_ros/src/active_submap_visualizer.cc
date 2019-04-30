@@ -5,14 +5,15 @@
 namespace cblox {
 
 void ActiveSubmapVisualizer::switchToActiveSubmap() {
+  CHECK(tsdf_submap_collection_ptr_);
   // Getting the active submap ID
   const SubmapID submap_id = tsdf_submap_collection_ptr_->getActiveSubMapID();
   if (mesh_layers_.find(submap_id) == mesh_layers_.end()) {
-    ROS_INFO("Creating new mesh layer");
+    ROS_INFO_STREAM("Creating mesh layer for submap id: " << submap_id);
     createMeshLayer();
     updateIntegrator();
   } else {
-    ROS_INFO("Recovering old mesh layer");
+    ROS_INFO_STREAM("Recovering mesh layer for submap id: " << submap_id);
     recoverMeshLayer();
     updateIntegrator();
   }
@@ -20,6 +21,7 @@ void ActiveSubmapVisualizer::switchToActiveSubmap() {
 
 void ActiveSubmapVisualizer::createMeshLayer() {
   // Active layer stuff
+  CHECK(tsdf_submap_collection_ptr_);
   active_submap_mesh_layer_ptr_.reset(
       new voxblox::MeshLayer(tsdf_submap_collection_ptr_->block_size()));
   active_submap_color_idx_ = current_color_idx_;
@@ -44,6 +46,7 @@ void ActiveSubmapVisualizer::recoverMeshLayer() {
 }
 
 void ActiveSubmapVisualizer::updateIntegrator() {
+  CHECK(active_submap_mesh_layer_ptr_) << "MeshLayer not initialized.";
   // New integrator operating on the mesh.
   active_submap_mesh_integrator_ptr_.reset(
       new voxblox::MeshIntegrator<TsdfVoxel>(
@@ -53,6 +56,7 @@ void ActiveSubmapVisualizer::updateIntegrator() {
 }
 
 void ActiveSubmapVisualizer::updateMeshLayer() {
+  CHECK(active_submap_mesh_integrator_ptr_) << "Integrator not initialized.";
   // Updating the mesh layer
   constexpr bool only_mesh_updated_blocks = true;
   constexpr bool clear_updated_flag = true;
