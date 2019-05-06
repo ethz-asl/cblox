@@ -50,6 +50,7 @@ class SubmapCollection {
   // the map doesn't exist. No hard crash.
   typename SubmapType::ConstPtr getSubMapConstPtrById(
       const SubmapID submap_id) const;
+  typename SubmapType::Ptr getSubMapPtrById(const SubmapID submap_id);
   // A list of the submaps
   const std::vector<typename SubmapType::Ptr> getSubMapPtrs() const;
   const std::vector<typename SubmapType::ConstPtr> getSubMapConstPtrs() const;

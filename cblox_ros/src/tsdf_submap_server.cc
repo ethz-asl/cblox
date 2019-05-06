@@ -3,6 +3,7 @@
 #include <geometry_msgs/PoseArray.h>
 #include <nav_msgs/Path.h>
 #include <visualization_msgs/Marker.h>
+#include <cblox_msgs/Submap.h>
 
 #include <pcl/conversions.h>
 #include <pcl/point_types.h>
@@ -18,6 +19,7 @@
 #include "cblox_ros/pointcloud_conversions.h"
 #include "cblox_ros/pose_vis.h"
 #include "cblox_ros/ros_params.h"
+#include "cblox_ros/submap_conversions.h"
 
 namespace cblox {
 
@@ -44,6 +46,10 @@ TsdfSubmapServer::TsdfSubmapServer(
       color_map_(new voxblox::GrayscaleColorMap()),
       transformer_(nh, nh_private) {
   ROS_DEBUG("Creating a TSDF Server");
+
+  std::time_t now = std::time(nullptr);
+  std::string now_str = std::ctime(&now);
+  timing_file_name_ = "/home/laura/Desktop/timing_output_" + now_str + ".txt";
 
   // Initial interaction with ROS
   getParametersFromRos();
@@ -76,6 +82,11 @@ void TsdfSubmapServer::subscribeToTopics() {
                     pointcloud_queue_size);
   pointcloud_sub_ = nh_.subscribe("pointcloud", pointcloud_queue_size,
                                   &TsdfSubmapServer::pointcloudCallback, this);
+  //
+  int submap_queue_size = 1;
+  submap_sub_ = nh_.subscribe("tsdf_submap_in", submap_queue_size,
+                              &TsdfSubmapServer::SubmapCallback, this);
+  //
 }
 
 void TsdfSubmapServer::advertiseTopics() {
@@ -97,6 +108,8 @@ void TsdfSubmapServer::advertiseTopics() {
   submap_poses_pub_ =
       nh_private_.advertise<geometry_msgs::PoseArray>("submap_baseframes", 1);
   trajectory_pub_ = nh_private_.advertise<nav_msgs::Path>("trajectory", 1);
+  // Publisher for submaps
+  submap_pub_ = nh_private_.advertise<cblox_msgs::Submap>("tsdf_submap_out", 1);
 }
 
 void TsdfSubmapServer::getParametersFromRos() {
@@ -255,6 +268,11 @@ bool TsdfSubmapServer::newSubmapRequired() const {
 }
 
 void TsdfSubmapServer::createNewSubMap(const Transformation& T_G_C) {
+  // publishing the old submap
+  ROS_WARN_STREAM("Publishing submap "
+                  << tsdf_submap_collection_ptr_->getActiveSubMapID());
+  publishSubmap(tsdf_submap_collection_ptr_->getActiveSubMapID());
+
   // Creating the submap
   const SubmapID submap_id =
       tsdf_submap_collection_ptr_->createNewSubMap(T_G_C);
@@ -295,6 +313,7 @@ void TsdfSubmapServer::visualizeWholeMap() {
     tsdf_submap_collection_ptr_->activateSubMap(submap_id);
     active_submap_visualizer_ptr_->switchToActiveSubmap();
     visualizeActiveSubmapMesh();
+    publishSubmap(submap_id);
   }
 }
 
@@ -384,6 +403,7 @@ bool TsdfSubmapServer::loadMap(const std::string& file_path) {
       visualizeWholeMap();
     }
   }
+  publishSubmap(tsdf_submap_collection_ptr_->getActiveSubMapID(), true);
   return success;
 }
 
@@ -398,6 +418,98 @@ bool TsdfSubmapServer::loadMapCallback(voxblox_msgs::FilePath::Request& request,
                                        /*response*/) {
   bool success = loadMap(request.file_path);
   return success;
+}
+
+
+const SubmapCollection<TsdfSubmap>::Ptr TsdfSubmapServer::getSubmapCollectionPtr() {
+  return tsdf_submap_collection_ptr_;
+}
+
+void TsdfSubmapServer::publishSubmap(SubmapID submap_id, bool global_map) {
+  ROS_INFO_STREAM("num sub: " << submap_pub_.getNumSubscribers());
+  ROS_INFO_STREAM("size collection: " << tsdf_submap_collection_ptr_->size()
+      << ", id: " << submap_id);
+//  if (submap_pub_.getNumSubscribers() > 0
+//      and tsdf_submap_collection_ptr_->getSubMapConstPtrById(submap_id)) {
+  if (tsdf_submap_collection_ptr_->getSubMapConstPtrById(submap_id)) {
+    // set timer
+    timing::Timer publish_map_timer("cblox/0 - publish submap");
+
+    cblox_msgs::Submap submap_msg;
+    if (global_map) {
+      // Merge submaps to global TSDF map
+      Transformation T_M_S;
+      submap_id = 0;
+      timing::Timer get_global_timer("cblox/1 - get global map");
+      voxblox::TsdfMap::Ptr tsdf_map =
+          tsdf_submap_collection_ptr_->getProjectedMap();
+      get_global_timer.Stop();
+
+      timing::Timer make_dummy_timer("cblox/2 - make dummy submap");
+      TsdfSubmap::Ptr submap_ptr(new TsdfSubmap(T_M_S, submap_id,
+          tsdf_submap_collection_ptr_->getConfig()));
+      // TODO: switch from copy to using layer
+      submap_ptr->getTsdfMapPtr().reset(
+          new voxblox::TsdfMap(tsdf_map->getTsdfLayer()));
+      make_dummy_timer.Stop();
+
+      // serialize into message
+      timing::Timer serialize_timer("cblox/3 - serialize");
+      serializeSubmapToMsg(submap_ptr, &submap_msg);
+      serialize_timer.Stop();
+    } else {
+      // Get latest submap for publishing
+      TsdfSubmap::ConstPtr submap_ptr = tsdf_submap_collection_ptr_->
+          getSubMapConstPtrById(submap_id);
+      timing::Timer serialize_timer("cblox/3 - serialize");
+      serializeSubmapToMsg(submap_ptr, &submap_msg);
+      serialize_timer.Stop();
+    }
+
+    // Publish message
+    timing::Timer publish_timer("cblox/4 - publish");
+    submap_pub_.publish(submap_msg);
+    publish_timer.Stop();
+
+    // stop timer
+    publish_map_timer.Stop();
+
+    ROS_INFO_STREAM(timing::Timing::Print());
+    writeTimingToFile("sent", tsdf_submap_collection_ptr_->size(),
+        ros::WallTime::now());
+  }
+}
+
+void TsdfSubmapServer::SubmapCallback(const cblox_msgs::Submap::Ptr& msg_in) {
+  ROS_WARN("Reading an incoming submap");
+  ros::WallTime time = ros::WallTime::now();
+  timing::Timer read_map_timer("cblox/receive submap");
+
+  // push newest message in queue to service
+  submap_queue_.push(msg_in);
+  // service message in queue
+//  ROS_INFO("Attaching submap to submap collection");
+  deserializeMsgToSubmap(submap_queue_.front(), getSubmapCollectionPtr());
+  submap_queue_.pop();
+
+  read_map_timer.Stop();
+
+  ROS_INFO_STREAM(timing::Timing::Print());
+  writeTimingToFile("received", tsdf_submap_collection_ptr_->size(), time);
+}
+
+void TsdfSubmapServer::writeTimingToFile(std::string str, SubmapID id,
+                                         ros::WallTime time) {
+  bool write_to_file = true;
+  if (write_to_file) {
+    std::ofstream timing_file;
+    timing_file.open(timing_file_name_, std::ios::app);
+    timing_file << str << " " << id << " " << time.toNSec();
+    timing_file << "\n";
+    timing_file << timing::Timing::Print();
+    timing_file << "\n";
+    timing_file.close();
+  }
 }
 
 }  // namespace cblox

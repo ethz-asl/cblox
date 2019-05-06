@@ -19,6 +19,7 @@
 #include <cblox/core/tsdf_submap.h>
 #include <cblox/integrator/tsdf_submap_collection_integrator.h>
 #include <cblox/mesh/submap_mesher.h>
+#include <cblox_msgs/Submap.h>
 
 #include "cblox_ros/active_submap_visualizer.h"
 #include "cblox_ros/trajectory_visualizer.h"
@@ -58,6 +59,9 @@ class TsdfSubmapServer {
                        voxblox_msgs::FilePath::Response& response);  // NOLINT
   bool loadMapCallback(voxblox_msgs::FilePath::Request& request,     // NOLINT
                        voxblox_msgs::FilePath::Response& response);  // NOLINT
+
+  // Access Submap Collection Pointer
+  const SubmapCollection<TsdfSubmap>::Ptr getSubmapCollectionPtr();
 
   // Update the mesh and publish for visualization
   void updateMeshEvent(const ros::TimerEvent& /*event*/);
@@ -109,6 +113,11 @@ class TsdfSubmapServer {
   bool newSubmapRequired() const;
   void createNewSubMap(const Transformation& T_G_C);
 
+  // Submap publishing
+  void publishSubmap(SubmapID submap_id, bool global_map=false);
+  virtual void SubmapCallback(const cblox_msgs::Submap::Ptr& msg);
+  void writeTimingToFile(std::string str, SubmapID id, ros::WallTime time);
+
 
   // Node handles
   ros::NodeHandle nh_;
@@ -116,11 +125,13 @@ class TsdfSubmapServer {
 
   // Subscribers
   ros::Subscriber pointcloud_sub_;
+  ros::Subscriber submap_sub_;
 
   // Publishers
   ros::Publisher active_submap_mesh_pub_;
   ros::Publisher submap_poses_pub_;
   ros::Publisher trajectory_pub_;
+  ros::Publisher submap_pub_;
 
   // Services
   ros::ServiceServer generate_separated_mesh_srv_;
@@ -130,6 +141,7 @@ class TsdfSubmapServer {
 
   // Timers.
   ros::Timer update_mesh_timer_;
+  std::string timing_file_name_;
 
   bool verbose_;
 
@@ -159,6 +171,7 @@ class TsdfSubmapServer {
 
   // The queue of unprocessed pointclouds
   std::queue<sensor_msgs::PointCloud2::Ptr> pointcloud_queue_;
+  std::queue<cblox_msgs::Submap::Ptr> submap_queue_;
 
   // Last message times for throttling input.
   ros::Duration min_time_between_msgs_;

@@ -263,6 +263,17 @@ typename SubmapType::ConstPtr SubmapCollection<
 }
 
 template <typename SubmapType>
+typename SubmapType::Ptr SubmapCollection<
+    SubmapType>::getSubMapPtrById(const SubmapID submap_id) {
+  const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
+  if (tsdf_submap_ptr_it != id_to_submap_.end()) {
+    return tsdf_submap_ptr_it->second;
+  } else {
+    return typename SubmapType::Ptr();
+  }
+}
+
+template <typename SubmapType>
 bool SubmapCollection<SubmapType>::saveToFile(
     const std::string& file_path) const {
   // Opening the file (if we can)
