@@ -20,6 +20,7 @@
 #include <cblox/integrator/tsdf_submap_collection_integrator.h>
 #include <cblox/mesh/submap_mesher.h>
 #include <cblox_msgs/Submap.h>
+//#include <cblox_msgs/PoseUpdate.h>
 
 #include "cblox_ros/active_submap_visualizer.h"
 #include "cblox_ros/trajectory_visualizer.h"
@@ -141,7 +142,8 @@ class TsdfSubmapServer {
 
   // Timers.
   ros::Timer update_mesh_timer_;
-  std::string timing_file_name_;
+  std::string timing_path_name_;
+  std::string timing_time_id_name_;
 
   bool verbose_;
 

@@ -47,9 +47,10 @@ TsdfSubmapServer::TsdfSubmapServer(
       transformer_(nh, nh_private) {
   ROS_DEBUG("Creating a TSDF Server");
 
+  timing_path_name_ = "/home/laura/Documents/output/timing/";
   std::time_t now = std::time(nullptr);
   std::string now_str = std::ctime(&now);
-  timing_file_name_ = "/home/laura/Desktop/timing_output_" + now_str + ".txt";
+  timing_time_id_name_ = now_str;
 
   // Initial interaction with ROS
   getParametersFromRos();
@@ -426,12 +427,8 @@ const SubmapCollection<TsdfSubmap>::Ptr TsdfSubmapServer::getSubmapCollectionPtr
 }
 
 void TsdfSubmapServer::publishSubmap(SubmapID submap_id, bool global_map) {
-  ROS_INFO_STREAM("num sub: " << submap_pub_.getNumSubscribers());
-  ROS_INFO_STREAM("size collection: " << tsdf_submap_collection_ptr_->size()
-      << ", id: " << submap_id);
-//  if (submap_pub_.getNumSubscribers() > 0
-//      and tsdf_submap_collection_ptr_->getSubMapConstPtrById(submap_id)) {
-  if (tsdf_submap_collection_ptr_->getSubMapConstPtrById(submap_id)) {
+  if (submap_pub_.getNumSubscribers() > 0
+      and tsdf_submap_collection_ptr_->getSubMapConstPtrById(submap_id)) {
     // set timer
     timing::Timer publish_map_timer("cblox/0 - publish submap");
 
@@ -473,8 +470,6 @@ void TsdfSubmapServer::publishSubmap(SubmapID submap_id, bool global_map) {
 
     // stop timer
     publish_map_timer.Stop();
-
-    ROS_INFO_STREAM(timing::Timing::Print());
     writeTimingToFile("sent", tsdf_submap_collection_ptr_->size(),
         ros::WallTime::now());
   }
@@ -488,23 +483,27 @@ void TsdfSubmapServer::SubmapCallback(const cblox_msgs::Submap::Ptr& msg_in) {
   // push newest message in queue to service
   submap_queue_.push(msg_in);
   // service message in queue
-//  ROS_INFO("Attaching submap to submap collection");
   deserializeMsgToSubmap(submap_queue_.front(), getSubmapCollectionPtr());
   submap_queue_.pop();
 
   read_map_timer.Stop();
-
-  ROS_INFO_STREAM(timing::Timing::Print());
   writeTimingToFile("received", tsdf_submap_collection_ptr_->size(), time);
 }
 
 void TsdfSubmapServer::writeTimingToFile(std::string str, SubmapID id,
                                          ros::WallTime time) {
-  bool write_to_file = true;
+  bool write_to_file = false;
   if (write_to_file) {
     std::ofstream timing_file;
-    timing_file.open(timing_file_name_, std::ios::app);
-    timing_file << str << " " << id << " " << time.toNSec();
+    timing_file.open(timing_path_name_ + "network_timing"
+        + timing_time_id_name_ + ".txt", std::ios::app);
+    timing_file << time.toNSec() << " " << id << " " << str;
+    timing_file << "\n";
+    timing_file.close();
+
+    timing_file.open(timing_path_name_ + "process_timing"
+                     + timing_time_id_name_ + ".txt", std::ios::app);
+    timing_file << str << " " << id;
     timing_file << "\n";
     timing_file << timing::Timing::Print();
     timing_file << "\n";
