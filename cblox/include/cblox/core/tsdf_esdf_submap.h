@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include <voxblox/integrator/esdf_integrator.h>
+
 #include "cblox/core/tsdf_submap.h"
 
 namespace cblox {
@@ -14,8 +16,11 @@ class TsdfEsdfSubmap : public TsdfSubmap {
 
   struct Config : TsdfSubmap::Config, EsdfMap::Config {};
 
-  TsdfEsdfSubmap(const Transformation &T_M_S, SubmapID submap_id, Config config)
-      : TsdfSubmap(T_M_S, submap_id, config), config_(config) {
+  TsdfEsdfSubmap(const Transformation &T_M_S, SubmapID submap_id, Config config,
+                 voxblox::EsdfIntegrator::Config esdf_integrator_config =
+                     voxblox::EsdfIntegrator::Config())
+      : TsdfSubmap(T_M_S, submap_id, config),
+        esdf_integrator_config_(esdf_integrator_config) {
     esdf_map_.reset(new EsdfMap(config));
   }
 
@@ -42,8 +47,8 @@ class TsdfEsdfSubmap : public TsdfSubmap {
    */
 
  private:
-  Config config_;
   EsdfMap::Ptr esdf_map_;
+  voxblox::EsdfIntegrator::Config esdf_integrator_config_;
 };
 }  // namespace cblox
 
