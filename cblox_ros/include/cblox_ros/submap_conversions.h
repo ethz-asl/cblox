@@ -53,7 +53,6 @@ inline void serializeSubmapToMsg(TsdfSubmap::ConstPtr submap_ptr,
     cblox_msgs::Submap* msg) {
   CHECK_NOTNULL(msg);
   CHECK_NOTNULL(submap_ptr);
-//  ROS_INFO("Writing Submap into Message");
 
   // Encode submap id in message
   msg->id = submap_ptr->getID();
@@ -76,7 +75,6 @@ inline bool deserializeMsgToSubmap(cblox_msgs::Submap::Ptr msg_ptr,
     SubmapCollection<TsdfSubmap>::Ptr submap_collection_ptr) {
   CHECK_NOTNULL(submap_collection_ptr);
   // TODO: more checks to parse
-//  ROS_INFO("Parsing Message into Submap");
 
   // read information in msg
   SubmapID submap_id = msg_ptr->id;

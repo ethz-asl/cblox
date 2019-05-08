@@ -6,11 +6,18 @@
   <arg name="truncation_distance_vox" default="4.0" />
 
 
-  <node name="cblox" pkg="cblox_ros" type="tsdf_submap_server" output="screen" args="-alsologtostderr" clear_params="true">
+  <node name="cblox" pkg="cblox_ros" type="tsdf_submap_server"
+        output="screen" args="-alsologtostderr" clear_params="true">
+
+    <!--
+    <param name="timing_path_name"
+           value="/home/laura/Documents/output/timing/" />
+    -->
     
     <!-- Voxblox params -->
      <param name="tsdf_voxel_size" value="$(arg voxel_size)" />
-    <param name="truncation_distance" value="$(eval arg('truncation_distance_vox') * arg('voxel_size'))"/>
+    <param name="truncation_distance"
+           value="$(eval arg('truncation_distance_vox') * arg('voxel_size'))"/>
     <param name="tsdf_voxels_per_side" value="16" />
 
   </node>

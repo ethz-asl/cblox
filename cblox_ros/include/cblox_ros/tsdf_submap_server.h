@@ -116,7 +116,7 @@ class TsdfSubmapServer {
 
   // Submap publishing
   void publishSubmap(SubmapID submap_id, bool global_map=false);
-  virtual void SubmapCallback(const cblox_msgs::Submap::Ptr& msg);
+  void SubmapCallback(const cblox_msgs::Submap::Ptr& msg);
   void writeTimingToFile(std::string str, SubmapID id, ros::WallTime time);
 
 

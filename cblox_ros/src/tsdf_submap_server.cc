@@ -44,13 +44,9 @@ TsdfSubmapServer::TsdfSubmapServer(
       num_integrated_frames_current_submap_(0),
       num_integrated_frames_per_submap_(kDefaultNumFramesPerSubmap),
       color_map_(new voxblox::GrayscaleColorMap()),
+      timing_path_name_(""),
       transformer_(nh, nh_private) {
   ROS_DEBUG("Creating a TSDF Server");
-
-  timing_path_name_ = "/home/laura/Documents/output/timing/";
-  std::time_t now = std::time(nullptr);
-  std::string now_str = std::ctime(&now);
-  timing_time_id_name_ = now_str;
 
   // Initial interaction with ROS
   getParametersFromRos();
@@ -74,6 +70,11 @@ TsdfSubmapServer::TsdfSubmapServer(
 
   // An object to visualize the trajectory
   trajectory_visualizer_ptr_.reset(new TrajectoryVisualizer);
+
+  // Define start of node as identifier for timing output file
+  std::time_t now = std::time(nullptr);
+  std::string now_str = std::ctime(&now);
+  timing_time_id_name_ = now_str;
 }
 
 void TsdfSubmapServer::subscribeToTopics() {
@@ -136,6 +137,8 @@ void TsdfSubmapServer::getParametersFromRos() {
   nh_private_.param("num_integrated_frames_per_submap",
                     num_integrated_frames_per_submap_,
                     num_integrated_frames_per_submap_);
+  // Outputs timings of submap publishing to file
+  nh_private_.param("timing_path_name", timing_path_name_, timing_path_name_);
 }
 
 void TsdfSubmapServer::pointcloudCallback(
@@ -430,7 +433,7 @@ void TsdfSubmapServer::publishSubmap(SubmapID submap_id, bool global_map) {
   if (submap_pub_.getNumSubscribers() > 0
       and tsdf_submap_collection_ptr_->getSubMapConstPtrById(submap_id)) {
     // set timer
-    timing::Timer publish_map_timer("cblox/0 - publish submap");
+    timing::Timer publish_map_timer("cblox/0 - publish map");
 
     cblox_msgs::Submap submap_msg;
     if (global_map) {
@@ -476,7 +479,6 @@ void TsdfSubmapServer::publishSubmap(SubmapID submap_id, bool global_map) {
 }
 
 void TsdfSubmapServer::SubmapCallback(const cblox_msgs::Submap::Ptr& msg_in) {
-  ROS_WARN("Reading an incoming submap");
   ros::WallTime time = ros::WallTime::now();
   timing::Timer read_map_timer("cblox/receive submap");
 
@@ -492,16 +494,15 @@ void TsdfSubmapServer::SubmapCallback(const cblox_msgs::Submap::Ptr& msg_in) {
 
 void TsdfSubmapServer::writeTimingToFile(std::string str, SubmapID id,
                                          ros::WallTime time) {
-  bool write_to_file = false;
-  if (write_to_file) {
+  if (!timing_path_name_.empty()) {
     std::ofstream timing_file;
-    timing_file.open(timing_path_name_ + "network_timing"
+    timing_file.open(timing_path_name_ + "network_timing_"
         + timing_time_id_name_ + ".txt", std::ios::app);
     timing_file << time.toNSec() << " " << id << " " << str;
     timing_file << "\n";
     timing_file.close();
 
-    timing_file.open(timing_path_name_ + "process_timing"
+    timing_file.open(timing_path_name_ + "process_timing_"
                      + timing_time_id_name_ + ".txt", std::ios::app);
     timing_file << str << " " << id;
     timing_file << "\n";
