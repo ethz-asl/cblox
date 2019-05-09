@@ -271,10 +271,17 @@ bool TsdfSubmapServer::newSubmapRequired() const {
           num_integrated_frames_per_submap_);
 }
 
+void TsdfSubmapServer::finishSubmap() {
+  if (tsdf_submap_collection_ptr_->getActiveSubMapPtr()) {
+    // publishing the old submap
+    tsdf_submap_collection_ptr_->getActiveSubMapPtr()->endRecordingTime();
+    publishSubmap(tsdf_submap_collection_ptr_->getActiveSubMapID());
+  }
+}
+
 void TsdfSubmapServer::createNewSubMap(const Transformation& T_G_C) {
-  // publishing the old submap
-  tsdf_submap_collection_ptr_->getActiveSubMapPtr()->endRecordingTime();
-  publishSubmap(tsdf_submap_collection_ptr_->getActiveSubMapID());
+  // finishing up the last submap
+  finishSubmap();
 
   // Creating the submap
   const SubmapID submap_id =

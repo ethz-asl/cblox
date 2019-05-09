@@ -81,7 +81,7 @@ class TsdfSubmapServer {
       std_srvs::Empty::Request& request,     // NOLINT
       std_srvs::Empty::Response& response);  // NOLINT
 
- private:
+ protected:
   // Gets parameters
   void subscribeToTopics();
   void advertiseTopics();
@@ -113,6 +113,7 @@ class TsdfSubmapServer {
   // Submap creation
   bool newSubmapRequired() const;
   void createNewSubMap(const Transformation& T_G_C);
+  virtual void finishSubmap();
 
   // Submap publishing
   void publishSubmap(SubmapID submap_id, bool global_map=false);
