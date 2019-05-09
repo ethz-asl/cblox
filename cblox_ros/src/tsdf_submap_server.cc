@@ -273,8 +273,7 @@ bool TsdfSubmapServer::newSubmapRequired() const {
 
 void TsdfSubmapServer::createNewSubMap(const Transformation& T_G_C) {
   // publishing the old submap
-  ROS_WARN_STREAM("Publishing submap "
-                  << tsdf_submap_collection_ptr_->getActiveSubMapID());
+  tsdf_submap_collection_ptr_->getActiveSubMapPtr()->endRecordingTime();
   publishSubmap(tsdf_submap_collection_ptr_->getActiveSubMapID());
 
   // Creating the submap
@@ -290,6 +289,9 @@ void TsdfSubmapServer::createNewSubMap(const Transformation& T_G_C) {
 
   // Publish the baseframes
   visualizeSubMapBaseframes();
+
+  // Time the start of recording
+  tsdf_submap_collection_ptr_->getActiveSubMapPtr()->startRecordingTime();
 
   if (verbose_) {
     ROS_INFO_STREAM("Created a new submap with id: "
@@ -425,7 +427,8 @@ bool TsdfSubmapServer::loadMapCallback(voxblox_msgs::FilePath::Request& request,
 }
 
 
-const SubmapCollection<TsdfSubmap>::Ptr TsdfSubmapServer::getSubmapCollectionPtr() {
+const SubmapCollection<TsdfSubmap>::Ptr
+    TsdfSubmapServer::getSubmapCollectionPtr() {
   return tsdf_submap_collection_ptr_;
 }
 

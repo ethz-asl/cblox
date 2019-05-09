@@ -22,6 +22,7 @@
   <depend>voxblox_ros</depend>
   <depend>voxblox_msgs</depend>
   <depend>cblox</depend>
+  <depend>cblox_msgs</depend>
   <depend>minkindr</depend>
   <depend>minkindr_conversions</depend>
 

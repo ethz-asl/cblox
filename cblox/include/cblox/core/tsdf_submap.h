@@ -5,6 +5,7 @@
 #include <mutex>
 
 #include <Eigen/Geometry>
+#include <ros/ros.h>
 
 #include <glog/logging.h>
 
@@ -50,6 +51,16 @@ class TsdfSubmap {
     T_M_S_ = T_M_S;
   }
 
+  void startRecordingTime(ros::Time time = ros::Time::now()) {
+    recording_time_.first = time;
+  }
+  void endRecordingTime(ros::Time time = ros::Time::now()) {
+    recording_time_.second = time;
+  }
+  const std::pair<ros::Time, ros::Time> getRecordingTime() const {
+    return recording_time_;
+  }
+
   SubmapID getID() const { return submap_id_; }
 
   FloatingPoint block_size() const { return tsdf_map_->block_size(); }
@@ -72,6 +83,7 @@ class TsdfSubmap {
   // The pose of this submap in the global map frame
   mutable std::mutex transformation_mutex;
   Transformation T_M_S_;
+  std::pair<ros::Time, ros::Time> recording_time_;
 
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW

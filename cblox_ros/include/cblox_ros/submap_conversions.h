@@ -69,6 +69,12 @@ inline void serializeSubmapToMsg(TsdfSubmap::ConstPtr submap_ptr,
   voxblox::serializeLayerAsMsg<TsdfVoxel>(
       submap_ptr->getTsdfMap().getTsdfLayer(), only_updated, &layer_msg);
   msg->layer = layer_msg;
+
+  // Write recording times
+  const std::pair<ros::Time, ros::Time> record_time =
+      submap_ptr->getRecordingTime();
+  msg->start_time = record_time.first;
+  msg->end_time = record_time.second;
 }
 
 inline bool deserializeMsgToSubmap(cblox_msgs::Submap::Ptr msg_ptr,
@@ -99,6 +105,12 @@ inline bool deserializeMsgToSubmap(cblox_msgs::Submap::Ptr msg_ptr,
         submap_collection_ptr->getSubMapPtrById(submap_id)->
         getTsdfMapPtr()->getTsdfLayerPtr());
   }
+
+  // save recording time
+  submap_collection_ptr->getSubMapPtrById(submap_id)
+      ->startRecordingTime(msg_ptr->start_time);
+  submap_collection_ptr->getSubMapPtrById(submap_id)
+      ->endRecordingTime(msg_ptr->end_time);
   return true;
 }
 
