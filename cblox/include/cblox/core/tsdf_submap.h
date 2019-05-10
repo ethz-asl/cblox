@@ -22,6 +22,9 @@ class TsdfSubmap {
   typedef TsdfMap::Config Config;
 
   // Constructor
+  TsdfSubmap(Config config) {
+    tsdf_map_.reset(new TsdfMap(config));
+  }
   TsdfSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config)
       : submap_id_(submap_id), T_M_S_(T_M_S) {
     tsdf_map_.reset(new TsdfMap(config));
