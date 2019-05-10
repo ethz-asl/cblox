@@ -112,7 +112,7 @@ class TsdfSubmapServer {
 
   // Submap creation
   bool newSubmapRequired() const;
-  void createNewSubMap(const Transformation& T_G_C);
+  virtual void createNewSubMap(const Transformation& T_G_C);
   virtual void finishSubmap();
 
   // Submap publishing

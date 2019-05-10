@@ -14,6 +14,10 @@ class TsdfEsdfSubmap : public TsdfSubmap {
 
   struct Config : TsdfSubmap::Config, EsdfMap::Config {};
 
+  TsdfEsdfSubmap(Config config)
+      : TsdfSubmap(config), config_(config) {
+    esdf_map_.reset(new EsdfMap(config));
+  }
   TsdfEsdfSubmap(const Transformation &T_M_S, SubmapID submap_id, Config config)
       : TsdfSubmap(T_M_S, submap_id, config), config_(config) {
     esdf_map_.reset(new EsdfMap(config));
