@@ -4,6 +4,7 @@
 #include <sensor_msgs/PointCloud2.h>
 
 #include <cblox/core/common.h>
+#include <voxblox/utils/color_maps.h>
 
 namespace cblox {
 

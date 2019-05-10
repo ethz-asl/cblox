@@ -1,5 +1,5 @@
-#ifndef CBLOX_ROS_TSDF_SUBMAP_SERVER_H_
-#define CBLOX_ROS_TSDF_SUBMAP_SERVER_H_
+#ifndef CBLOX_ROS_SUBMAP_SERVER_TEMPLATE_H_
+#define CBLOX_ROS_SUBMAP_SERVER_TEMPLATE_H_
 
 #include <memory>
 #include <queue>
@@ -28,20 +28,21 @@
 namespace cblox {
 
 // Default values for parameters
-constexpr bool kDefaultVerbose = true;
-constexpr int kDefaultNumFramesPerSubmap = 20;
-constexpr double kDefaultMinTimeBetweenMsgsSec = 0.0;
+//constexpr bool kDefaultVerbose = true;
+//constexpr int kDefaultNumFramesPerSubmap = 20;
+//constexpr double kDefaultMinTimeBetweenMsgsSec = 0.0;
 
 // Data queue sizes
-constexpr int kDefaultPointcloudQueueSize = 1;
+//constexpr int kDefaultPointcloudQueueSize = 1;
+
 
 // Receives ROS Data and produces a collection of submaps
 template<typename SubmapType>
 class SubmapServer {
  public:
   // Constructor
-  SubmapServer(const ros::NodeHandle& nh,
-                   const ros::NodeHandle& nh_private);
+  explicit SubmapServer(const ros::NodeHandle& nh,
+                        const ros::NodeHandle& nh_private);
   SubmapServer(
       const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
       const TsdfMap::Config& tsdf_map_config,
@@ -63,7 +64,7 @@ class SubmapServer {
                        voxblox_msgs::FilePath::Response& response);  // NOLINT
 
   // Access Submap Collection Pointer
-  const typename SubmapCollection<SubmapType>::Ptr getSubmapCollectionPtr();
+  const typename SubmapCollection<SubmapType>::Ptr getSubmapCollectionPtr() const;
 
   // Update the mesh and publish for visualization
   void updateMeshEvent(const ros::TimerEvent& /*event*/);
@@ -108,7 +109,7 @@ class SubmapServer {
                            const bool is_freespace_pointcloud);
 
   // Initializes the map
-  bool mapIntialized() const { return !tsdf_submap_collection_ptr_->empty(); }
+  bool mapIntialized() const { return !submap_collection_ptr->empty(); }
   void intializeMap(const Transformation& T_G_C);
 
   // Submap creation
@@ -153,7 +154,7 @@ class SubmapServer {
   std::string world_frame_;
 
   // The submap collection
-  std::shared_ptr<SubmapCollection<SubmapType>> tsdf_submap_collection_ptr_;
+  std::shared_ptr<SubmapCollection<SubmapType>> submap_collection_ptr;
 
   // The integrator
   std::shared_ptr<TsdfSubmapCollectionIntegrator>
@@ -192,4 +193,6 @@ class SubmapServer {
 
 }  // namespace cblox
 
-#endif  // CBLOX_ROS_TSDF_SUBMAP_SERVER_H_
+#include "cblox_ros/submap_server_template_inl.h"
+
+#endif  // CBLOX_ROS_SUBMAP_SERVER_TEMPLATE_H_
