@@ -272,7 +272,8 @@ bool TsdfSubmapServer::newSubmapRequired() const {
 }
 
 void TsdfSubmapServer::finishSubmap() {
-  if (tsdf_submap_collection_ptr_->getActiveSubMapPtr()) {
+  if (tsdf_submap_collection_ptr_->exists(
+      tsdf_submap_collection_ptr_->getActiveSubMapID())) {
     // publishing the old submap
     tsdf_submap_collection_ptr_->getActiveSubMapPtr()->endRecordingTime();
     publishSubmap(tsdf_submap_collection_ptr_->getActiveSubMapID());
