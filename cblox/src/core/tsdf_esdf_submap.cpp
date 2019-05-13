@@ -12,4 +12,8 @@ void TsdfEsdfSubmap::generateEsdf() {
   LOG(INFO) << "Generating ESDF from TSDF for submap with ID: " << submap_id_;
   esdf_integrator.updateFromTsdfLayerBatch();
 }
+
+void TsdfEsdfSubmap::setTsdfMap(const voxblox::Layer<TsdfVoxel>& tsdf_layer) {
+  tsdf_map_.reset(new voxblox::TsdfMap(tsdf_layer));
+}
 }  // namespace cblox

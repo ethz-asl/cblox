@@ -36,6 +36,8 @@ class SubmapCollection {
   // NOTE(alexmillane): Creating a new submap automatically makes it active.
   void createNewSubMap(const Transformation &T_G_S, const SubmapID submap_id);
   SubmapID createNewSubMap(const Transformation &T_G_S);
+  void createNewSubMap(const Transformation &T_G_S, const SubmapID submap_id,
+      voxblox::TsdfMap::Ptr tsdf_map_ptr);
 
   // Create a new submap which duplicates an existing source submap
   bool duplicateSubMap(const SubmapID source_submap_id,
@@ -50,7 +52,7 @@ class SubmapCollection {
   // the map doesn't exist. No hard crash.
   typename SubmapType::ConstPtr getSubMapConstPtrById(
       const SubmapID submap_id) const;
-  typename SubmapType::Ptr getSubMapPtrById(const SubmapID submap_id);
+  typename SubmapType::Ptr getSubMapPtrById(const SubmapID submap_id) const;
   // A list of the submaps
   const std::vector<typename SubmapType::Ptr> getSubMapPtrs() const;
   const std::vector<typename SubmapType::ConstPtr> getSubMapConstPtrs() const;

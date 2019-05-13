@@ -62,7 +62,7 @@ class TsdfSubmapServer {
                        voxblox_msgs::FilePath::Response& response);  // NOLINT
 
   // Access Submap Collection Pointer
-  const SubmapCollection<TsdfSubmap>::Ptr getSubmapCollectionPtr();
+  const SubmapCollection<TsdfSubmap>::Ptr getSubmapCollectionPtr() const;
 
   // Update the mesh and publish for visualization
   void updateMeshEvent(const ros::TimerEvent& /*event*/);

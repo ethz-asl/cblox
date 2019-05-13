@@ -76,6 +76,18 @@ SubmapID SubmapCollection<SubmapType>::createNewSubMap(
 }
 
 template <typename SubmapType>
+void SubmapCollection<SubmapType>::createNewSubMap(
+    const Transformation &T_G_S, const SubmapID submap_id,
+    voxblox::TsdfMap::Ptr tsdf_map_ptr) {
+
+  typename SubmapType::Ptr new_tsdf_sub_map(
+      new SubmapType(T_G_S, submap_id, submap_config_));
+  *(new_tsdf_sub_map->getTsdfMapPtr()) =
+      *(new TsdfMap(tsdf_map_ptr->getTsdfLayer()));
+  id_to_submap_.emplace(submap_id, new_tsdf_sub_map);
+}
+
+template <typename SubmapType>
 bool SubmapCollection<SubmapType>::duplicateSubMap(
     const SubmapID source_submap_id, const SubmapID new_submap_id) {
   // Get pointer to the source submap
@@ -264,7 +276,7 @@ typename SubmapType::ConstPtr SubmapCollection<
 
 template <typename SubmapType>
 typename SubmapType::Ptr SubmapCollection<
-    SubmapType>::getSubMapPtrById(const SubmapID submap_id) {
+    SubmapType>::getSubMapPtrById(const SubmapID submap_id) const {
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
     return tsdf_submap_ptr_it->second;

@@ -436,7 +436,7 @@ bool TsdfSubmapServer::loadMapCallback(voxblox_msgs::FilePath::Request& request,
 
 
 const SubmapCollection<TsdfSubmap>::Ptr
-    TsdfSubmapServer::getSubmapCollectionPtr() {
+    TsdfSubmapServer::getSubmapCollectionPtr() const {
   return tsdf_submap_collection_ptr_;
 }
 

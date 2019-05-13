@@ -35,6 +35,8 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   // Generate the ESDF from the TSDF
   void generateEsdf();
 
+  void setTsdfMap(const voxblox::Layer<TsdfVoxel>& tsdf_layer);
+
   // Returns the underlying ESDF map pointers
   EsdfMap::Ptr getEsdfMapPtr() { return esdf_map_; }
   const EsdfMap &getEsdfMap() const { return *esdf_map_; }
