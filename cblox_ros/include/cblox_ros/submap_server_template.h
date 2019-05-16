@@ -11,8 +11,8 @@
 #include <std_srvs/Empty.h>
 
 #include <voxblox/utils/color_maps.h>
-#include <voxblox_ros/transformer.h>
 #include <voxblox_msgs/FilePath.h>
+#include <voxblox_ros/transformer.h>
 
 #include <cblox/core/common.h>
 #include <cblox/core/submap_collection.h>
@@ -28,16 +28,15 @@
 namespace cblox {
 
 // Default values for parameters
-//constexpr bool kDefaultVerbose = true;
-//constexpr int kDefaultNumFramesPerSubmap = 20;
-//constexpr double kDefaultMinTimeBetweenMsgsSec = 0.0;
+// constexpr bool kDefaultVerbose = true;
+// constexpr int kDefaultNumFramesPerSubmap = 20;
+// constexpr double kDefaultMinTimeBetweenMsgsSec = 0.0;
 
 // Data queue sizes
-//constexpr int kDefaultPointcloudQueueSize = 1;
-
+// constexpr int kDefaultPointcloudQueueSize = 1;
 
 // Receives ROS Data and produces a collection of submaps
-template<typename SubmapType>
+template <typename SubmapType>
 class SubmapServer {
  public:
   // Constructor
@@ -45,7 +44,7 @@ class SubmapServer {
                         const ros::NodeHandle& nh_private);
   SubmapServer(
       const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
-      const TsdfMap::Config& tsdf_map_config,
+      const typename SubmapType::Config& submap_config,
       const voxblox::TsdfIntegratorBase::Config& tsdf_integrator_config,
       const voxblox::TsdfIntegratorType& tsdf_integrator_type,
       const voxblox::MeshIntegratorConfig& mesh_config);
@@ -64,7 +63,8 @@ class SubmapServer {
                        voxblox_msgs::FilePath::Response& response);  // NOLINT
 
   // Access Submap Collection Pointer
-  const typename SubmapCollection<SubmapType>::Ptr getSubmapCollectionPtr() const;
+  const typename SubmapCollection<SubmapType>::Ptr getSubmapCollectionPtr()
+      const;
 
   // Update the mesh and publish for visualization
   void updateMeshEvent(const ros::TimerEvent& /*event*/);
@@ -118,10 +118,9 @@ class SubmapServer {
   virtual void finishSubmap();
 
   // Submap publishing
-  void publishSubmap(SubmapID submap_id, bool global_map=false);
+  void publishSubmap(SubmapID submap_id, bool global_map = false);
   void SubmapCallback(const cblox_msgs::Submap::Ptr& msg);
   void writeTimingToFile(std::string str, SubmapID id, ros::WallTime time);
-
 
   // Node handles
   ros::NodeHandle nh_;

@@ -12,13 +12,17 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   typedef std::shared_ptr<TsdfEsdfSubmap> Ptr;
   typedef std::shared_ptr<const TsdfEsdfSubmap> ConstPtr;
 
-  struct Config : TsdfSubmap::Config, EsdfMap::Config {};
+  struct Config : TsdfSubmap::Config, EsdfMap::Config {
+    Config(const TsdfSubmap::Config& tsdf_map_config,
+           const EsdfMap::Config& esdf_map_config)
+        : TsdfSubmap::Config(tsdf_map_config),
+          EsdfMap::Config(esdf_map_config) {}
+  };
 
-  TsdfEsdfSubmap(Config config)
-      : TsdfSubmap(config), config_(config) {
+  TsdfEsdfSubmap(Config config) : TsdfSubmap(config), config_(config) {
     esdf_map_.reset(new EsdfMap(config));
   }
-  TsdfEsdfSubmap(const Transformation &T_M_S, SubmapID submap_id, Config config)
+  TsdfEsdfSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config)
       : TsdfSubmap(T_M_S, submap_id, config), config_(config) {
     esdf_map_.reset(new EsdfMap(config));
   }
@@ -39,7 +43,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
 
   // Returns the underlying ESDF map pointers
   EsdfMap::Ptr getEsdfMapPtr() { return esdf_map_; }
-  const EsdfMap &getEsdfMap() const { return *esdf_map_; }
+  const EsdfMap& getEsdfMap() const { return *esdf_map_; }
 
   /* NOTE: When converting TsdfEsdf submaps into protobuffs, only their
    *       TSDF map is converted. The ESDF can be recomputed when needed.

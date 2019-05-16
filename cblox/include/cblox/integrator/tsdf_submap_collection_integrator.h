@@ -17,7 +17,7 @@ class TsdfSubmapCollectionIntegrator {
   TsdfSubmapCollectionIntegrator(
       const voxblox::TsdfIntegratorBase::Config& tsdf_integrator_config,
       const voxblox::TsdfIntegratorType& tsdf_integrator_type,
-      const std::shared_ptr<SubmapCollection<TsdfSubmap>>&
+      const std::shared_ptr<SubmapCollectionInterface>&
           tsdf_submap_collection_ptr)
       : tsdf_integrator_config_(tsdf_integrator_config),
         tsdf_submap_collection_ptr_(tsdf_submap_collection_ptr),
@@ -45,8 +45,7 @@ class TsdfSubmapCollectionIntegrator {
   Transformation getSubmapRelativePose(const Transformation& T_G_C) const;
 
   // The submap collection
-  std::shared_ptr<cblox::SubmapCollection<TsdfSubmap>>
-      tsdf_submap_collection_ptr_;
+  std::shared_ptr<SubmapCollectionInterface> tsdf_submap_collection_ptr_;
 
   // Transform to the currently targeted submap
   // NOTE(alexmilane): T_G_S - Transformation between Submap base frame (S) and

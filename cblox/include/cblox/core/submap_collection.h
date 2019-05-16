@@ -12,15 +12,40 @@
 
 namespace cblox {
 
+// A interface for use where the type of submap doesnt matter.
+class SubmapCollectionInterface {
+ public:
+  typedef std::shared_ptr<SubmapCollectionInterface> Ptr;
+  typedef std::shared_ptr<const SubmapCollectionInterface> ConstPtr;
+
+  SubmapCollectionInterface(){}
+
+  // NOTE(alexmillane): I'm moving methods over only as I need them. There's no
+  // design intent here in leaving some out. There is only the intent to be
+  // lazy.
+  virtual const Transformation &getActiveSubMapPose() const = 0;
+  virtual const SubmapID getActiveSubMapID() const = 0;
+
+  virtual TsdfMap::Ptr getActiveTsdfMapPtr() = 0;
+  virtual const TsdfMap &getActiveTsdfMap() const = 0;
+
+  virtual bool empty() const = 0;
+  virtual size_t size() const = 0;
+  virtual size_t num_patches() const = 0;
+  virtual FloatingPoint block_size() const = 0;
+
+};
+
+// Collection of submaps
 template <typename SubmapType>
-class SubmapCollection {
+class SubmapCollection : public SubmapCollectionInterface {
  public:
   typedef std::shared_ptr<SubmapCollection> Ptr;
   typedef std::shared_ptr<const SubmapCollection> ConstPtr;
 
   // Constructor. Constructs an empty submap collection map
   explicit SubmapCollection(const typename SubmapType::Config &submap_config)
-      : submap_config_(submap_config) {}
+      : SubmapCollectionInterface(), submap_config_(submap_config) {}
 
   // Constructor. Constructs a submap collection from a list of submaps
   SubmapCollection(const typename SubmapType::Config &submap_config,
@@ -58,14 +83,14 @@ class SubmapCollection {
   const std::vector<typename SubmapType::ConstPtr> getSubMapConstPtrs() const;
 
   // Interactions with the active submap
-  const SubmapType &getActiveSubMap() const;
+  virtual const SubmapType &getActiveSubMap() const;
   typename SubmapType::Ptr getActiveSubMapPtr();
-  const Transformation &getActiveSubMapPose() const;
-  const SubmapID getActiveSubMapID() const;
+  virtual const Transformation &getActiveSubMapPose() const;
+  virtual const SubmapID getActiveSubMapID() const;
 
   // Access the tsdf_map member of the active submap
-  TsdfMap::Ptr getActiveTsdfMapPtr();
-  const TsdfMap &getActiveTsdfMap() const;
+  virtual TsdfMap::Ptr getActiveTsdfMapPtr();
+  virtual const TsdfMap &getActiveTsdfMap() const;
 
   // Activate a submap
   // NOTE(alexmillane): Note that creating a new submap automatically activates it.
@@ -81,7 +106,7 @@ class SubmapCollection {
   void clear() { id_to_submap_.clear(); }
 
   // Size information
-  bool empty() const { return id_to_submap_.empty(); }
+  virtual bool empty() const { return id_to_submap_.empty(); }
   size_t size() const { return id_to_submap_.size(); }
   size_t num_patches() const { return id_to_submap_.size(); }
   FloatingPoint block_size() const {
