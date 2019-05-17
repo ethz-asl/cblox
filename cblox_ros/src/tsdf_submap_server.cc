@@ -1,9 +1,9 @@
 #include "cblox_ros/tsdf_submap_server.h"
 
+#include <cblox_msgs/Submap.h>
 #include <geometry_msgs/PoseArray.h>
 #include <nav_msgs/Path.h>
 #include <visualization_msgs/Marker.h>
-#include <cblox_msgs/Submap.h>
 
 #include <pcl/conversions.h>
 #include <pcl/point_types.h>
@@ -273,7 +273,7 @@ bool TsdfSubmapServer::newSubmapRequired() const {
 
 void TsdfSubmapServer::finishSubmap() {
   if (tsdf_submap_collection_ptr_->exists(
-      tsdf_submap_collection_ptr_->getActiveSubMapID())) {
+          tsdf_submap_collection_ptr_->getActiveSubMapID())) {
     // publishing the old submap
     tsdf_submap_collection_ptr_->getActiveSubMapPtr()->endRecordingTime();
     publishSubmap(tsdf_submap_collection_ptr_->getActiveSubMapID());
@@ -434,15 +434,14 @@ bool TsdfSubmapServer::loadMapCallback(voxblox_msgs::FilePath::Request& request,
   return success;
 }
 
-
 const SubmapCollection<TsdfSubmap>::Ptr
-    TsdfSubmapServer::getSubmapCollectionPtr() const {
+TsdfSubmapServer::getSubmapCollectionPtr() const {
   return tsdf_submap_collection_ptr_;
 }
 
 void TsdfSubmapServer::publishSubmap(SubmapID submap_id, bool global_map) {
-  if (submap_pub_.getNumSubscribers() > 0
-      and tsdf_submap_collection_ptr_->getSubMapConstPtrById(submap_id)) {
+  if (submap_pub_.getNumSubscribers() > 0 and
+      tsdf_submap_collection_ptr_->getSubMapConstPtrById(submap_id)) {
     // set timer
     timing::Timer publish_map_timer("cblox/0 - publish map");
 
@@ -457,8 +456,8 @@ void TsdfSubmapServer::publishSubmap(SubmapID submap_id, bool global_map) {
       get_global_timer.Stop();
 
       timing::Timer make_dummy_timer("cblox/2 - make dummy submap");
-      TsdfSubmap::Ptr submap_ptr(new TsdfSubmap(T_M_S, submap_id,
-          tsdf_submap_collection_ptr_->getConfig()));
+      TsdfSubmap::Ptr submap_ptr(new TsdfSubmap(
+          T_M_S, submap_id, tsdf_submap_collection_ptr_->getConfig()));
       // TODO: switch from copy to using layer
       submap_ptr->getTsdfMapPtr().reset(
           new voxblox::TsdfMap(tsdf_map->getTsdfLayer()));
@@ -470,8 +469,8 @@ void TsdfSubmapServer::publishSubmap(SubmapID submap_id, bool global_map) {
       serialize_timer.Stop();
     } else {
       // Get latest submap for publishing
-      TsdfSubmap::ConstPtr submap_ptr = tsdf_submap_collection_ptr_->
-          getSubMapConstPtrById(submap_id);
+      TsdfSubmap::ConstPtr submap_ptr =
+          tsdf_submap_collection_ptr_->getSubMapConstPtrById(submap_id);
       timing::Timer serialize_timer("cblox/3 - serialize");
       serializeSubmapToMsg(submap_ptr, &submap_msg);
       serialize_timer.Stop();
@@ -485,7 +484,7 @@ void TsdfSubmapServer::publishSubmap(SubmapID submap_id, bool global_map) {
     // stop timer
     publish_map_timer.Stop();
     writeTimingToFile("sent", tsdf_submap_collection_ptr_->size(),
-        ros::WallTime::now());
+                      ros::WallTime::now());
   }
 }
 
@@ -507,14 +506,16 @@ void TsdfSubmapServer::writeTimingToFile(std::string str, SubmapID id,
                                          ros::WallTime time) {
   if (!timing_path_name_.empty()) {
     std::ofstream timing_file;
-    timing_file.open(timing_path_name_ + "network_timing_"
-        + timing_time_id_name_ + ".txt", std::ios::app);
+    timing_file.open(
+        timing_path_name_ + "network_timing_" + timing_time_id_name_ + ".txt",
+        std::ios::app);
     timing_file << time.toNSec() << " " << id << " " << str;
     timing_file << "\n";
     timing_file.close();
 
-    timing_file.open(timing_path_name_ + "process_timing_"
-                     + timing_time_id_name_ + ".txt", std::ios::app);
+    timing_file.open(
+        timing_path_name_ + "process_timing_" + timing_time_id_name_ + ".txt",
+        std::ios::app);
     timing_file << str << " " << id;
     timing_file << "\n";
     timing_file << timing::Timing::Print();

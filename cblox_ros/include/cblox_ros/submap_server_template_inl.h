@@ -30,15 +30,15 @@ template <typename SubmapType>
 SubmapServer<SubmapType>::SubmapServer(const ros::NodeHandle& nh,
                                        const ros::NodeHandle& nh_private)
     : SubmapServer<SubmapType>(
-        nh, nh_private, voxblox::getTsdfMapConfigFromRosParam(nh_private),
-        voxblox::getTsdfIntegratorConfigFromRosParam(nh_private),
-        getTsdfIntegratorTypeFromRosParam(nh_private),
-        voxblox::getMeshIntegratorConfigFromRosParam(nh_private)) {}
+          nh, nh_private, getSubmapConfigFromRosParam<SubmapType>(nh_private),
+          voxblox::getTsdfIntegratorConfigFromRosParam(nh_private),
+          getTsdfIntegratorTypeFromRosParam(nh_private),
+          voxblox::getMeshIntegratorConfigFromRosParam(nh_private)) {}
 
 template <typename SubmapType>
 SubmapServer<SubmapType>::SubmapServer(
     const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
-    const TsdfMap::Config& tsdf_map_config,
+    const typename SubmapType::Config& submap_config,
     const voxblox::TsdfIntegratorBase::Config& tsdf_integrator_config,
     const voxblox::TsdfIntegratorType& tsdf_integrator_type,
     const voxblox::MeshIntegratorConfig& mesh_config)
@@ -60,16 +60,15 @@ SubmapServer<SubmapType>::SubmapServer(
 
   // Creating the submap collection
   submap_collection_ptr.reset(
-      new SubmapCollection<TsdfSubmap>(tsdf_map_config));
+      new SubmapCollection<SubmapType>(submap_config));
 
   // Creating an integrator and targetting the collection
   tsdf_submap_collection_integrator_ptr_.reset(
-      new TsdfSubmapCollectionIntegrator(tsdf_integrator_config,
-                                         tsdf_integrator_type,
-                                         submap_collection_ptr));
+      new TsdfSubmapCollectionIntegrator(
+          tsdf_integrator_config, tsdf_integrator_type, submap_collection_ptr));
 
   // An object to visualize the submaps
-  submap_mesher_ptr_.reset(new SubmapMesher(tsdf_map_config, mesh_config));
+  submap_mesher_ptr_.reset(new SubmapMesher(submap_config, mesh_config));
   active_submap_visualizer_ptr_.reset(
       new ActiveSubmapVisualizer(mesh_config, submap_collection_ptr));
 

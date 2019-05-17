@@ -27,7 +27,7 @@ class ActiveSubmapVisualizer {
 
   // Constructor
   ActiveSubmapVisualizer(const MeshIntegratorConfig& mesh_config,
-                         const std::shared_ptr<SubmapCollection<TsdfSubmap>>&
+                         const std::shared_ptr<SubmapCollectionInterface>&
                              tsdf_submap_collection_ptr)
       : mesh_config_(mesh_config),
         tsdf_submap_collection_ptr_(tsdf_submap_collection_ptr),
@@ -64,7 +64,7 @@ private:
   std::unique_ptr<MeshIntegrator<TsdfVoxel>> active_submap_mesh_integrator_ptr_;
 
   // The submap collection
-  std::shared_ptr<SubmapCollection<TsdfSubmap>> tsdf_submap_collection_ptr_;
+  std::shared_ptr<SubmapCollectionInterface> tsdf_submap_collection_ptr_;
 
   // Storing the mesh layers
   std::map<SubmapID, std::shared_ptr<MeshLayer>> mesh_layers_;

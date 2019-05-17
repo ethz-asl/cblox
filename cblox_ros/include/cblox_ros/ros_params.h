@@ -4,12 +4,15 @@
 #include <ros/node_handle.h>
 
 #include <voxblox/integrator/tsdf_integrator.h>
+#include <voxblox_ros/ros_params.h>
+
+#include "cblox/core/tsdf_esdf_submap.h"
+#include "cblox/core/tsdf_submap.h"
 
 namespace cblox {
 
 inline voxblox::TsdfIntegratorType getTsdfIntegratorTypeFromRosParam(
     const ros::NodeHandle& nh_private) {
-
   voxblox::TsdfIntegratorType tsdf_integrator_type;
   std::string integrator_type_str("merged");
   nh_private.param("method", integrator_type_str, integrator_type_str);
@@ -30,6 +33,24 @@ inline voxblox::TsdfIntegratorType getTsdfIntegratorTypeFromRosParam(
   }
 
   return tsdf_integrator_type;
+}
+
+template <typename SubmapType>
+inline typename SubmapType::Config getSubmapConfigFromRosParam(
+    const ros::NodeHandle& nh_private);
+
+template <>
+inline typename TsdfSubmap::Config getSubmapConfigFromRosParam<TsdfSubmap>(
+    const ros::NodeHandle& nh_private) {
+  return voxblox::getTsdfMapConfigFromRosParam(nh_private);
+}
+
+template <>
+inline typename TsdfEsdfSubmap::Config
+getSubmapConfigFromRosParam<TsdfEsdfSubmap>(const ros::NodeHandle& nh_private) {
+  auto tsdf_map_config = voxblox::getTsdfMapConfigFromRosParam(nh_private);
+  auto esdf_map_config = voxblox::getEsdfMapConfigFromRosParam(nh_private);
+  return TsdfEsdfSubmap::Config(tsdf_map_config, esdf_map_config);
 }
 
 }  // namespace cblox
