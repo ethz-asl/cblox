@@ -10,8 +10,8 @@ add_definitions(-std=c++11 -Wall -Wextra)
 # LIBRARIES #
 #############
 cs_add_library(${PROJECT_NAME}
-  src/tsdf_submap_server.cc
-  src/tsdf_esdf_submap_server.cpp
+  #src/tsdf_submap_server.cc
+  #src/tsdf_esdf_submap_server.cpp
   src/active_submap_visualizer.cc
   src/trajectory_visualizer.cc
 )
