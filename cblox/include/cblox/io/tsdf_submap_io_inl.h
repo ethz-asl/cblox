@@ -17,6 +17,13 @@ namespace cblox {
 namespace io {
 
 template <typename SubmapType>
+bool SaveTsdfSubmapCollection(
+    const SubmapCollection<SubmapType> &tsdf_submap_collection,
+    const std::string &file_path) {
+  return tsdf_submap_collection.saveToFile(file_path);
+}
+
+template <typename SubmapType>
 bool LoadSubmapFromStream(
     std::fstream *proto_file_ptr,
     typename SubmapCollection<SubmapType>::Ptr tsdf_submap_collection_ptr,

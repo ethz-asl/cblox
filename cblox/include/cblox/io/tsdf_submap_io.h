@@ -9,8 +9,9 @@
 namespace cblox {
 namespace io {
 
+template <typename SubmapType>
 bool SaveTsdfSubmapCollection(
-    const SubmapCollection<TsdfSubmap> &tsdf_submap_collection,
+    const SubmapCollection<SubmapType> &tsdf_submap_collection,
     const std::string &file_path);
 
 template <typename SubmapType>
