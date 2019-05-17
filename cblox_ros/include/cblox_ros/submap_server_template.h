@@ -28,12 +28,12 @@
 namespace cblox {
 
 // Default values for parameters
-// constexpr bool kDefaultVerbose = true;
-// constexpr int kDefaultNumFramesPerSubmap = 20;
-// constexpr double kDefaultMinTimeBetweenMsgsSec = 0.0;
+constexpr bool kDefaultVerbose = true;
+constexpr int kDefaultNumFramesPerSubmap = 20;
+constexpr double kDefaultMinTimeBetweenMsgsSec = 0.0;
 
 // Data queue sizes
-// constexpr int kDefaultPointcloudQueueSize = 1;
+constexpr int kDefaultPointcloudQueueSize = 1;
 
 // Receives ROS Data and produces a collection of submaps
 template <typename SubmapType>
@@ -62,12 +62,12 @@ class SubmapServer {
   bool loadMapCallback(voxblox_msgs::FilePath::Request& request,     // NOLINT
                        voxblox_msgs::FilePath::Response& response);  // NOLINT
 
-  // Access Submap Collection Pointer
-  const typename SubmapCollection<SubmapType>::Ptr getSubmapCollectionPtr()
-      const;
-
   // Update the mesh and publish for visualization
   void updateMeshEvent(const ros::TimerEvent& /*event*/);
+
+  // Access Submap Collection Pointer
+  inline const typename SubmapCollection<SubmapType>::Ptr
+      getSubmapCollectionPtr() const;
   void visualizeActiveSubmapMesh();
   void visualizeWholeMap();
 
@@ -115,7 +115,7 @@ class SubmapServer {
   // Submap creation
   bool newSubmapRequired() const;
   void createNewSubMap(const Transformation& T_G_C);
-  virtual void finishSubmap();
+  inline void finishSubmap();
 
   // Submap publishing
   void publishSubmap(SubmapID submap_id, bool global_map = false);

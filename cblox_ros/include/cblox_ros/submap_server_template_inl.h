@@ -21,8 +21,8 @@
 #include "cblox_ros/pose_vis.h"
 #include "cblox_ros/ros_params.h"
 #include "cblox_ros/submap_conversions.h"
+
 #include "cblox_ros/submap_server_template.h"
-#include "cblox_ros/tsdf_submap_server.h"
 
 namespace cblox {
 
@@ -288,7 +288,7 @@ bool SubmapServer<SubmapType>::newSubmapRequired() const {
 }
 
 template<>
-void SubmapServer<TsdfSubmap>::finishSubmap() {
+inline void SubmapServer<TsdfSubmap>::finishSubmap() {
   if (submap_collection_ptr->exists(
       submap_collection_ptr->getActiveSubMapID())) {
     // publishing the old submap
@@ -297,7 +297,7 @@ void SubmapServer<TsdfSubmap>::finishSubmap() {
   }
 }
 template<>
-void SubmapServer<TsdfEsdfSubmap>::finishSubmap() {
+inline void SubmapServer<TsdfEsdfSubmap>::finishSubmap() {
   if (submap_collection_ptr->exists(
       submap_collection_ptr->getActiveSubMapID())) {
     // publishing the old submap
@@ -477,13 +477,13 @@ bool SubmapServer<SubmapType>::loadMapCallback(voxblox_msgs::FilePath::Request& 
 
 
 template <>
-const SubmapCollection<TsdfSubmap>::Ptr
+inline const SubmapCollection<TsdfSubmap>::Ptr
     SubmapServer<TsdfSubmap>::getSubmapCollectionPtr() const {
   return submap_collection_ptr;
 }
 template<>
-const SubmapCollection<TsdfEsdfSubmap>::Ptr
-SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() const {
+inline const SubmapCollection<TsdfEsdfSubmap>::Ptr
+    SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() const {
   return submap_collection_ptr;
 }
 
