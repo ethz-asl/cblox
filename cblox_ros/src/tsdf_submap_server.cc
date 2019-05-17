@@ -465,14 +465,14 @@ void TsdfSubmapServer::publishSubmap(SubmapID submap_id, bool global_map) {
 
       // serialize into message
       timing::Timer serialize_timer("cblox/3 - serialize");
-      serializeSubmapToMsg(submap_ptr, &submap_msg);
+      serializeSubmapToMsg<TsdfSubmap>(submap_ptr, &submap_msg);
       serialize_timer.Stop();
     } else {
       // Get latest submap for publishing
-      TsdfSubmap::ConstPtr submap_ptr =
-          tsdf_submap_collection_ptr_->getSubMapConstPtrById(submap_id);
+      TsdfSubmap::Ptr submap_ptr =
+          tsdf_submap_collection_ptr_->getSubMapPtrById(submap_id);
       timing::Timer serialize_timer("cblox/3 - serialize");
-      serializeSubmapToMsg(submap_ptr, &submap_msg);
+      serializeSubmapToMsg<TsdfSubmap>(submap_ptr, &submap_msg);
       serialize_timer.Stop();
     }
 
@@ -495,7 +495,8 @@ void TsdfSubmapServer::SubmapCallback(const cblox_msgs::Submap::Ptr& msg_in) {
   // push newest message in queue to service
   submap_queue_.push(msg_in);
   // service message in queue
-  deserializeMsgToSubmap(submap_queue_.front(), getSubmapCollectionPtr());
+  deserializeMsgToSubmap<TsdfSubmap>(
+      submap_queue_.front(), getSubmapCollectionPtr());
   submap_queue_.pop();
 
   read_map_timer.Stop();

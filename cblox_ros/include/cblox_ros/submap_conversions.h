@@ -49,7 +49,8 @@ inline bool deserializeMsgToPoseUpdate(cblox_msgs::PoseUpdate::Ptr msg_ptr,
 }
 */
 
-inline void serializeSubmapToMsg(TsdfSubmap::ConstPtr submap_ptr,
+template <typename SubmapType>
+inline void serializeSubmapToMsg(typename SubmapType::Ptr submap_ptr,
     cblox_msgs::Submap* msg) {
   CHECK_NOTNULL(msg);
   CHECK_NOTNULL(submap_ptr);
@@ -77,8 +78,9 @@ inline void serializeSubmapToMsg(TsdfSubmap::ConstPtr submap_ptr,
   msg->end_time = record_time.second;
 }
 
+template <typename SubmapType>
 inline bool deserializeMsgToSubmap(cblox_msgs::Submap::Ptr msg_ptr,
-    SubmapCollection<TsdfSubmap>::Ptr submap_collection_ptr) {
+    typename SubmapCollection<SubmapType>::Ptr submap_collection_ptr) {
   CHECK_NOTNULL(submap_collection_ptr);
   // TODO: more checks to parse
 
@@ -94,6 +96,7 @@ inline bool deserializeMsgToSubmap(cblox_msgs::Submap::Ptr msg_ptr,
     submap_collection_ptr->getSubMapPtrById(submap_id)->setPose(submap_pose);
 
     // update submap
+    // TODO: include parameter to specify update behaviour
     voxblox::deserializeMsgToLayer(msg_ptr->layer,
         submap_collection_ptr->getSubMapPtrById(submap_id)->
         getTsdfMapPtr()->getTsdfLayerPtr());

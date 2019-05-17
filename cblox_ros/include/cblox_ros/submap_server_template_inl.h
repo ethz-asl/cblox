@@ -446,7 +446,7 @@ bool SubmapServer<SubmapType>::saveMap(const std::string& file_path) {
 
 template <typename SubmapType>
 bool SubmapServer<SubmapType>::loadMap(const std::string& file_path) {
-  bool success = io::LoadSubmapCollection<TsdfSubmap>(
+  bool success = io::LoadSubmapCollection<SubmapType>(
       file_path, &submap_collection_ptr);
   if (success) {
     ROS_INFO("Successfully loaded TSDFSubmapCollection.");
@@ -514,14 +514,14 @@ void SubmapServer<SubmapType>::publishSubmap(SubmapID submap_id, bool global_map
 
       // serialize into message
       timing::Timer serialize_timer("cblox/3 - serialize");
-      serializeSubmapToMsg(submap_ptr, &submap_msg);
+      serializeSubmapToMsg<TsdfSubmap>(submap_ptr, &submap_msg);
       serialize_timer.Stop();
     } else {
       // Get latest submap for publishing
-      TsdfSubmap::ConstPtr submap_ptr = submap_collection_ptr->
-          getSubMapConstPtrById(submap_id);
+      TsdfSubmap::Ptr submap_ptr = submap_collection_ptr->
+          getSubMapPtrById(submap_id);
       timing::Timer serialize_timer("cblox/3 - serialize");
-      serializeSubmapToMsg(submap_ptr, &submap_msg);
+      serializeSubmapToMsg<TsdfSubmap>(submap_ptr, &submap_msg);
       serialize_timer.Stop();
     }
 
@@ -545,7 +545,7 @@ void SubmapServer<SubmapType>::SubmapCallback(const cblox_msgs::Submap::Ptr& msg
   // push newest message in queue to service
   submap_queue_.push(msg_in);
   // service message in queue
-  deserializeMsgToSubmap(submap_queue_.front(), getSubmapCollectionPtr());
+  deserializeMsgToSubmap<SubmapType>(submap_queue_.front(), getSubmapCollectionPtr());
   submap_queue_.pop();
 
   read_map_timer.Stop();
