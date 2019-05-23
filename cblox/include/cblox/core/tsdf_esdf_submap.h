@@ -51,7 +51,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
    *       saveToStream() methods from tsdf_submap.
    */
 
- private:
+ protected:
   Config config_;
   EsdfMap::Ptr esdf_map_;
 };

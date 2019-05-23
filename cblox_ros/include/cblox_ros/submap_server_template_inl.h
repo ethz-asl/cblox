@@ -287,17 +287,8 @@ bool SubmapServer<SubmapType>::newSubmapRequired() const {
           num_integrated_frames_per_submap_);
 }
 
-template<>
-inline void SubmapServer<TsdfSubmap>::finishSubmap() {
-  if (submap_collection_ptr->exists(
-      submap_collection_ptr->getActiveSubMapID())) {
-    // publishing the old submap
-    submap_collection_ptr->getActiveSubMapPtr()->endRecordingTime();
-    publishSubmap(submap_collection_ptr->getActiveSubMapID());
-  }
-}
-template<>
-inline void SubmapServer<TsdfEsdfSubmap>::finishSubmap() {
+template <typename SubmapType>
+inline void SubmapServer<SubmapType>::finishSubmap() {
   if (submap_collection_ptr->exists(
       submap_collection_ptr->getActiveSubMapID())) {
     // publishing the old submap
@@ -305,6 +296,15 @@ inline void SubmapServer<TsdfEsdfSubmap>::finishSubmap() {
     publishSubmap(submap_collection_ptr->getActiveSubMapID());
     // generating ESDF map
     submap_collection_ptr->getActiveSubMapPtr()->generateEsdf();
+  }
+}
+template<>
+inline void SubmapServer<TsdfSubmap>::finishSubmap() {
+  if (submap_collection_ptr->exists(
+      submap_collection_ptr->getActiveSubMapID())) {
+    // publishing the old submap
+    submap_collection_ptr->getActiveSubMapPtr()->endRecordingTime();
+    publishSubmap(submap_collection_ptr->getActiveSubMapID());
   }
 }
 
@@ -486,6 +486,14 @@ inline const SubmapCollection<TsdfEsdfSubmap>::Ptr
     SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() const {
   return submap_collection_ptr;
 }
+
+template<>
+inline const SubmapCollection<PlanningSubmap>::Ptr
+SubmapServer<PlanningSubmap>::getSubmapCollectionPtr() const {
+  return submap_collection_ptr;
+}
+
+
 
 template <typename SubmapType>
 void SubmapServer<SubmapType>::publishSubmap(SubmapID submap_id, bool global_map) {

@@ -82,11 +82,12 @@ class TsdfSubmap {
   SubmapID submap_id_;
   TsdfMap::Ptr tsdf_map_;
 
+  Transformation T_M_S_;
+  std::pair<ros::Time, ros::Time> recording_time_;
+
  private:
   // The pose of this submap in the global map frame
   mutable std::mutex transformation_mutex;
-  Transformation T_M_S_;
-  std::pair<ros::Time, ros::Time> recording_time_;
 
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
