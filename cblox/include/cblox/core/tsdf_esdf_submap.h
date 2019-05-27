@@ -46,7 +46,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
    *       saveToStream() methods from tsdf_submap.
    */
 
- private:
+ protected:
   EsdfMap::Ptr esdf_map_;
   voxblox::EsdfIntegrator::Config esdf_integrator_config_;
 };
