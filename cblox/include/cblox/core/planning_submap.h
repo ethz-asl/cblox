@@ -22,8 +22,44 @@ public:
 
   // map functions
   void computeMapBounds() {
+    Eigen::Vector3d lower_tmp, upper_tmp;
     voxblox::utils::computeMapBoundsFromLayer(*tsdf_map_->getTsdfLayerPtr(),
-        &lower_bound_, &upper_bound_);
+        &lower_tmp, &upper_tmp);
+
+    // get corners of bounding cube
+    std::vector<Eigen::Vector3d> bounds;
+    bounds.emplace_back(lower_tmp);
+    bounds.emplace_back(upper_tmp);
+    bounds.emplace_back(Eigen::Vector3d(
+        lower_tmp.x(), lower_tmp.y(), upper_tmp.z()));
+    bounds.emplace_back(Eigen::Vector3d(
+        lower_tmp.x(), upper_tmp.y(), lower_tmp.z()));
+    bounds.emplace_back(Eigen::Vector3d(
+        upper_tmp.x(), lower_tmp.y(), lower_tmp.z()));
+    bounds.emplace_back(Eigen::Vector3d(
+        lower_tmp.x(), upper_tmp.y(), upper_tmp.z()));
+    bounds.emplace_back(Eigen::Vector3d(
+        upper_tmp.x(), lower_tmp.y(), upper_tmp.z()));
+    bounds.emplace_back(Eigen::Vector3d(
+        upper_tmp.x(), upper_tmp.y(), lower_tmp.z()));
+
+    // transform and save global extrema
+    bool first = true;
+    for (int i = 0; i < bounds.size(); i++) {
+      bounds[i] = T_M_S_.cast<double>() * bounds[i];
+      if (first) {
+        first = false;
+        lower_bound_ = bounds[i];
+        upper_bound_ = bounds[i];
+      } else {
+        lower_bound_ = bounds[i].cwiseMin(lower_bound_);
+        upper_bound_ = bounds[i].cwiseMax(upper_bound_);
+      }
+    }
+  }
+  void getMapBounds(Eigen::Vector3d* lower_bound, Eigen::Vector3d* upper_bound) {
+    *lower_bound = lower_bound_;
+    *upper_bound = upper_bound_;
   }
 
   // skeleton functions

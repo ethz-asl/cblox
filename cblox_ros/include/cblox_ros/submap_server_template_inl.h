@@ -79,6 +79,13 @@ SubmapServer<SubmapType>::SubmapServer(
   std::time_t now = std::time(nullptr);
   std::string now_str = std::ctime(&now);
   timing_time_id_name_ = now_str;
+
+  std::string map_path;
+  nh_private_.param("map_path", map_path, map_path);
+  if (map_path.size() > 0) {
+    ROS_INFO("[SubmapServer] Loading cblox map.");
+    loadMap(map_path);
+  }
 }
 
 template <typename SubmapType>
