@@ -46,9 +46,10 @@ class SubmapCollection {
   // exist... This puts the onus on the caller to call exists() first. I don't
   // like this but I can't see a solution.
   const SubmapType &getSubMap(const SubmapID submap_id) const;
-  // Note(alexmillane): Unlike the above this function returns a nullptr when
-  // the map doesn't exist. No hard crash.
-  typename SubmapType::ConstPtr getSubMapConstPtrById(
+  // Note(alexmillane): Unlike the above method, the two methods below return a
+  // nullptr when the map doesn't exist. No hard crash.
+  typename SubmapType::Ptr getSubMapPtr(const SubmapID submap_id);
+  typename SubmapType::ConstPtr getSubMapConstPtr(
       const SubmapID submap_id) const;
   // A list of the submaps
   const std::vector<typename SubmapType::Ptr> getSubMapPtrs() const;
@@ -65,7 +66,8 @@ class SubmapCollection {
   const TsdfMap &getActiveTsdfMap() const;
 
   // Activate a submap
-  // NOTE(alexmillane): Note that creating a new submap automatically activates it.
+  // NOTE(alexmillane): Note that creating a new submap automatically activates
+  //                    it.
   void activateSubMap(const SubmapID submap_id);
 
   // Interacting with the submap poses
