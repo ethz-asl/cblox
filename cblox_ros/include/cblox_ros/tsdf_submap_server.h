@@ -65,7 +65,7 @@ class TsdfSubmapServer {
   void visualizeWholeMap();
 
   // Visualize trajectory
-  void visualizeSubMapBaseframes() const;
+  void visualizeSubmapBaseframes() const;
   void visualizeTrajectory() const;
 
   // Mesh output
@@ -107,8 +107,7 @@ class TsdfSubmapServer {
 
   // Submap creation
   bool newSubmapRequired() const;
-  void createNewSubMap(const Transformation& T_G_C);
-
+  void createNewSubmap(const Transformation& T_G_C);
 
   // Node handles
   ros::NodeHandle nh_;

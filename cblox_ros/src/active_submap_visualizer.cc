@@ -7,7 +7,7 @@ namespace cblox {
 void ActiveSubmapVisualizer::switchToActiveSubmap() {
   CHECK(tsdf_submap_collection_ptr_);
   // Getting the active submap ID
-  const SubmapID submap_id = tsdf_submap_collection_ptr_->getActiveSubMapID();
+  const SubmapID submap_id = tsdf_submap_collection_ptr_->getActiveSubmapID();
   if (mesh_layers_.find(submap_id) == mesh_layers_.end()) {
     ROS_INFO_STREAM("Creating mesh layer for submap id: " << submap_id);
     createMeshLayer();
@@ -26,7 +26,7 @@ void ActiveSubmapVisualizer::createMeshLayer() {
       new voxblox::MeshLayer(tsdf_submap_collection_ptr_->block_size()));
   active_submap_color_idx_ = current_color_idx_;
   // Saving mesh layer and color for later recovery
-  const SubmapID submap_id = tsdf_submap_collection_ptr_->getActiveSubMapID();
+  const SubmapID submap_id = tsdf_submap_collection_ptr_->getActiveSubmapID();
   mesh_layers_[submap_id] = active_submap_mesh_layer_ptr_;
   mesh_color_indices_[submap_id] = active_submap_color_idx_;
   // Updating the color index for the next map.
@@ -34,7 +34,7 @@ void ActiveSubmapVisualizer::createMeshLayer() {
 }
 
 void ActiveSubmapVisualizer::recoverMeshLayer() {
-  const SubmapID submap_id = tsdf_submap_collection_ptr_->getActiveSubMapID();
+  const SubmapID submap_id = tsdf_submap_collection_ptr_->getActiveSubmapID();
   auto mesh_it = mesh_layers_.find(submap_id);
   auto color_it = mesh_color_indices_.find(submap_id);
   CHECK(mesh_it != mesh_layers_.end())
@@ -69,7 +69,7 @@ void ActiveSubmapVisualizer::transformMeshLayerToGlobalFrame(
   CHECK_NOTNULL(mesh_layer_G_ptr);
   // Transforming all triangles in the mesh and adding to the combined layer
   const Transformation& T_G_S =
-      tsdf_submap_collection_ptr_->getActiveSubMapPose();
+      tsdf_submap_collection_ptr_->getActiveSubmapPose();
   SubmapMesher::transformAndAddTrianglesToLayer(mesh_layer_S, T_G_S,
                                                 mesh_layer_G_ptr);
 }
@@ -103,7 +103,7 @@ void ActiveSubmapVisualizer::getDisplayMesh(
   // Filling the marker
   const voxblox::ColorMode color_mode = voxblox::ColorMode::kLambertColor;
   voxblox::fillMarkerWithMesh(mesh_layer_ptr, color_mode, marker_ptr);
-  marker_ptr->id = tsdf_submap_collection_ptr_->getActiveSubMapID();
+  marker_ptr->id = tsdf_submap_collection_ptr_->getActiveSubmapID();
 }
 
 }  // namespace cblox

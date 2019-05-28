@@ -45,7 +45,7 @@ bool SubmapCollection<SubmapType>::exists(const SubmapID submap_id) const {
 }
 
 template <typename SubmapType>
-void SubmapCollection<SubmapType>::createNewSubMap(const Transformation& T_G_S,
+void SubmapCollection<SubmapType>::createNewSubmap(const Transformation& T_G_S,
                                                    const SubmapID submap_id) {
   // Checking if the submap already exists
   // NOTE(alexmillane): This hard fails the program if the submap already
@@ -63,7 +63,7 @@ void SubmapCollection<SubmapType>::createNewSubMap(const Transformation& T_G_S,
 }
 
 template <typename SubmapType>
-SubmapID SubmapCollection<SubmapType>::createNewSubMap(
+SubmapID SubmapCollection<SubmapType>::createNewSubmap(
     const Transformation& T_G_S) {
   // Creating a submap with a generated SubmapID
   // NOTE(alexmillane): rbegin() returns the pair with the highest key.
@@ -71,12 +71,12 @@ SubmapID SubmapCollection<SubmapType>::createNewSubMap(
   if (!id_to_submap_.empty()) {
     new_ID = id_to_submap_.rbegin()->first + 1;
   }
-  createNewSubMap(T_G_S, new_ID);
+  createNewSubmap(T_G_S, new_ID);
   return new_ID;
 }
 
 template <typename SubmapType>
-bool SubmapCollection<SubmapType>::duplicateSubMap(
+bool SubmapCollection<SubmapType>::duplicateSubmap(
     const SubmapID source_submap_id, const SubmapID new_submap_id) {
   // Get pointer to the source submap
   const auto src_submap_ptr_it = id_to_submap_.find(source_submap_id);
@@ -101,7 +101,7 @@ bool SubmapCollection<SubmapType>::duplicateSubMap(
 }
 
 template <typename SubmapType>
-const SubmapType& SubmapCollection<SubmapType>::getSubMap(
+const SubmapType& SubmapCollection<SubmapType>::getSubmap(
     const SubmapID submap_id) const {
   const auto it = id_to_submap_.find(submap_id);
   CHECK(it != id_to_submap_.end());
@@ -110,7 +110,7 @@ const SubmapType& SubmapCollection<SubmapType>::getSubMap(
 
 template <typename SubmapType>
 const std::vector<typename SubmapType::Ptr>
-SubmapCollection<SubmapType>::getSubMapPtrs() const {
+SubmapCollection<SubmapType>::getSubmapPtrs() const {
   std::vector<typename SubmapType::Ptr> submap_ptrs;
   for (const auto& id_submap_pair : id_to_submap_) {
     submap_ptrs.emplace_back(id_submap_pair.second);
@@ -120,7 +120,7 @@ SubmapCollection<SubmapType>::getSubMapPtrs() const {
 
 template <typename SubmapType>
 const std::vector<typename SubmapType::ConstPtr>
-SubmapCollection<SubmapType>::getSubMapConstPtrs() const {
+SubmapCollection<SubmapType>::getSubmapConstPtrs() const {
   std::vector<typename SubmapType::ConstPtr> submap_ptrs;
   for (const auto& id_submap_pair : id_to_submap_) {
     submap_ptrs.emplace_back(id_submap_pair.second);
@@ -142,7 +142,7 @@ const TsdfMap& SubmapCollection<SubmapType>::getActiveTsdfMap() const {
 }
 
 template <typename SubmapType>
-const SubmapType& SubmapCollection<SubmapType>::getActiveSubMap() const {
+const SubmapType& SubmapCollection<SubmapType>::getActiveSubmap() const {
   const auto it = id_to_submap_.find(active_submap_id_);
   CHECK(it != id_to_submap_.end());
   return *(it->second);
@@ -150,24 +150,24 @@ const SubmapType& SubmapCollection<SubmapType>::getActiveSubMap() const {
 
 // Gets a pointer to the active submap
 template <typename SubmapType>
-typename SubmapType::Ptr SubmapCollection<SubmapType>::getActiveSubMapPtr() {
+typename SubmapType::Ptr SubmapCollection<SubmapType>::getActiveSubmapPtr() {
   const auto it = id_to_submap_.find(active_submap_id_);
   CHECK(it != id_to_submap_.end());
   return it->second;
 }
 
 template <typename SubmapType>
-const Transformation& SubmapCollection<SubmapType>::getActiveSubMapPose()
+const Transformation& SubmapCollection<SubmapType>::getActiveSubmapPose()
     const {
-  return getActiveSubMap().getPose();
+  return getActiveSubmap().getPose();
 }
 template <typename SubmapType>
-const SubmapID SubmapCollection<SubmapType>::getActiveSubMapID() const {
+const SubmapID SubmapCollection<SubmapType>::getActiveSubmapID() const {
   return active_submap_id_;
 }
 
 template <typename SubmapType>
-void SubmapCollection<SubmapType>::activateSubMap(const SubmapID submap_id) {
+void SubmapCollection<SubmapType>::activateSubmap(const SubmapID submap_id) {
   const auto it = id_to_submap_.find(submap_id);
   CHECK(it != id_to_submap_.end());
   active_submap_id_ = submap_id;
@@ -194,7 +194,7 @@ TsdfMap::Ptr SubmapCollection<SubmapType>::getProjectedMap() const {
 }
 
 template <typename SubmapType>
-bool SubmapCollection<SubmapType>::setSubMapPose(const SubmapID submap_id,
+bool SubmapCollection<SubmapType>::setSubmapPose(const SubmapID submap_id,
                                                  const Transformation& pose) {
   // Looking for the submap
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
@@ -210,7 +210,7 @@ bool SubmapCollection<SubmapType>::setSubMapPose(const SubmapID submap_id,
 }
 
 template <typename SubmapType>
-void SubmapCollection<SubmapType>::setSubMapPoses(
+void SubmapCollection<SubmapType>::setSubmapPoses(
     const TransformationVector& transforms) {
   CHECK_EQ(transforms.size(), id_to_submap_.size());
   // NOTE(alexmillane): This assumes that the order of transforms matches the
@@ -224,7 +224,7 @@ void SubmapCollection<SubmapType>::setSubMapPoses(
 }
 
 template <typename SubmapType>
-bool SubmapCollection<SubmapType>::getSubMapPose(
+bool SubmapCollection<SubmapType>::getSubmapPose(
     const SubmapID submap_id, Transformation* pose_ptr) const {
   // Looking for the submap
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
@@ -240,7 +240,7 @@ bool SubmapCollection<SubmapType>::getSubMapPose(
 }
 
 template <typename SubmapType>
-void SubmapCollection<SubmapType>::getSubMapPoses(
+void SubmapCollection<SubmapType>::getSubmapPoses(
     AlignedVector<Transformation>* submap_poses_ptr) const {
   CHECK_NOTNULL(submap_poses_ptr);
   // Extracting transforms
@@ -252,7 +252,7 @@ void SubmapCollection<SubmapType>::getSubMapPoses(
 }
 
 template <typename SubmapType>
-typename SubmapType::Ptr SubmapCollection<SubmapType>::getSubMapPtr(
+typename SubmapType::Ptr SubmapCollection<SubmapType>::getSubmapPtr(
     const SubmapID submap_id) {
   const auto submap_ptr_it = id_to_submap_.find(submap_id);
   if (submap_ptr_it != id_to_submap_.end()) {
@@ -263,7 +263,7 @@ typename SubmapType::Ptr SubmapCollection<SubmapType>::getSubMapPtr(
 }
 
 template <typename SubmapType>
-typename SubmapType::ConstPtr SubmapCollection<SubmapType>::getSubMapConstPtr(
+typename SubmapType::ConstPtr SubmapCollection<SubmapType>::getSubmapConstPtr(
     const SubmapID submap_id) const {
   const auto submap_ptr_it = id_to_submap_.find(submap_id);
   if (submap_ptr_it != id_to_submap_.end()) {

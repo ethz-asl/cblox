@@ -156,7 +156,7 @@ void TsdfSubmapServer::servicePointcloudQueue() {
                                       is_freespace_pointcloud);
 
     if (newSubmapRequired()) {
-      createNewSubMap(T_G_C);
+      createNewSubmap(T_G_C);
     }
 
     trajectory_visualizer_ptr_->addPose(T_G_C);
@@ -246,7 +246,7 @@ void TsdfSubmapServer::integratePointcloud(const Transformation& T_G_C,
 
 void TsdfSubmapServer::intializeMap(const Transformation& T_G_C) {
   // Just creates the first submap
-  createNewSubMap(T_G_C);
+  createNewSubmap(T_G_C);
 }
 
 bool TsdfSubmapServer::newSubmapRequired() const {
@@ -254,10 +254,10 @@ bool TsdfSubmapServer::newSubmapRequired() const {
           num_integrated_frames_per_submap_);
 }
 
-void TsdfSubmapServer::createNewSubMap(const Transformation& T_G_C) {
+void TsdfSubmapServer::createNewSubmap(const Transformation& T_G_C) {
   // Creating the submap
   const SubmapID submap_id =
-      tsdf_submap_collection_ptr_->createNewSubMap(T_G_C);
+      tsdf_submap_collection_ptr_->createNewSubmap(T_G_C);
   // Activating the submap in the frame integrator
   tsdf_submap_collection_integrator_ptr_->switchToActiveSubmap();
   // Resetting current submap counters
@@ -267,7 +267,7 @@ void TsdfSubmapServer::createNewSubMap(const Transformation& T_G_C) {
   active_submap_visualizer_ptr_->switchToActiveSubmap();
 
   // Publish the baseframes
-  visualizeSubMapBaseframes();
+  visualizeSubmapBaseframes();
 
   if (verbose_) {
     ROS_INFO_STREAM("Created a new submap with id: "
@@ -292,7 +292,7 @@ void TsdfSubmapServer::visualizeActiveSubmapMesh() {
 void TsdfSubmapServer::visualizeWholeMap() {
   // Looping through the whole map, meshing and publishing.
   for (const SubmapID submap_id : tsdf_submap_collection_ptr_->getIDs()) {
-    tsdf_submap_collection_ptr_->activateSubMap(submap_id);
+    tsdf_submap_collection_ptr_->activateSubmap(submap_id);
     active_submap_visualizer_ptr_->switchToActiveSubmap();
     visualizeActiveSubmapMesh();
   }
@@ -350,10 +350,10 @@ void TsdfSubmapServer::updateMeshEvent(const ros::TimerEvent& /*event*/) {
   }
 }
 
-void TsdfSubmapServer::visualizeSubMapBaseframes() const {
+void TsdfSubmapServer::visualizeSubmapBaseframes() const {
   // Get poses
   TransformationVector submap_poses;
-  tsdf_submap_collection_ptr_->getSubMapPoses(&submap_poses);
+  tsdf_submap_collection_ptr_->getSubmapPoses(&submap_poses);
   // Transform to message
   geometry_msgs::PoseArray pose_array_msg;
   posesToMsg(submap_poses, &pose_array_msg);

@@ -11,7 +11,7 @@ void SubmapMesher::generateSeparatedMesh(
   CHECK_NOTNULL(seperated_mesh_layer_ptr);
   // Getting the submaps
   const std::vector<typename SubmapType::ConstPtr> sub_maps =
-      submap_collection.getSubMapConstPtrs();
+      submap_collection.getSubmapConstPtrs();
   // Generating the mesh layers
   std::vector<MeshLayer::Ptr> sub_map_mesh_layers;
   generateSeparatedMeshLayers<SubmapType>(sub_maps, &sub_map_mesh_layers);
@@ -19,7 +19,7 @@ void SubmapMesher::generateSeparatedMesh(
   colorMeshLayersWithIndex(&sub_map_mesh_layers);
   // Get submap transforms
   AlignedVector<Transformation> sub_map_poses;
-  submap_collection.getSubMapPoses(&sub_map_poses);
+  submap_collection.getSubmapPoses(&sub_map_poses);
   // Combining the mesh layers
   // NOTE(alexmillane): Have to construct a vector of pointers to const...
   combineMeshLayers(std::vector<MeshLayer::ConstPtr>(

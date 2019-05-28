@@ -17,7 +17,7 @@ void SubmapMesher::generatePatchMeshes(
   CHECK_NOTNULL(sub_map_mesh_layers_ptr);
   // Getting the submaps
   const std::vector<TsdfSubmap::ConstPtr> tsdf_sub_maps =
-      tsdf_submap_collection.getSubMapConstPtrs();
+      tsdf_submap_collection.getSubmapConstPtrs();
   // Generating the mesh layers
   generateSeparatedMeshLayers<TsdfSubmap>(tsdf_sub_maps,
                                           sub_map_mesh_layers_ptr);
