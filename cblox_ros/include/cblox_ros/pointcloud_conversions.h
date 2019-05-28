@@ -8,10 +8,10 @@
 namespace cblox {
 
 // Convert the PCL pointcloud into our awesome format.
-inline void
-convertPointcloudMsg(const voxblox::ColorMap &color_map,
-                     const sensor_msgs::PointCloud2::Ptr &pointcloud_msg,
-                     Pointcloud *points_C_ptr, Colors *colors_ptr) {
+inline void convertPointcloudMsg(
+    const voxblox::ColorMap& color_map,
+    const sensor_msgs::PointCloud2::Ptr& pointcloud_msg,
+    Pointcloud* points_C_ptr, Colors* colors_ptr) {
   CHECK(pointcloud_msg);
   CHECK_NOTNULL(points_C_ptr);
   CHECK_NOTNULL(colors_ptr);
@@ -69,6 +69,6 @@ convertPointcloudMsg(const voxblox::ColorMap &color_map,
   ptcloud_timer.Stop();
 }
 
-} // namespace cblox
+}  // namespace cblox
 
-#endif // CBLOX_ROS_POINTCLOUD_CONVERSIONS_H_
+#endif  // CBLOX_ROS_POINTCLOUD_CONVERSIONS_H_
