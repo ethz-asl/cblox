@@ -10,8 +10,8 @@ namespace cblox {
 namespace io {
 
 bool SaveTransformationArray(
-    const AlignedVector<Transformation> &transformation_array,
-    const std::string &file_path) {
+    const AlignedVector<Transformation>& transformation_array,
+    const std::string& file_path) {
   // Opening the file (if we can)
   CHECK(!file_path.empty());
   std::fstream proto_file;
@@ -31,7 +31,7 @@ bool SaveTransformationArray(
 
   // Looping over the transforms and saving them to an array
   size_t transform_index = 0;
-  for (const Transformation &transform : transformation_array) {
+  for (const Transformation& transform : transformation_array) {
     LOG(INFO) << "Saving the transform number: " << transform_index;
     transform_index++;
     // Getting the proto
@@ -52,8 +52,8 @@ bool SaveTransformationArray(
 }
 
 bool LoadTransformationArray(
-    const std::string &file_path,
-    AlignedVector<Transformation> *transformation_array_ptr) {
+    const std::string& file_path,
+    AlignedVector<Transformation>* transformation_array_ptr) {
   CHECK_NOTNULL(transformation_array_ptr);
 
   // Opening the file

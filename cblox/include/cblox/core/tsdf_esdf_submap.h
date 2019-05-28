@@ -16,7 +16,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
 
   struct Config : TsdfSubmap::Config, EsdfMap::Config {};
 
-  TsdfEsdfSubmap(const Transformation &T_M_S, SubmapID submap_id, Config config,
+  TsdfEsdfSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config,
                  voxblox::EsdfIntegrator::Config esdf_integrator_config =
                      voxblox::EsdfIntegrator::Config())
       : TsdfSubmap(T_M_S, submap_id, config),
@@ -38,7 +38,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
 
   // Returns the underlying ESDF map pointers
   EsdfMap::Ptr getEsdfMapPtr() { return esdf_map_; }
-  const EsdfMap &getEsdfMap() const { return *esdf_map_; }
+  const EsdfMap& getEsdfMap() const { return *esdf_map_; }
 
   /* NOTE: When converting TsdfEsdf submaps into protobuffs, only their
    *       TSDF map is converted. The ESDF can be recomputed when needed.

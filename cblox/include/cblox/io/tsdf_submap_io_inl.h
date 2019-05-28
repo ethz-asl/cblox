@@ -18,9 +18,9 @@ namespace io {
 
 template <typename SubmapType>
 bool LoadSubmapFromStream(
-    std::fstream *proto_file_ptr,
+    std::fstream* proto_file_ptr,
     typename SubmapCollection<SubmapType>::Ptr tsdf_submap_collection_ptr,
-    uint32_t *tmp_byte_offset_ptr) {
+    uint32_t* tmp_byte_offset_ptr) {
   CHECK_NOTNULL(proto_file_ptr);
   CHECK(tsdf_submap_collection_ptr);
   CHECK_NOTNULL(tmp_byte_offset_ptr);
@@ -64,8 +64,8 @@ bool LoadSubmapFromStream(
 
 template <typename SubmapType>
 bool LoadSubmapCollection(
-    const std::string &file_path,
-    typename SubmapCollection<SubmapType>::Ptr *tsdf_submap_collection_ptr) {
+    const std::string& file_path,
+    typename SubmapCollection<SubmapType>::Ptr* tsdf_submap_collection_ptr) {
   CHECK_NOTNULL(tsdf_submap_collection_ptr);
   // Open and check the file
   std::fstream proto_file;
