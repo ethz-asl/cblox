@@ -26,7 +26,7 @@ void TsdfSubmapCollectionIntegrator::switchToActiveSubmap() {
   //                    integrator wont be affecting the latest submap in the
   //                    collection.
   updateIntegratorTarget(tsdf_submap_collection_ptr_->getActiveTsdfMapPtr());
-  T_G_S_active_ = tsdf_submap_collection_ptr_->getActiveSubMapPose();
+  T_G_S_active_ = tsdf_submap_collection_ptr_->getActiveSubmapPose();
 }
 
 void TsdfSubmapCollectionIntegrator::initializeIntegrator(

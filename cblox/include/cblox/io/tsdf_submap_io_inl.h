@@ -47,7 +47,7 @@ bool LoadSubmapFromStream(
             << q.x() << ", " << q.y() << ", " << q.z() << " ]";
 
   // Creating a new submap to hold the data
-  tsdf_submap_collection_ptr->createNewSubMap(T_M_S, tsdf_sub_map_proto.id());
+  tsdf_submap_collection_ptr->createNewSubmap(T_M_S, tsdf_sub_map_proto.id());
 
   // Getting the blocks for this submap (the tsdf layer)
   if (!voxblox::io::LoadBlocksFromStream(

@@ -34,45 +34,47 @@ class SubmapCollection {
   // NOTE(alexmillane): T_G_S - Transformation between submap frame (S) and
   //                           the global tracking frame (G).
   // NOTE(alexmillane): Creating a new submap automatically makes it active.
-  void createNewSubMap(const Transformation &T_G_S, const SubmapID submap_id);
-  SubmapID createNewSubMap(const Transformation &T_G_S);
+  void createNewSubmap(const Transformation &T_G_S, const SubmapID submap_id);
+  SubmapID createNewSubmap(const Transformation &T_G_S);
 
   // Create a new submap which duplicates an existing source submap
-  bool duplicateSubMap(const SubmapID source_submap_id,
+  bool duplicateSubmap(const SubmapID source_submap_id,
                        const SubmapID new_submap_id);
 
   // Gets a const pointer to a raw submap
   // NOTE(alexmillane): This function hard fails when the submap doesn't
   // exist... This puts the onus on the caller to call exists() first. I don't
   // like this but I can't see a solution.
-  const SubmapType &getSubMap(const SubmapID submap_id) const;
-  // Note(alexmillane): Unlike the above this function returns a nullptr when
-  // the map doesn't exist. No hard crash.
-  typename SubmapType::ConstPtr getSubMapConstPtrById(
+  const SubmapType &getSubmap(const SubmapID submap_id) const;
+  // Note(alexmillane): Unlike the above method, the two methods below return a
+  // nullptr when the map doesn't exist. No hard crash.
+  typename SubmapType::Ptr getSubmapPtr(const SubmapID submap_id);
+  typename SubmapType::ConstPtr getSubmapConstPtr(
       const SubmapID submap_id) const;
   // A list of the submaps
-  const std::vector<typename SubmapType::Ptr> getSubMapPtrs() const;
-  const std::vector<typename SubmapType::ConstPtr> getSubMapConstPtrs() const;
+  const std::vector<typename SubmapType::Ptr> getSubmapPtrs() const;
+  const std::vector<typename SubmapType::ConstPtr> getSubmapConstPtrs() const;
 
   // Interactions with the active submap
-  const SubmapType &getActiveSubMap() const;
-  typename SubmapType::Ptr getActiveSubMapPtr();
-  const Transformation &getActiveSubMapPose() const;
-  const SubmapID getActiveSubMapID() const;
+  const SubmapType &getActiveSubmap() const;
+  typename SubmapType::Ptr getActiveSubmapPtr();
+  const Transformation &getActiveSubmapPose() const;
+  const SubmapID getActiveSubmapID() const;
 
   // Access the tsdf_map member of the active submap
   TsdfMap::Ptr getActiveTsdfMapPtr();
   const TsdfMap &getActiveTsdfMap() const;
 
   // Activate a submap
-  // NOTE(alexmillane): Note that creating a new submap automatically activates it.
-  void activateSubMap(const SubmapID submap_id);
+  // NOTE(alexmillane): Note that creating a new submap automatically activates
+  //                    it.
+  void activateSubmap(const SubmapID submap_id);
 
   // Interacting with the submap poses
-  bool setSubMapPose(const SubmapID submap_id, const Transformation &pose);
-  void setSubMapPoses(const TransformationVector &transforms);
-  bool getSubMapPose(const SubmapID submap_id, Transformation *pose_ptr) const;
-  void getSubMapPoses(TransformationVector* submap_poses) const;
+  bool setSubmapPose(const SubmapID submap_id, const Transformation &pose);
+  void setSubmapPoses(const TransformationVector &transforms);
+  bool getSubmapPose(const SubmapID submap_id, Transformation *pose_ptr) const;
+  void getSubmapPoses(TransformationVector *submap_poses) const;
 
   // Clears the collection, leaving an empty map
   void clear() { id_to_submap_.clear(); }
