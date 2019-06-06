@@ -5,6 +5,7 @@
 #include <voxblox/utils/planning_utils.h>
 #include <voxblox_skeleton/skeleton.h>
 #include <voxblox_skeleton/skeleton_generator.h>
+#include <voxblox_skeleton/sparse_graph_planner.h>
 
 namespace cblox {
 
@@ -31,16 +32,22 @@ public:
                           Eigen::Vector3d* upper_bound);
 
   // skeleton functions
-  void generateSkeleton() {
-    skeleton_generator_.generateSkeleton();
-  }
-  void generateSparseGraph() {
-    skeleton_generator_.generateSparseGraph();
-  }
+  void generateGlobalSparseGraph();
+  void setupGraphPlanner();
+
 
   // get functions
   voxblox::SkeletonGenerator* getSkeletonGenerator() {
     return &skeleton_generator_;
+  }
+  const voxblox::SparseSkeletonGraph& getConstGlobalSparseGraph() {
+    return global_skeleton_graph_;
+  };
+  voxblox::SparseSkeletonGraph& getGlobalSparseGraph() {
+    return global_skeleton_graph_;
+  }
+  voxblox::SparseGraphPlanner* getSkeletonGraphPlanner() {
+    return &skeleton_graph_planner_;
   }
 
  private:
@@ -48,6 +55,8 @@ public:
   Eigen::Vector3d upper_bound_;
 
   voxblox::SkeletonGenerator skeleton_generator_;
+  voxblox::SparseSkeletonGraph global_skeleton_graph_;
+  voxblox::SparseGraphPlanner skeleton_graph_planner_;
 };
 
 } // namespace cblox
