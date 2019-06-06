@@ -83,8 +83,6 @@ SubmapServer<SubmapType>::SubmapServer(
   std::string map_path;
   nh_private_.param("map_path", map_path, map_path);
   if (map_path.size() > 0) {
-    ros::Duration sleepy(10);
-    sleepy.sleep();
     ROS_INFO("[SubmapServer] Loading cblox map.");
     loadMap(map_path);
   }
