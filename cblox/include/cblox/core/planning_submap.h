@@ -16,11 +16,13 @@ public:
 
   PlanningSubmap(Config config)
       : TsdfEsdfSubmap(config),
-        skeleton_generator_(esdf_map_->getEsdfLayerPtr()) { }
+        skeleton_generator_(
+            new voxblox::SkeletonGenerator(esdf_map_->getEsdfLayerPtr())) { }
 
   PlanningSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config)
       : TsdfEsdfSubmap(T_M_S, submap_id, config),
-        skeleton_generator_(esdf_map_->getEsdfLayerPtr()) { }
+        skeleton_generator_(
+            new voxblox::SkeletonGenerator(esdf_map_->getEsdfLayerPtr())) { }
 
   // map functions
   void computeMapBounds();
@@ -34,11 +36,14 @@ public:
   // skeleton functions
   void generateGlobalSparseGraph();
   void setupGraphPlanner();
-
+  void clearSkeletonGenerator() {
+    skeleton_generator_ =
+        new voxblox::SkeletonGenerator(esdf_map_->getEsdfLayerPtr());
+  }
 
   // get functions
   voxblox::SkeletonGenerator* getSkeletonGenerator() {
-    return &skeleton_generator_;
+    return skeleton_generator_;
   }
   const voxblox::SparseSkeletonGraph& getConstGlobalSparseGraph() {
     return global_skeleton_graph_;
@@ -54,7 +59,7 @@ public:
   Eigen::Vector3d lower_bound_;
   Eigen::Vector3d upper_bound_;
 
-  voxblox::SkeletonGenerator skeleton_generator_;
+  voxblox::SkeletonGenerator* skeleton_generator_;
   voxblox::SparseSkeletonGraph global_skeleton_graph_;
   voxblox::SparseGraphPlanner skeleton_graph_planner_;
 };

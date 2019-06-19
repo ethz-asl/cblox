@@ -43,7 +43,8 @@ void PlanningSubmap::getGlobalMapBounds(Eigen::Vector3d* lower_bound,
   }
 
 void PlanningSubmap::generateGlobalSparseGraph() {
-  global_skeleton_graph_ = skeleton_generator_.getSparseGraph();
+  global_skeleton_graph_.clear();
+  global_skeleton_graph_ = skeleton_generator_->getSparseGraph();
   global_skeleton_graph_.transformFrame(T_M_S_);
   setupGraphPlanner();
 }
