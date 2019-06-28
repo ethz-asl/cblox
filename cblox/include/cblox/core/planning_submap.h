@@ -5,6 +5,7 @@
 #include <voxblox/utils/planning_utils.h>
 #include <voxblox_skeleton/skeleton.h>
 #include <voxblox_skeleton/skeleton_generator.h>
+#include <cblox/core/prm_generator.h>
 #include <voxblox_skeleton/sparse_graph_planner.h>
 
 namespace cblox {
@@ -14,15 +15,18 @@ public:
   typedef std::shared_ptr<PlanningSubmap> Ptr;
   typedef std::shared_ptr<const PlanningSubmap> ConstPtr;
 
-  PlanningSubmap(Config config)
+  explicit PlanningSubmap(Config config)
       : TsdfEsdfSubmap(config),
         skeleton_generator_(
-            new voxblox::SkeletonGenerator(esdf_map_->getEsdfLayerPtr())) { }
+            new voxblox::SkeletonGenerator(esdf_map_->getEsdfLayerPtr())),
+        prm_generator_(new test_namespace::PrmGenerator()) { }
 
-  PlanningSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config)
+  explicit PlanningSubmap(
+      const Transformation& T_M_S, SubmapID submap_id, Config config)
       : TsdfEsdfSubmap(T_M_S, submap_id, config),
         skeleton_generator_(
-            new voxblox::SkeletonGenerator(esdf_map_->getEsdfLayerPtr())) { }
+            new voxblox::SkeletonGenerator(esdf_map_->getEsdfLayerPtr())),
+        prm_generator_(new test_namespace::PrmGenerator()) { }
 
   // map functions
   void computeMapBounds();
@@ -34,34 +38,50 @@ public:
                           Eigen::Vector3d* upper_bound);
 
   // skeleton functions
+  void setLocalGraph(const voxblox::SparseGraph& graph) {
+    local_graph_ = graph;
+  };
   void generateGlobalSparseGraph();
-  void setupGraphPlanner();
+
+  void setupPrmGenerator(double robot_radius);
   void clearSkeletonGenerator() {
     skeleton_generator_ =
         new voxblox::SkeletonGenerator(esdf_map_->getEsdfLayerPtr());
   }
 
+  void setupGraphPlanner();
+
   // get functions
   voxblox::SkeletonGenerator* getSkeletonGenerator() {
     return skeleton_generator_;
   }
-  const voxblox::SparseSkeletonGraph& getConstGlobalSparseGraph() {
-    return global_skeleton_graph_;
-  };
-  voxblox::SparseSkeletonGraph& getGlobalSparseGraph() {
-    return global_skeleton_graph_;
+  test_namespace::PrmGenerator* getPrmGenerator() {
+    return prm_generator_;
   }
-  voxblox::SparseGraphPlanner* getSkeletonGraphPlanner() {
-    return &skeleton_graph_planner_;
+  const voxblox::SparseGraph& getConstGlobalSparseGraph() {
+    return sparse_graph_;
+  };
+  voxblox::SparseGraph& getGlobalSparseGraph() {
+    return sparse_graph_;
+  }
+  voxblox::SparseGraphPlanner* getGraphPlanner() {
+    return &graph_planner_;
   }
 
  private:
+  double getMapDistance(const Eigen::Vector3d& position);
+  bool checkCollision(const Eigen::Vector3d& start, const Eigen::Vector3d& goal,
+      const double& robot_radius);
+
   Eigen::Vector3d lower_bound_;
   Eigen::Vector3d upper_bound_;
 
   voxblox::SkeletonGenerator* skeleton_generator_;
-  voxblox::SparseSkeletonGraph global_skeleton_graph_;
-  voxblox::SparseGraphPlanner skeleton_graph_planner_;
+  test_namespace::PrmGenerator* prm_generator_;
+
+  voxblox::SparseGraph local_graph_;
+  voxblox::SparseGraph sparse_graph_;
+  voxblox::SparseGraphPlanner graph_planner_;
 };
 
 } // namespace cblox

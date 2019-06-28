@@ -37,7 +37,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   }
 
   // Generate the ESDF from the TSDF
-  void generateEsdf();
+  void generateEsdf(bool full_euclidian = false);
 
   void setTsdfMap(const voxblox::Layer<TsdfVoxel>& tsdf_layer);
 

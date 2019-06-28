@@ -20,5 +20,7 @@
   <depend>voxblox</depend>
   <depend>minkindr</depend>
   <depend>voxblox_skeleton</depend>
+  <depend>mav_planning_common</depend>
+  <depend>mav_trajectory_generation</depend>
 
 </package>

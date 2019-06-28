@@ -458,7 +458,7 @@ bool SubmapServer<SubmapType>::loadMap(const std::string& file_path) {
   if (success) {
     ROS_INFO("Successfully loaded TSDFSubmapCollection.");
     constexpr bool kVisualizeMapOnLoad = true;
-    if (kVisualizeMapOnLoad) {
+    if (kVisualizeMapOnLoad and verbose_) {
       ROS_INFO("Publishing loaded map's mesh.");
       visualizeWholeMap();
     }

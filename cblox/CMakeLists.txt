@@ -49,6 +49,7 @@ cs_add_library(cblox_lib
   src/core/tsdf_submap.cpp
   src/core/tsdf_esdf_submap.cpp
   src/core/planning_submap.cpp
+  src/core/prm_generator.cpp
   src/integrator/tsdf_submap_collection_integrator.cpp
   src/utils/quat_transformation_protobuf_utils.cpp
   src/mesh/submap_mesher.cpp

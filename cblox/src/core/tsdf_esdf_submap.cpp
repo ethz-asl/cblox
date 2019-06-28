@@ -2,7 +2,7 @@
 #include <voxblox/integrator/esdf_integrator.h>
 
 namespace cblox {
-void TsdfEsdfSubmap::generateEsdf() {
+void TsdfEsdfSubmap::generateEsdf(bool full_euclidian) {
   // Instantiate the integrator
   voxblox::EsdfIntegrator::Config esdf_integrator_config;
   voxblox::EsdfIntegrator esdf_integrator(esdf_integrator_config,
@@ -10,6 +10,7 @@ void TsdfEsdfSubmap::generateEsdf() {
                                           esdf_map_->getEsdfLayerPtr());
   // Generate the ESDF
   LOG(INFO) << "Generating ESDF from TSDF for submap with ID: " << submap_id_;
+  esdf_integrator.setFullEuclidean(full_euclidian);
   esdf_integrator.updateFromTsdfLayerBatch();
 }
 
