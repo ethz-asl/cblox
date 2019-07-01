@@ -72,6 +72,33 @@ void SubmapMesher::generateSeparatedMeshLayers(
     sub_map_mesh_layers->push_back(mesh_layer_ptr);
   }
 }
+
+template <typename SubmapType>
+void SubmapMesher::generateMeshInGlobalFrame(const SubmapType& submap,
+                                             MeshLayer* mesh_layer_G_ptr) {
+  CHECK_NOTNULL(mesh_layer_G_ptr);
+  // Mesh in submap frame
+  MeshLayer mesh_layer_S(submap.getTsdfMap().block_size());
+  generateMeshInSubmapFrame(submap, &mesh_layer_S);
+  // To world frame
+  const Transformation& T_G_S = submap.getPose();
+  transformAndAddTrianglesToLayer(mesh_layer_S, T_G_S, mesh_layer_G_ptr);
+}
+
+template <typename SubmapType>
+void SubmapMesher::generateMeshInSubmapFrame(const SubmapType& submap,
+                                             MeshLayer* mesh_layer_S_ptr) {
+  CHECK_NOTNULL(mesh_layer_S_ptr);
+  // Getting the TSDF data
+  const TsdfMap& tsdf_map = submap.getTsdfMap();
+  // Generating the mesh
+  MeshIntegrator<TsdfVoxel> mesh_integrator(
+      mesh_config_, tsdf_map.getTsdfLayer(), mesh_layer_S_ptr);
+  constexpr bool only_mesh_updated_blocks = false;
+  constexpr bool clear_updated_flag = false;
+  mesh_integrator.generateMesh(only_mesh_updated_blocks, clear_updated_flag);
+}
+
 }  // namespace cblox
 
 #endif  // CBLOX_MESH_SUBMAP_MESHER_INL_H_
