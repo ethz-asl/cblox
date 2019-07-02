@@ -23,6 +23,8 @@ namespace test_namespace {
   }
 
   void PrmGenerator::growRoadmap(const ros::Duration& duration) {
+      mav_trajectory_generation::timing::Timer
+          grow_prm_timer("prm/grow_roadmap");
     roadmap_.clear();
     double max_dist = 3.0;
     current_time_ = ros::Time::now();
@@ -66,8 +68,8 @@ namespace test_namespace {
           connect_neighbors_timer("prm/grow_roadmap/connect_neighbors");
       for (int vertex_id : neighbors) {
         const voxblox::GraphVertex &neighbor = roadmap_.getVertex(vertex_id);
-        if (!check_collision_function_(new_state.cast<double>(), neighbor.point.cast<double>(),
-                robot_radius_)) {
+        if (!check_collision_function_(new_state.cast<double>(),
+                neighbor.point.cast<double>(), robot_radius_)) {
           voxblox::GraphEdge new_edge;
           new_edge.start_distance = new_vertex.distance;
           new_edge.start_point = new_vertex.point;
@@ -81,10 +83,10 @@ namespace test_namespace {
       }
       connect_neighbors_timer.Stop();
     }
-    bool verbose_ = true;
     if (verbose_) {
       ROS_INFO("[PrmGenerator] %d nodes and %d edges", num_nodes, num_edges);
     }
+    grow_prm_timer.Stop();
   }
 
 }

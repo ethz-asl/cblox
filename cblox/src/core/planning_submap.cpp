@@ -46,8 +46,8 @@ void PlanningSubmap::generateGlobalSparseGraph() {
   sparse_graph_.clear();
   sparse_graph_ = local_graph_;
   sparse_graph_.transformFrame(T_M_S_);
-  setupGraphPlanner();
-
+//  setupGraphPlanner();
+  /*
   std::vector<int64_t> ids;
   local_graph_.getAllVertexIds(&ids);
   int num_nodes = ids.size();
@@ -64,6 +64,7 @@ void PlanningSubmap::generateGlobalSparseGraph() {
   num_edges = ids.size();
   ROS_INFO("global graph: %d nodes, %d edges",
            num_nodes, num_edges);
+  */
 }
 
 void PlanningSubmap::setupGraphPlanner() {
