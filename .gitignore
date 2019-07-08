@@ -32,4 +32,8 @@
 *.app
 
 # IDE
+<<<<<<< HEAD
 .idea/
+=======
+**/.idea
+>>>>>>> master
