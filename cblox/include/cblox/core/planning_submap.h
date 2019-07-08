@@ -58,10 +58,7 @@ public:
   test_namespace::PrmGenerator* getPrmGenerator() {
     return prm_generator_;
   }
-  const voxblox::SparseGraph& getConstGlobalSparseGraph() {
-    return sparse_graph_;
-  };
-  voxblox::SparseGraph& getGlobalSparseGraph() {
+  const voxblox::SparseGraph& getGlobalSparseGraph() {
     return sparse_graph_;
   }
   voxblox::SparseGraphPlanner* getGraphPlanner() {
