@@ -90,8 +90,8 @@ double PlanningSubmap::getMapDistance(const Eigen::Vector3d& position) {
   }
   return 0.0;
 }
-bool PlanningSubmap::checkCollision(
-    const Eigen::Vector3d& start, const Eigen::Vector3d& goal, const double& robot_radius) {
+bool PlanningSubmap::checkCollision(const Eigen::Vector3d& start,
+    const Eigen::Vector3d& goal, const double& robot_radius) {
   Eigen::Vector3d position = start;
   Eigen::Vector3d direction = (goal - start).normalized();
   double distance = (goal - start).norm();

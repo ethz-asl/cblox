@@ -68,18 +68,19 @@ namespace test_namespace {
           connect_neighbors_timer("prm/grow_roadmap/connect_neighbors");
       for (int vertex_id : neighbors) {
         const voxblox::GraphVertex &neighbor = roadmap_.getVertex(vertex_id);
-        if (!check_collision_function_(new_state.cast<double>(),
+        if (check_collision_function_(new_state.cast<double>(),
                 neighbor.point.cast<double>(), robot_radius_)) {
-          voxblox::GraphEdge new_edge;
-          new_edge.start_distance = new_vertex.distance;
-          new_edge.start_point = new_vertex.point;
-          new_edge.start_vertex = new_vertex_id;
-          new_edge.end_point = neighbor.point;
-          new_edge.end_distance = neighbor.distance;
-          new_edge.end_vertex = neighbor.vertex_id;
-          roadmap_.addEdge(new_edge);
-          num_edges++;
+          continue;
         }
+        voxblox::GraphEdge new_edge;
+        new_edge.start_distance = new_vertex.distance;
+        new_edge.start_point = new_vertex.point;
+        new_edge.start_vertex = new_vertex_id;
+        new_edge.end_point = neighbor.point;
+        new_edge.end_distance = neighbor.distance;
+        new_edge.end_vertex = neighbor.vertex_id;
+        roadmap_.addEdge(new_edge);
+        num_edges++;
       }
       connect_neighbors_timer.Stop();
     }
