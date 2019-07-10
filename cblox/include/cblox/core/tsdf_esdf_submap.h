@@ -11,6 +11,8 @@ namespace cblox {
 
 class TsdfEsdfSubmap : public TsdfSubmap {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef std::shared_ptr<TsdfEsdfSubmap> Ptr;
   typedef std::shared_ptr<const TsdfEsdfSubmap> ConstPtr;
 

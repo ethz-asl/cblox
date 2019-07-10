@@ -14,6 +14,8 @@ namespace cblox {
 
 class TsdfSubmapCollectionIntegrator {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   TsdfSubmapCollectionIntegrator(
       const voxblox::TsdfIntegratorBase::Config& tsdf_integrator_config,
       const voxblox::TsdfIntegratorType& tsdf_integrator_type,

@@ -26,6 +26,8 @@ using voxblox::VertexIndex;
 
 class SubmapMesher {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef std::shared_ptr<SubmapMesher> Ptr;
   typedef std::shared_ptr<const SubmapMesher> ConstPtr;
 

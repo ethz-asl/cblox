@@ -15,6 +15,8 @@ namespace cblox {
 template <typename SubmapType>
 class SubmapCollection {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef std::shared_ptr<SubmapCollection> Ptr;
   typedef std::shared_ptr<const SubmapCollection> ConstPtr;
 

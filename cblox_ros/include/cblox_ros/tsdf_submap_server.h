@@ -36,6 +36,8 @@ constexpr int kDefaultPointcloudQueueSize = 1;
 // Receives ROS Data and produces a collection of submaps
 class TsdfSubmapServer {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  
   // Constructor
   TsdfSubmapServer(const ros::NodeHandle& nh,
                    const ros::NodeHandle& nh_private);

@@ -22,6 +22,8 @@ constexpr int kDefaultColorCycleLength = 20;
 
 class ActiveSubmapVisualizer {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef std::shared_ptr<ActiveSubmapVisualizer> Ptr;
   typedef std::shared_ptr<const ActiveSubmapVisualizer> ConstPtr;
 

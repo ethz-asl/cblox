@@ -16,6 +16,8 @@ namespace cblox {
 // Class representing TSDF submap
 class TsdfSubmap {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef std::shared_ptr<TsdfSubmap> Ptr;
   typedef std::shared_ptr<const TsdfSubmap> ConstPtr;
   typedef TsdfMap::Config Config;
@@ -73,8 +75,6 @@ class TsdfSubmap {
   mutable std::mutex transformation_mutex;
   Transformation T_M_S_;
 
- public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 }  // namespace cblox

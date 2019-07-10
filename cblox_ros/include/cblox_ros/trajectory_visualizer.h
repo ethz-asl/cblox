@@ -9,6 +9,8 @@ namespace cblox {
 
 class TrajectoryVisualizer {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef std::shared_ptr<TrajectoryVisualizer> Ptr;
   typedef std::shared_ptr<const TrajectoryVisualizer> ConstPtr;
 
