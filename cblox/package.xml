@@ -18,5 +18,6 @@
   <depend>glog_catkin</depend>
   <depend>voxblox</depend>
   <depend>minkindr</depend>
+  <depend>eigen_catkin</depend>
 
 </package>

@@ -11,6 +11,8 @@ namespace cblox {
 
 class TsdfEsdfSubmap : public TsdfSubmap {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef std::shared_ptr<TsdfEsdfSubmap> Ptr;
   typedef std::shared_ptr<const TsdfEsdfSubmap> ConstPtr;
 
@@ -49,6 +51,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
  protected:
   EsdfMap::Ptr esdf_map_;
   voxblox::EsdfIntegrator::Config esdf_integrator_config_;
+  std::shared_ptr<voxblox::EsdfIntegrator> esdf_integrator_;
 };
 }  // namespace cblox
 
