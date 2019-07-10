@@ -6,11 +6,10 @@ add_definitions(-std=c++11 -march=native)
 find_package(catkin_simple REQUIRED)
 catkin_simple(ALL_DEPS_REQUIRED)
 
+add_definitions(-DEIGEN_DONT_VECTORIZE)
+
 # Mark these as system deps to supress warnings.
 include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
-
-find_package(Eigen3 REQUIRED)
-include_directories(${Eigen_INCLUDE_DIRS})
 
 ############
 # PROTOBUF #
