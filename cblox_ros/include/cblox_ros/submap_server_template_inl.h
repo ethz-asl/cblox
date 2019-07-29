@@ -191,7 +191,7 @@ void SubmapServer<SubmapType>::servicePointcloudQueue() {
                                       is_freespace_pointcloud);
 
     if (newSubmapRequired()) {
-      createNewSubMap(T_G_C);
+      createNewSubmap(T_G_C);
     }
 
     trajectory_visualizer_ptr_->addPose(T_G_C);
@@ -285,7 +285,7 @@ void SubmapServer<SubmapType>::integratePointcloud(const Transformation& T_G_C,
 template <typename SubmapType>
 void SubmapServer<SubmapType>::intializeMap(const Transformation& T_G_C) {
   // Just creates the first submap
-  createNewSubMap(T_G_C);
+  createNewSubmap(T_G_C);
 }
 
 template <typename SubmapType>
@@ -297,32 +297,32 @@ bool SubmapServer<SubmapType>::newSubmapRequired() const {
 template <typename SubmapType>
 inline void SubmapServer<SubmapType>::finishSubmap() {
   if (submap_collection_ptr->exists(
-      submap_collection_ptr->getActiveSubMapID())) {
+      submap_collection_ptr->getActiveSubmapID())) {
     // publishing the old submap
-    submap_collection_ptr->getActiveSubMapPtr()->endRecordingTime();
-    publishSubmap(submap_collection_ptr->getActiveSubMapID());
+    submap_collection_ptr->getActiveSubmapPtr()->endRecordingTime();
+    publishSubmap(submap_collection_ptr->getActiveSubmapID());
     // generating ESDF map
-    submap_collection_ptr->getActiveSubMapPtr()->generateEsdf();
+    submap_collection_ptr->getActiveSubmapPtr()->generateEsdf();
   }
 }
 template<>
 inline void SubmapServer<TsdfSubmap>::finishSubmap() {
   if (submap_collection_ptr->exists(
-      submap_collection_ptr->getActiveSubMapID())) {
+      submap_collection_ptr->getActiveSubmapID())) {
     // publishing the old submap
-    submap_collection_ptr->getActiveSubMapPtr()->endRecordingTime();
-    publishSubmap(submap_collection_ptr->getActiveSubMapID());
+    submap_collection_ptr->getActiveSubmapPtr()->endRecordingTime();
+    publishSubmap(submap_collection_ptr->getActiveSubmapID());
   }
 }
 
 template <typename SubmapType>
-void SubmapServer<SubmapType>::createNewSubMap(const Transformation& T_G_C) {
+void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C) {
   // finishing up the last submap
   finishSubmap();
 
   // Creating the submap
   const SubmapID submap_id =
-      submap_collection_ptr->createNewSubMap(T_G_C);
+      tsdf_submap_collection_ptr_->createNewSubmap(T_G_C);
   // Activating the submap in the frame integrator
   tsdf_submap_collection_integrator_ptr_->switchToActiveSubmap();
   // Resetting current submap counters
@@ -332,7 +332,7 @@ void SubmapServer<SubmapType>::createNewSubMap(const Transformation& T_G_C) {
   active_submap_visualizer_ptr_->switchToActiveSubmap();
 
   // Publish the baseframes
-  visualizeSubMapBaseframes();
+  visualizeSubmapBaseframes();
 
   // Time the start of recording
   submap_collection_ptr->getActiveSubMapPtr()->startRecordingTime();
@@ -361,8 +361,8 @@ void SubmapServer<SubmapType>::visualizeActiveSubmapMesh() {
 template <typename SubmapType>
 void SubmapServer<SubmapType>::visualizeWholeMap() {
   // Looping through the whole map, meshing and publishing.
-  for (const SubmapID submap_id : submap_collection_ptr->getIDs()) {
-    submap_collection_ptr->activateSubMap(submap_id);
+  for (const SubmapID submap_id : tsdf_submap_collection_ptr_->getIDs()) {
+    tsdf_submap_collection_ptr_->activateSubMap(submap_id);
     active_submap_visualizer_ptr_->switchToActiveSubmap();
     visualizeActiveSubmapMesh();
     publishSubmap(submap_id);
@@ -424,11 +424,10 @@ void SubmapServer<SubmapType>::updateMeshEvent(const ros::TimerEvent& /*event*/)
   }
 }
 
-template <typename SubmapType>
-void SubmapServer<SubmapType>::visualizeSubMapBaseframes() const {
+void TsdfSubmapServer::visualizeSubMapBaseframes() const {
   // Get poses
   TransformationVector submap_poses;
-  submap_collection_ptr->getSubMapPoses(&submap_poses);
+  tsdf_submap_collection_ptr_->getSubMapPoses(&submap_poses);
   // Transform to message
   geometry_msgs::PoseArray pose_array_msg;
   posesToMsg(submap_poses, &pose_array_msg);

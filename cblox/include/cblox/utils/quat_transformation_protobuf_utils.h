@@ -8,12 +8,12 @@
 namespace cblox {
 namespace conversions {
 
-void transformKindrToProto(const Transformation &transformation,
-                           QuatTransformationProto *quat_transformation_proto);
+void transformKindrToProto(const Transformation& transformation,
+                           QuatTransformationProto* quat_transformation_proto);
 
 void transformProtoToKindr(
-    const QuatTransformationProto &quat_transformation_proto,
-    Transformation *transformation);
+    const QuatTransformationProto& quat_transformation_proto,
+    Transformation* transformation);
 
 }  // namespace conversions
 }  // namespace cblox

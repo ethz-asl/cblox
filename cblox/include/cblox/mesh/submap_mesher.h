@@ -53,6 +53,14 @@ class SubmapMesher {
       const std::vector<typename SubmapType::ConstPtr> &sub_maps,
       std::vector<MeshLayer::Ptr> *sub_map_mesh_layers);
 
+  // Generating a mesh for a single submap
+  template <typename SubmapType>
+  void generateMeshInGlobalFrame(const SubmapType& submap,
+                                 MeshLayer* mesh_layer_M_ptr);
+  template <typename SubmapType>
+  void generateMeshInSubmapFrame(const SubmapType& submap,
+                                 MeshLayer* mesh_layer_S_ptr);
+
   // Transforms a vector of mesh layers by a vector of posses
   static void transformMeshLayers(
       const std::vector<MeshLayer::ConstPtr> &sub_map_mesh_layers,

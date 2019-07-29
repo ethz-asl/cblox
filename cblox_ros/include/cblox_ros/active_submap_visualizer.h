@@ -41,7 +41,7 @@ class ActiveSubmapVisualizer {
   void getDisplayMesh(visualization_msgs::Marker* marker_ptr);
   MeshLayer::Ptr getDisplayMeshLayer();
 
-private:
+ private:
   // Functions called when swapping active submaps
   void createMeshLayer();
   void recoverMeshLayer();

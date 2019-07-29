@@ -73,7 +73,7 @@ class SubmapServer {
   void visualizeWholeMap();
 
   // Visualize trajectory
-  void visualizeSubMapBaseframes() const;
+  void visualizeSubmapBaseframes() const;
   void visualizeTrajectory() const;
 
   // Mesh output
@@ -115,7 +115,7 @@ class SubmapServer {
 
   // Submap creation
   bool newSubmapRequired() const;
-  void createNewSubMap(const Transformation& T_G_C);
+  void createNewSubmap(const Transformation& T_G_C);
   inline void finishSubmap();
 
   // Submap publishing

@@ -7,12 +7,12 @@ namespace cblox {
 namespace io {
 
 bool SaveTransformationArray(
-    const AlignedVector<Transformation> &transformation_array,
-    const std::string &file_path);
+    const AlignedVector<Transformation>& transformation_array,
+    const std::string& file_path);
 
 bool LoadTransformationArray(
-    const std::string &file_path,
-    AlignedVector<Transformation> *transformation_array_ptr);
+    const std::string& file_path,
+    AlignedVector<Transformation>* transformation_array_ptr);
 
 }  // namespace io
 }  // namespace cblox

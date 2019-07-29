@@ -25,9 +25,9 @@ bool SaveTsdfSubmapCollection(
 
 template <typename SubmapType>
 bool LoadSubmapFromStream(
-    std::fstream *proto_file_ptr,
+    std::fstream* proto_file_ptr,
     typename SubmapCollection<SubmapType>::Ptr tsdf_submap_collection_ptr,
-    uint32_t *tmp_byte_offset_ptr) {
+    uint32_t* tmp_byte_offset_ptr) {
   CHECK_NOTNULL(proto_file_ptr);
   CHECK(tsdf_submap_collection_ptr);
   CHECK_NOTNULL(tmp_byte_offset_ptr);
@@ -54,7 +54,7 @@ bool LoadSubmapFromStream(
             << q.x() << ", " << q.y() << ", " << q.z() << " ]";
 
   // Creating a new submap to hold the data
-  tsdf_submap_collection_ptr->createNewSubMap(T_M_S, tsdf_sub_map_proto.id());
+  tsdf_submap_collection_ptr->createNewSubmap(T_M_S, tsdf_sub_map_proto.id());
 
   // Getting the blocks for this submap (the tsdf layer)
   if (!voxblox::io::LoadBlocksFromStream(
@@ -71,8 +71,8 @@ bool LoadSubmapFromStream(
 
 template <typename SubmapType>
 bool LoadSubmapCollection(
-    const std::string &file_path,
-    typename SubmapCollection<SubmapType>::Ptr *tsdf_submap_collection_ptr) {
+    const std::string& file_path,
+    typename SubmapCollection<SubmapType>::Ptr* tsdf_submap_collection_ptr) {
   CHECK_NOTNULL(tsdf_submap_collection_ptr);
   // Open and check the file
   std::fstream proto_file;

@@ -11,7 +11,7 @@ void SubmapMesher::generateSeparatedMesh(
   CHECK_NOTNULL(seperated_mesh_layer_ptr);
   // Getting the submaps
   const std::vector<typename SubmapType::ConstPtr> sub_maps =
-      submap_collection.getSubMapConstPtrs();
+      submap_collection.getSubmapConstPtrs();
   // Generating the mesh layers
   std::vector<MeshLayer::Ptr> sub_map_mesh_layers;
   generateSeparatedMeshLayers<SubmapType>(sub_maps, &sub_map_mesh_layers);
@@ -19,7 +19,7 @@ void SubmapMesher::generateSeparatedMesh(
   colorMeshLayersWithIndex(&sub_map_mesh_layers);
   // Get submap transforms
   AlignedVector<Transformation> sub_map_poses;
-  submap_collection.getSubMapPoses(&sub_map_poses);
+  submap_collection.getSubmapPoses(&sub_map_poses);
   // Combining the mesh layers
   // NOTE(alexmillane): Have to construct a vector of pointers to const...
   combineMeshLayers(std::vector<MeshLayer::ConstPtr>(
@@ -72,6 +72,33 @@ void SubmapMesher::generateSeparatedMeshLayers(
     sub_map_mesh_layers->push_back(mesh_layer_ptr);
   }
 }
+
+template <typename SubmapType>
+void SubmapMesher::generateMeshInGlobalFrame(const SubmapType& submap,
+                                             MeshLayer* mesh_layer_G_ptr) {
+  CHECK_NOTNULL(mesh_layer_G_ptr);
+  // Mesh in submap frame
+  MeshLayer mesh_layer_S(submap.getTsdfMap().block_size());
+  generateMeshInSubmapFrame(submap, &mesh_layer_S);
+  // To world frame
+  const Transformation& T_G_S = submap.getPose();
+  transformAndAddTrianglesToLayer(mesh_layer_S, T_G_S, mesh_layer_G_ptr);
+}
+
+template <typename SubmapType>
+void SubmapMesher::generateMeshInSubmapFrame(const SubmapType& submap,
+                                             MeshLayer* mesh_layer_S_ptr) {
+  CHECK_NOTNULL(mesh_layer_S_ptr);
+  // Getting the TSDF data
+  const TsdfMap& tsdf_map = submap.getTsdfMap();
+  // Generating the mesh
+  MeshIntegrator<TsdfVoxel> mesh_integrator(
+      mesh_config_, tsdf_map.getTsdfLayer(), mesh_layer_S_ptr);
+  constexpr bool only_mesh_updated_blocks = false;
+  constexpr bool clear_updated_flag = false;
+  mesh_integrator.generateMesh(only_mesh_updated_blocks, clear_updated_flag);
+}
+
 }  // namespace cblox
 
 #endif  // CBLOX_MESH_SUBMAP_MESHER_INL_H_
