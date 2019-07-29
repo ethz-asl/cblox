@@ -23,8 +23,8 @@ class SubmapCollectionInterface {
   // NOTE(alexmillane): I'm moving methods over only as I need them. There's no
   // design intent here in leaving some out. There is only the intent to be
   // lazy.
-  virtual const Transformation &getActiveSubMapPose() const = 0;
-  virtual const SubmapID getActiveSubMapID() const = 0;
+  virtual const Transformation &getActiveSubmapPose() const = 0;
+  virtual const SubmapID getActiveSubmapID() const = 0;
 
   virtual TsdfMap::Ptr getActiveTsdfMapPtr() = 0;
   virtual const TsdfMap &getActiveTsdfMap() const = 0;
@@ -60,6 +60,8 @@ class SubmapCollection : public SubmapCollectionInterface {
   //                           the global tracking frame (G).
   // NOTE(alexmillane): Creating a new submap automatically makes it active.
   void createNewSubmap(const Transformation& T_G_S, const SubmapID submap_id);
+  void createNewSubmap(const Transformation &T_G_S, const SubmapID submap_id,
+                       voxblox::TsdfMap::Ptr tsdf_map_ptr);
   SubmapID createNewSubmap(const Transformation& T_G_S);
 
   // Create a new submap which duplicates an existing source submap
@@ -76,7 +78,7 @@ class SubmapCollection : public SubmapCollectionInterface {
   typename SubmapType::Ptr getSubmapPtr(const SubmapID submap_id);
   typename SubmapType::ConstPtr getSubmapConstPtr(
       const SubmapID submap_id) const;
-  typename SubmapType::Ptr getSubMapPtrById(const SubmapID submap_id) const;
+  typename SubmapType::Ptr getSubmapPtr(const SubmapID submap_id) const;
   // A list of the submaps
   const std::vector<typename SubmapType::Ptr> getSubmapPtrs() const;
   const std::vector<typename SubmapType::ConstPtr> getSubmapConstPtrs() const;

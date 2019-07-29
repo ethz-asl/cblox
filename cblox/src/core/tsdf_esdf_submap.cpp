@@ -9,7 +9,7 @@ void TsdfEsdfSubmap::generateEsdf() {
                                           esdf_map_->getEsdfLayerPtr());
   // Generate the ESDF
   LOG(INFO) << "Generating ESDF from TSDF for submap with ID: " << submap_id_;
-  esdf_integrator.setFullEuclidean(full_euclidian);
+  esdf_integrator.setFullEuclidean(false);
   esdf_integrator.updateFromTsdfLayerBatch();
 }
 

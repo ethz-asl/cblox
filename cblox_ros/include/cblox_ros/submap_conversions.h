@@ -38,7 +38,7 @@ inline bool deserializeMsgToPoseUpdate(cblox_msgs::PoseUpdate::Ptr msg_ptr,
 
   // update pose of submap
   if (submap_collection_ptr->exists(submap_id)) {
-    submap_collection_ptr->getSubMapPtrById(submap_id)->setPose(submap_pose);
+    submap_collection_ptr->getSubmapPtrById(submap_id)->setPose(submap_pose);
   } else {
     ROS_WARN_STREAM("Pose update failed! (Submap " << submap_id <<
         " does not exist in collection!)");
@@ -93,26 +93,26 @@ inline bool deserializeMsgToSubmap(cblox_msgs::Submap::Ptr msg_ptr,
 
   // create or change submap in collection
   if (submap_collection_ptr->exists(submap_id)) {
-    submap_collection_ptr->getSubMapPtrById(submap_id)->setPose(submap_pose);
+    submap_collection_ptr->getSubmapPtr(submap_id)->setPose(submap_pose);
 
     // update submap
     // TODO: include parameter to specify update behaviour
     voxblox::deserializeMsgToLayer(msg_ptr->layer,
-        submap_collection_ptr->getSubMapPtrById(submap_id)->
+        submap_collection_ptr->getSubmapPtr(submap_id)->
         getTsdfMapPtr()->getTsdfLayerPtr());
   } else {
     // create new submap
-    submap_collection_ptr->createNewSubMap(submap_pose, submap_id);
+    submap_collection_ptr->createNewSubmap(submap_pose, submap_id);
     // set TSDF map in submap collection
     voxblox::deserializeMsgToLayer(msg_ptr->layer,
-        submap_collection_ptr->getSubMapPtrById(submap_id)->
+        submap_collection_ptr->getSubmapPtr(submap_id)->
         getTsdfMapPtr()->getTsdfLayerPtr());
   }
 
   // save recording time
-  submap_collection_ptr->getSubMapPtrById(submap_id)
+  submap_collection_ptr->getSubmapPtr(submap_id)
       ->startRecordingTime(msg_ptr->start_time);
-  submap_collection_ptr->getSubMapPtrById(submap_id)
+  submap_collection_ptr->getSubmapPtr(submap_id)
       ->endRecordingTime(msg_ptr->end_time);
   return true;
 }

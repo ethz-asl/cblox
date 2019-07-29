@@ -18,7 +18,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
     Config(const TsdfSubmap::Config& tsdf_map_config,
            const EsdfMap::Config& esdf_map_config)
         : TsdfSubmap::Config(tsdf_map_config),
-          EsdfMap::Config(esdf_map_config) {}
+          EsdfMap::Config(esdf_map_config) {};
   };
   TsdfEsdfSubmap(Config config) : TsdfSubmap(config), config_(config) {
     esdf_map_.reset(new EsdfMap(config));
@@ -26,7 +26,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   TsdfEsdfSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config,
                  voxblox::EsdfIntegrator::Config esdf_integrator_config =
                      voxblox::EsdfIntegrator::Config())
-      : TsdfSubmap(T_M_S, submap_id, config),
+      : TsdfSubmap(T_M_S, submap_id, config), config_(config),
         esdf_integrator_config_(esdf_integrator_config) {
     esdf_map_.reset(new EsdfMap(config));
   }
@@ -41,7 +41,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   }
 
   // Generate the ESDF from the TSDF
-  void generateEsdf(bool full_euclidian = false);
+  void generateEsdf();
 
   void setTsdfMap(const voxblox::Layer<TsdfVoxel>& tsdf_layer);
 
@@ -55,7 +55,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
    *       saveToStream() methods from tsdf_submap.
    */
 
- private:
+ protected:
   Config config_;
   EsdfMap::Ptr esdf_map_;
   voxblox::EsdfIntegrator::Config esdf_integrator_config_;

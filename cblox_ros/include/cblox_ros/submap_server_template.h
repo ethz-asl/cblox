@@ -110,7 +110,7 @@ class SubmapServer {
                            const bool is_freespace_pointcloud);
 
   // Initializes the map
-  bool mapIntialized() const { return !submap_collection_ptr->empty(); }
+  bool mapIntialized() const { return !submap_collection_ptr_->empty(); }
   void intializeMap(const Transformation& T_G_C);
 
   // Submap creation
@@ -154,7 +154,7 @@ class SubmapServer {
   std::string world_frame_;
 
   // The submap collection
-  std::shared_ptr<SubmapCollection<SubmapType>> submap_collection_ptr;
+  std::shared_ptr<SubmapCollection<SubmapType>> submap_collection_ptr_;
 
   // The integrator
   std::shared_ptr<TsdfSubmapCollectionIntegrator>

@@ -76,7 +76,7 @@ SubmapID SubmapCollection<SubmapType>::createNewSubmap(
 }
 
 template <typename SubmapType>
-void SubmapCollection<SubmapType>::createNewSubMap(
+void SubmapCollection<SubmapType>::createNewSubmap(
     const Transformation &T_G_S, const SubmapID submap_id,
     voxblox::TsdfMap::Ptr tsdf_map_ptr) {
 
@@ -287,7 +287,7 @@ typename SubmapType::ConstPtr SubmapCollection<SubmapType>::getSubmapConstPtr(
 
 template <typename SubmapType>
 typename SubmapType::Ptr SubmapCollection<
-    SubmapType>::getSubMapPtrById(const SubmapID submap_id) const {
+    SubmapType>::getSubmapPtr(const SubmapID submap_id) const {
   const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
   if (tsdf_submap_ptr_it != id_to_submap_.end()) {
     return tsdf_submap_ptr_it->second;
