@@ -22,14 +22,19 @@ namespace test_namespace {
     check_collision_function_ = function;
   }
 
-  void PrmGenerator::growRoadmap(const ros::Duration& duration) {
-      mav_trajectory_generation::timing::Timer
-          grow_prm_timer("prm/grow_roadmap");
-    roadmap_.clear();
+  void PrmGenerator::growRoadmap(const ros::Duration& duration,
+      const bool& incremental) {
+    mav_trajectory_generation::timing::Timer
+        grow_prm_timer("prm/grow_roadmap");
+
+    if (!incremental) {
+      roadmap_.clear();
+    }
+
     double max_dist = 3.0;
+    int num_nodes = roadmap_.getVertexMap().size();
+    int num_edges = roadmap_.getEdgeMap().size();
     current_time_ = ros::Time::now();
-    int num_nodes = 0;
-    int num_edges = 0;
     while (ros::Time::now() - current_time_ < duration) {
 //    while (num_nodes < 100) {
       // randomly sample
@@ -84,10 +89,15 @@ namespace test_namespace {
       }
       connect_neighbors_timer.Stop();
     }
+    grow_prm_timer.Stop();
+
     if (verbose_) {
       ROS_INFO("[PrmGenerator] %d nodes and %d edges", num_nodes, num_edges);
+      Eigen::Vector3d range = (upper_bound_ - lower_bound_);
+      float volume = range.x() * range.y() * range.z();
+      ROS_INFO("[PrmGenerator] %f nodes and %f edges per unit volume",
+               num_nodes / volume, num_edges / volume);
     }
-    grow_prm_timer.Stop();
   }
 
 }

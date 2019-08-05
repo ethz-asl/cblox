@@ -25,7 +25,7 @@ public:
       const Eigen::Vector3d& start, const Eigen::Vector3d& goal,
       const double& robot_radius)>& function);
 
-  void growRoadmap(const ros::Duration& duration);
+  void growRoadmap(const ros::Duration& duration, const bool& incremental);
 
   const voxblox::SparseGraph& getRoadmap() const {return roadmap_;};
   void setRoadmap(const voxblox::SparseGraph& roadmap) {roadmap_ = roadmap;};
