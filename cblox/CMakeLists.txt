@@ -1,16 +1,13 @@
 cmake_minimum_required(VERSION 2.8.0)
 project(cblox)
 
-add_definitions(-std=c++11 -march=native)
+add_definitions(-std=c++11)
 
 find_package(catkin_simple REQUIRED)
 catkin_simple(ALL_DEPS_REQUIRED)
 
 # Mark these as system deps to supress warnings.
 include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
-
-find_package(Eigen3 REQUIRED)
-include_directories(${Eigen_INCLUDE_DIRS})
 
 ############
 # PROTOBUF #
