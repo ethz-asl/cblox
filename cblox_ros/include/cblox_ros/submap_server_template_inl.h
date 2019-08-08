@@ -361,6 +361,7 @@ void SubmapServer<SubmapType>::visualizeActiveSubmapMesh() {
 template <typename SubmapType>
 void SubmapServer<SubmapType>::visualizeWholeMap() {
   // Looping through the whole map, meshing and publishing.
+  ROS_INFO("[CbloxServer] visualizing submaps (#%d)", submap_collection_ptr_->size());
   for (const SubmapID submap_id : submap_collection_ptr_->getIDs()) {
     submap_collection_ptr_->activateSubmap(submap_id);
     active_submap_visualizer_ptr_->switchToActiveSubmap();
@@ -453,13 +454,14 @@ bool SubmapServer<SubmapType>::saveMap(const std::string& file_path) {
 
 template <typename SubmapType>
 bool SubmapServer<SubmapType>::loadMap(const std::string& file_path) {
+  ROS_INFO("[CbloxServer] loading map");
   bool success = io::LoadSubmapCollection<SubmapType>(
       file_path, &submap_collection_ptr_);
   if (success) {
-    ROS_INFO("Successfully loaded TSDFSubmapCollection.");
+    ROS_INFO("[CbloxServer] Successfully loaded TSDFSubmapCollection.");
     constexpr bool kVisualizeMapOnLoad = true;
     if (kVisualizeMapOnLoad and verbose_) {
-      ROS_INFO("Publishing loaded map's mesh.");
+      ROS_INFO("[CbloxServer] Publishing loaded map's mesh.");
       visualizeWholeMap();
     }
   }
