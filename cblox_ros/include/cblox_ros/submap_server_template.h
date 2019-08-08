@@ -21,7 +21,6 @@
 #include <cblox/mesh/submap_mesher.h>
 #include <cblox_msgs/Submap.h>
 //#include <cblox_msgs/PoseUpdate.h>
-#include <cblox/core/planning_submap.h>
 
 #include "cblox_ros/active_submap_visualizer.h"
 #include "cblox_ros/trajectory_visualizer.h"

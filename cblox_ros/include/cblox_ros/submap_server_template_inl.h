@@ -494,14 +494,6 @@ inline const SubmapCollection<TsdfEsdfSubmap>::Ptr
   return submap_collection_ptr_;
 }
 
-template<>
-inline const SubmapCollection<PlanningSubmap>::Ptr
-SubmapServer<PlanningSubmap>::getSubmapCollectionPtr() const {
-  return submap_collection_ptr_;
-}
-
-
-
 template <typename SubmapType>
 void SubmapServer<SubmapType>::publishSubmap(SubmapID submap_id, bool global_map) {
   if (submap_pub_.getNumSubscribers() > 0

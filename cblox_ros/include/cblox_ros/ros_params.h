@@ -8,7 +8,6 @@
 
 #include "cblox/core/tsdf_esdf_submap.h"
 #include "cblox/core/tsdf_submap.h"
-#include "cblox/core/planning_submap.h"
 
 namespace cblox {
 
@@ -53,14 +52,6 @@ getSubmapConfigFromRosParam<TsdfEsdfSubmap>(
   auto tsdf_map_config = voxblox::getTsdfMapConfigFromRosParam(nh_private);
   auto esdf_map_config = voxblox::getEsdfMapConfigFromRosParam(nh_private);
   return TsdfEsdfSubmap::Config(tsdf_map_config, esdf_map_config);
-}
-template <>
-inline typename PlanningSubmap::Config
-getSubmapConfigFromRosParam<PlanningSubmap>(
-    const ros::NodeHandle& nh_private) {
-  auto tsdf_map_config = voxblox::getTsdfMapConfigFromRosParam(nh_private);
-  auto esdf_map_config = voxblox::getEsdfMapConfigFromRosParam(nh_private);
-  return PlanningSubmap::Config(tsdf_map_config, esdf_map_config);
 }
 
 }  // namespace cblox
