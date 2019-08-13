@@ -361,7 +361,7 @@ void SubmapServer<SubmapType>::visualizeActiveSubmapMesh() {
 template <typename SubmapType>
 void SubmapServer<SubmapType>::visualizeWholeMap() {
   // Looping through the whole map, meshing and publishing.
-  ROS_INFO("[CbloxServer] visualizing submaps (#%d)", submap_collection_ptr_->size());
+  ROS_INFO("[CbloxServer] visualizing submaps (#%lu)", submap_collection_ptr_->size());
   for (const SubmapID submap_id : submap_collection_ptr_->getIDs()) {
     submap_collection_ptr_->activateSubmap(submap_id);
     active_submap_visualizer_ptr_->switchToActiveSubmap();
