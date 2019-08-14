@@ -308,10 +308,10 @@ bool SubmapCollection<SubmapType>::saveToFile(
     return false;
   }
   // Saving the submap collection header object
-  TsdfSubmapCollectionProto tsdf_submap_collection_proto;
-  getProto(&tsdf_submap_collection_proto);
+  SubmapCollectionProto submap_collection_proto;
+  getProto(&submap_collection_proto);
   // Write out the layer header.
-  if (!voxblox::utils::writeProtoMsgToStream(tsdf_submap_collection_proto,
+  if (!voxblox::utils::writeProtoMsgToStream(submap_collection_proto,
                                              &outfile)) {
     LOG(ERROR) << "Could not write submap collection header message.";
     outfile.close();
@@ -330,7 +330,7 @@ bool SubmapCollection<SubmapType>::saveToFile(
 
 template <typename SubmapType>
 void SubmapCollection<SubmapType>::getProto(
-    TsdfSubmapCollectionProto* proto) const {
+    SubmapCollectionProto* proto) const {
   CHECK_NOTNULL(proto);
   // Filling out the description of the submap collection
   proto->set_num_submaps(num_patches());

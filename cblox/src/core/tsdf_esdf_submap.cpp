@@ -1,4 +1,5 @@
 #include "cblox/core/tsdf_esdf_submap.h"
+#include "cblox/utils/quat_transformation_protobuf_utils.h"
 
 namespace cblox {
 
@@ -16,4 +17,33 @@ void TsdfEsdfSubmap::generateEsdf() {
 void TsdfEsdfSubmap::setTsdfMap(const voxblox::Layer<TsdfVoxel>& tsdf_layer) {
   tsdf_map_.reset(new voxblox::TsdfMap(tsdf_layer));
 }
+
+void TsdfEsdfSubmap::getProto(cblox::SubmapProto *proto) const {
+  CHECK_NOTNULL(proto);
+  TsdfSubmap::getProto(proto);
+
+  // add ESDF info
+  size_t num_blocks = esdf_map_->getEsdfLayer().getNumberOfAllocatedBlocks();
+  proto->set_num_esdf_blocks(num_blocks);
+}
+bool TsdfEsdfSubmap::saveToStream(std::fstream* outfile_ptr) const {
+  CHECK_NOTNULL(outfile_ptr);
+  bool success = TsdfSubmap::saveToStream(outfile_ptr);
+  if (!success) {
+    return false;
+  }
+
+  // Saving ESDF layer
+  constexpr bool kIncludeAllBlocks = true;
+  const Layer<voxblox::EsdfVoxel>& esdf_layer = esdf_map_->getEsdfLayer();
+  if (!esdf_layer.saveBlocksToStream(kIncludeAllBlocks,
+                                     voxblox::BlockIndexList(), outfile_ptr)) {
+    LOG(ERROR) << "Could not write sub map blocks to stream.";
+    outfile_ptr->close();
+    return false;
+  }
+  // Success
+  return true;
+}
+
 }  // namespace cblox

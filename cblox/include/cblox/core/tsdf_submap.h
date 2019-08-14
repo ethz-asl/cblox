@@ -9,7 +9,7 @@
 
 #include <glog/logging.h>
 
-#include "./TsdfSubmap.pb.h"
+#include "./Submap.pb.h"
 #include "cblox/core/common.h"
 
 namespace cblox {
@@ -73,10 +73,10 @@ class TsdfSubmap {
   }
 
   // Getting the proto for this submap
-  void getProto(TsdfSubmapProto* proto) const;
+  virtual void getProto(SubmapProto* proto) const;
 
   // Save the submap to file
-  bool saveToStream(std::fstream* outfile_ptr) const;
+  virtual bool saveToStream(std::fstream* outfile_ptr) const;
 
  protected:
   SubmapID submap_id_;

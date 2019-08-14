@@ -1,0 +1,15 @@
+syntax = "proto2";
+
+package cblox;
+
+import public "QuatTransformation.proto";
+
+message SubmapProto {
+  optional uint32 id = 1;
+
+  optional uint32 num_blocks = 2;
+ 
+  optional QuatTransformationProto transform = 3;
+
+  optional uint32 num_esdf_blocks = 4;
+}

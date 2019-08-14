@@ -1,5 +1,0 @@
-package cblox;
-
-message TsdfSubmapCollectionProto {
-  optional uint32 num_submaps = 3;
-}

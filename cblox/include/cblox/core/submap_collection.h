@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "./TsdfSubmapCollection.pb.h"
+#include "./SubmapCollection.pb.h"
 #include "cblox/core/common.h"
 #include "cblox/core/tsdf_esdf_submap.h"
 
@@ -123,7 +123,7 @@ class SubmapCollection : public SubmapCollectionInterface {
 
   // Save the collection to file
   bool saveToFile(const std::string& file_path) const;
-  void getProto(TsdfSubmapCollectionProto* proto) const;
+  void getProto(SubmapCollectionProto* proto) const;
 
   // Fusing the submap pairs
   void fuseSubmapPair(const SubmapIdPair& submap_id_pair);

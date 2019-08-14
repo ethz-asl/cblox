@@ -8,8 +8,8 @@
 #include <glog/logging.h>
 
 #include "./QuatTransformation.pb.h"
-#include "./TsdfSubmap.pb.h"
-#include "./TsdfSubmapCollection.pb.h"
+#include "./Submap.pb.h"
+#include "./SubmapCollection.pb.h"
 
 #include "cblox/utils/quat_transformation_protobuf_utils.h"
 
@@ -26,43 +26,55 @@ bool SaveTsdfSubmapCollection(
 template <typename SubmapType>
 bool LoadSubmapFromStream(
     std::fstream* proto_file_ptr,
-    typename SubmapCollection<SubmapType>::Ptr tsdf_submap_collection_ptr,
+    typename SubmapCollection<SubmapType>::Ptr submap_collection_ptr,
     uint32_t* tmp_byte_offset_ptr) {
   CHECK_NOTNULL(proto_file_ptr);
-  CHECK(tsdf_submap_collection_ptr);
+  CHECK(submap_collection_ptr);
   CHECK_NOTNULL(tmp_byte_offset_ptr);
 
   // Getting the header for this submap
-  TsdfSubmapProto tsdf_sub_map_proto;
+  SubmapProto submap_proto;
   if (!voxblox::utils::readProtoMsgFromStream(
-          proto_file_ptr, &tsdf_sub_map_proto, tmp_byte_offset_ptr)) {
+          proto_file_ptr, &submap_proto, tmp_byte_offset_ptr)) {
     LOG(ERROR) << "Could not read tsdf sub map protobuf message.";
     return false;
   }
 
   // Getting the transformation
   Transformation T_M_S;
-  QuatTransformationProto transformation_proto = tsdf_sub_map_proto.transform();
+  QuatTransformationProto transformation_proto = submap_proto.transform();
   conversions::transformProtoToKindr(transformation_proto, &T_M_S);
 
-  LOG(INFO) << "Tsdf submap id: " << tsdf_sub_map_proto.id();
-  LOG(INFO) << "Tsdf number of allocated blocks: "
-            << tsdf_sub_map_proto.num_blocks();
+  LOG(INFO) << "Submap id: " << submap_proto.id();
   Eigen::Vector3 t = T_M_S.getPosition();
   Quaternion q = T_M_S.getRotation();
   LOG(INFO) << "[ " << t.x() << ", " << t.y() << ", " << t.z() << ", " << q.w()
             << q.x() << ", " << q.y() << ", " << q.z() << " ]";
 
   // Creating a new submap to hold the data
-  tsdf_submap_collection_ptr->createNewSubmap(T_M_S, tsdf_sub_map_proto.id());
+  submap_collection_ptr->createNewSubmap(T_M_S, submap_proto.id());
 
-  // Getting the blocks for this submap (the tsdf layer)
+  // Getting the tsdf blocks for this submap (the tsdf layer)
+  LOG(INFO) << "Tsdf number of allocated blocks: "
+            << submap_proto.num_blocks();
   if (!voxblox::io::LoadBlocksFromStream(
-          tsdf_sub_map_proto.num_blocks(),
+          submap_proto.num_blocks(),
           Layer<TsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
-          tsdf_submap_collection_ptr->getActiveTsdfMapPtr()->getTsdfLayerPtr(),
+          submap_collection_ptr->getActiveTsdfMapPtr()->getTsdfLayerPtr(),
           tmp_byte_offset_ptr)) {
-    LOG(ERROR) << "Could not load the blocks from stream.";
+    LOG(ERROR) << "Could not load the tsdf blocks from stream.";
+    return false;
+  }
+
+  // Getting the esdf blocks for this submap (the tsdf layer)
+  LOG(INFO) << "Esdf number of allocated blocks: "
+            << submap_proto.num_esdf_blocks();
+  if (!voxblox::io::LoadBlocksFromStream(
+      submap_proto.num_esdf_blocks(),
+      Layer<TsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
+      submap_collection_ptr->getActiveEsdfMapPtr()->getEsdfLayerPtr(),
+      tmp_byte_offset_ptr)) {
+    LOG(ERROR) << "Could not load the esdf blocks from stream.";
     return false;
   }
 
@@ -72,8 +84,8 @@ bool LoadSubmapFromStream(
 template <typename SubmapType>
 bool LoadSubmapCollection(
     const std::string& file_path,
-    typename SubmapCollection<SubmapType>::Ptr* tsdf_submap_collection_ptr) {
-  CHECK_NOTNULL(tsdf_submap_collection_ptr);
+    typename SubmapCollection<SubmapType>::Ptr* submap_collection_ptr) {
+  CHECK_NOTNULL(submap_collection_ptr);
   // Open and check the file
   std::fstream proto_file;
   proto_file.open(file_path, std::fstream::in);
@@ -84,25 +96,25 @@ bool LoadSubmapCollection(
   // Unused byte offset result.
   uint32_t tmp_byte_offset = 0;
   // Loading the header
-  TsdfSubmapCollectionProto tsdf_submap_collection_proto;
+  SubmapCollectionProto submap_collection_proto;
   if (!voxblox::utils::readProtoMsgFromStream(
-          &proto_file, &tsdf_submap_collection_proto, &tmp_byte_offset)) {
+          &proto_file, &submap_collection_proto, &tmp_byte_offset)) {
     LOG(ERROR) << "Could not read tsdf submap collection map protobuf message.";
     return false;
   }
 
   LOG(INFO) << "tsdf_submap_collection_proto.num_submaps(): "
-            << tsdf_submap_collection_proto.num_submaps();
+            << submap_collection_proto.num_submaps();
 
-  // Loading each of the tsdf sub maps
+  // Loading each of the submaps
   for (size_t sub_map_index = 0;
-       sub_map_index < tsdf_submap_collection_proto.num_submaps();
+       sub_map_index < submap_collection_proto.num_submaps();
        sub_map_index++) {
-    LOG(INFO) << "Loading tsdf sub map number: " << sub_map_index;
+    LOG(INFO) << "Loading submap number: " << sub_map_index;
     // Loading the submaps
     if (!LoadSubmapFromStream<SubmapType>(
-            &proto_file, *tsdf_submap_collection_ptr, &tmp_byte_offset)) {
-      LOG(ERROR) << "Could not load the tsdf sub map from stream.";
+            &proto_file, *submap_collection_ptr, &tmp_byte_offset)) {
+      LOG(ERROR) << "Could not load the submap from stream.";
       return false;
     }
   }
