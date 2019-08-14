@@ -71,8 +71,8 @@ bool LoadSubmapFromStream(
             << submap_proto.num_esdf_blocks();
   if (!voxblox::io::LoadBlocksFromStream(
       submap_proto.num_esdf_blocks(),
-      Layer<TsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
-      submap_collection_ptr->getActiveEsdfMapPtr()->getEsdfLayerPtr(),
+      Layer<voxblox::EsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
+      submap_collection_ptr->getActiveSubmapPtr()-> getEsdfMapPtr()->getEsdfLayerPtr(),
       tmp_byte_offset_ptr)) {
     LOG(ERROR) << "Could not load the esdf blocks from stream.";
     return false;
