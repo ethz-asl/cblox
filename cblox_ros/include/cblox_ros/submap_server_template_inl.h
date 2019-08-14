@@ -44,13 +44,13 @@ SubmapServer<SubmapType>::SubmapServer(
     const voxblox::MeshIntegratorConfig& mesh_config)
     : nh_(nh),
       nh_private_(nh_private),
+      timing_path_name_(""),
       verbose_(true),
       world_frame_("world"),
-      num_integrated_frames_current_submap_(0),
-      num_integrated_frames_per_submap_(kDefaultNumFramesPerSubmap),
+      transformer_(nh, nh_private),
       color_map_(new voxblox::GrayscaleColorMap()),
-      timing_path_name_(""),
-      transformer_(nh, nh_private) {
+      num_integrated_frames_current_submap_(0),
+      num_integrated_frames_per_submap_(kDefaultNumFramesPerSubmap) {
   ROS_DEBUG("Creating a TSDF Server");
 
   // Initial interaction with ROS
@@ -275,7 +275,7 @@ template <typename SubmapType>
 void SubmapServer<SubmapType>::integratePointcloud(const Transformation& T_G_C,
                                            const Pointcloud& ptcloud_C,
                                            const Colors& colors,
-                                           const bool is_freespace_pointcloud) {
+                                           const bool /*is_freespace_pointcloud*/) {
   // Note(alexmillane): Freespace pointcloud option left out for now.
   CHECK_EQ(ptcloud_C.size(), colors.size());
   tsdf_submap_collection_integrator_ptr_->integratePointCloud(T_G_C, ptcloud_C,
@@ -372,7 +372,7 @@ void SubmapServer<SubmapType>::visualizeWholeMap() {
 
 template <typename SubmapType>
 bool SubmapServer<SubmapType>::generateSeparatedMeshCallback(
-    std_srvs::Empty::Request& request,
+    std_srvs::Empty::Request& /*request*/,
     std_srvs::Empty::Response& /*response*/) {  // NO LINT
   // Saving mesh to file if required
   if (!mesh_filename_.empty()) {
@@ -396,7 +396,7 @@ bool SubmapServer<SubmapType>::generateSeparatedMeshCallback(
 
 template <typename SubmapType>
 bool SubmapServer<SubmapType>::generateCombinedMeshCallback(
-    std_srvs::Empty::Request& request,
+    std_srvs::Empty::Request& /*request*/,
     std_srvs::Empty::Response& /*response*/) {  // NO LINT
   // Saving mesh to file if required
   if (!mesh_filename_.empty()) {

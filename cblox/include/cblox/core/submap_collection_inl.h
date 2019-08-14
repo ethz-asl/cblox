@@ -38,7 +38,7 @@ std::vector<SubmapID> SubmapCollection<SubmapType>::getIDs() const {
 }
 
 template <typename SubmapType>
-bool SubmapCollection<SubmapType>::exists(const SubmapID submap_id) const {
+bool SubmapCollection<SubmapType>::exists(const SubmapID& submap_id) const {
   // Searching for the passed submap ID
   const auto it = id_to_submap_.find(submap_id);
   return (it != id_to_submap_.end());
@@ -174,7 +174,7 @@ const Transformation& SubmapCollection<SubmapType>::getActiveSubmapPose()
   return getActiveSubmap().getPose();
 }
 template <typename SubmapType>
-const SubmapID SubmapCollection<SubmapType>::getActiveSubmapID() const {
+const SubmapID& SubmapCollection<SubmapType>::getActiveSubmapID() const {
   return active_submap_id_;
 }
 
