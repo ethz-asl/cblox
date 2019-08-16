@@ -1,5 +1,5 @@
-#ifndef CBLOX_ROS_SUBMAP_SERVER_TEMPLATE_H_
-#define CBLOX_ROS_SUBMAP_SERVER_TEMPLATE_H_
+#ifndef CBLOX_ROS_SUBMAP_SERVER_H_
+#define CBLOX_ROS_SUBMAP_SERVER_H_
 
 #include <memory>
 #include <queue>
@@ -118,9 +118,9 @@ class SubmapServer {
   inline void finishSubmap();
 
   // Submap publishing
-  void publishSubmap(SubmapID submap_id, bool global_map = false);
+  void publishSubmap(SubmapID submap_id, bool global_map = false) const;
   void SubmapCallback(const cblox_msgs::Submap::Ptr& msg);
-  void writeTimingToFile(std::string str, SubmapID id, ros::WallTime time);
+  void publishWholeMap() const;
 
   // Node handles
   ros::NodeHandle nh_;
@@ -144,8 +144,6 @@ class SubmapServer {
 
   // Timers.
   ros::Timer update_mesh_timer_;
-  std::string timing_path_name_;
-  std::string timing_time_id_name_;
 
   bool verbose_;
 
@@ -192,6 +190,6 @@ class SubmapServer {
 
 }  // namespace cblox
 
-#include "cblox_ros/submap_server_template_inl.h"
+#include "cblox_ros/submap_server_inl.h"
 
-#endif  // CBLOX_ROS_SUBMAP_SERVER_TEMPLATE_H_
+#endif  // CBLOX_ROS_SUBMAP_SERVER__H_

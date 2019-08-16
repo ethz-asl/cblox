@@ -1,5 +1,5 @@
-#ifndef CBLOX_ROS_SUBMAP_SERVER_TEMPLATE_INL_H_
-#define CBLOX_ROS_SUBMAP_SERVER_TEMPLATE_INL_H_
+#ifndef CBLOX_ROS_SUBMAP_SERVER_INL_H_
+#define CBLOX_ROS_SUBMAP_SERVER_INL_H_
 
 #include <geometry_msgs/PoseArray.h>
 #include <nav_msgs/Path.h>
@@ -22,20 +22,20 @@
 #include "cblox_ros/ros_params.h"
 #include "cblox_ros/submap_conversions.h"
 
-#include "cblox_ros/submap_server_template.h"
+#include "cblox_ros/submap_server.h"
 
 namespace cblox {
 
-template <typename SubmapType>
+template<typename SubmapType>
 SubmapServer<SubmapType>::SubmapServer(const ros::NodeHandle& nh,
                                        const ros::NodeHandle& nh_private)
     : SubmapServer<SubmapType>(
-          nh, nh_private, getSubmapConfigFromRosParam<SubmapType>(nh_private),
-          voxblox::getTsdfIntegratorConfigFromRosParam(nh_private),
-          getTsdfIntegratorTypeFromRosParam(nh_private),
-          voxblox::getMeshIntegratorConfigFromRosParam(nh_private)) {}
+    nh, nh_private, getSubmapConfigFromRosParam<SubmapType>(nh_private),
+    voxblox::getTsdfIntegratorConfigFromRosParam(nh_private),
+    getTsdfIntegratorTypeFromRosParam(nh_private),
+    voxblox::getMeshIntegratorConfigFromRosParam(nh_private)) {}
 
-template <typename SubmapType>
+template<typename SubmapType>
 SubmapServer<SubmapType>::SubmapServer(
     const ros::NodeHandle& nh, const ros::NodeHandle& nh_private,
     const typename SubmapType::Config& submap_config,
@@ -44,7 +44,6 @@ SubmapServer<SubmapType>::SubmapServer(
     const voxblox::MeshIntegratorConfig& mesh_config)
     : nh_(nh),
       nh_private_(nh_private),
-      timing_path_name_(""),
       verbose_(true),
       world_frame_("world"),
       transformer_(nh, nh_private),
@@ -74,36 +73,24 @@ SubmapServer<SubmapType>::SubmapServer(
 
   // An object to visualize the trajectory
   trajectory_visualizer_ptr_.reset(new TrajectoryVisualizer);
-
-  // Define start of node as identifier for timing output file
-  std::time_t now = std::time(nullptr);
-  std::string now_str = std::ctime(&now);
-  timing_time_id_name_ = now_str;
-
-  std::string map_path;
-  nh_private_.param("map_path", map_path, map_path);
-  if (map_path.size() > 0) {
-    ROS_INFO("[SubmapServer] Loading cblox map.");
-    loadMap(map_path);
-  }
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 void SubmapServer<SubmapType>::subscribeToTopics() {
   // Subscribing to the input pointcloud
   int pointcloud_queue_size = kDefaultPointcloudQueueSize;
   nh_private_.param("pointcloud_queue_size", pointcloud_queue_size,
                     pointcloud_queue_size);
   pointcloud_sub_ = nh_.subscribe("pointcloud", pointcloud_queue_size,
-      &SubmapServer<SubmapType>::pointcloudCallback, this);
+                                  &SubmapServer<SubmapType>::pointcloudCallback, this);
   //
   int submap_queue_size = 1;
   submap_sub_ = nh_.subscribe("tsdf_submap_in", submap_queue_size,
-      &SubmapServer<SubmapType>::SubmapCallback, this);
+                              &SubmapServer<SubmapType>::SubmapCallback, this);
   //
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 void SubmapServer<SubmapType>::advertiseTopics() {
   // Services for saving meshes to file
   generate_separated_mesh_srv_ = nh_private_.advertiseService(
@@ -128,7 +115,7 @@ void SubmapServer<SubmapType>::advertiseTopics() {
   submap_pub_ = nh_private_.advertise<cblox_msgs::Submap>("tsdf_submap_out", 1);
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 void SubmapServer<SubmapType>::getParametersFromRos() {
   ROS_DEBUG("Getting params from ROS");
   nh_private_.param("verbose", verbose_, verbose_);
@@ -152,11 +139,9 @@ void SubmapServer<SubmapType>::getParametersFromRos() {
   nh_private_.param("num_integrated_frames_per_submap",
                     num_integrated_frames_per_submap_,
                     num_integrated_frames_per_submap_);
-  // Outputs timings of submap publishing to file
-  nh_private_.param("timing_path_name", timing_path_name_, timing_path_name_);
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 void SubmapServer<SubmapType>::pointcloudCallback(
     const sensor_msgs::PointCloud2::Ptr& pointcloud_msg_in) {
   // Pushing this message onto the queue for processing
@@ -165,7 +150,7 @@ void SubmapServer<SubmapType>::pointcloudCallback(
   servicePointcloudQueue();
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 void SubmapServer<SubmapType>::addMesageToPointcloudQueue(
     const sensor_msgs::PointCloud2::Ptr& pointcloud_msg_in) {
   // Pushing this message onto the queue for processing
@@ -176,7 +161,7 @@ void SubmapServer<SubmapType>::addMesageToPointcloudQueue(
   }
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 void SubmapServer<SubmapType>::servicePointcloudQueue() {
   // NOTE(alexmilane): T_G_C - Transformation between Camera frame (C) and
   //                           global tracking frame (G).
@@ -210,10 +195,10 @@ void SubmapServer<SubmapType>::servicePointcloudQueue() {
   }
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 bool SubmapServer<SubmapType>::getNextPointcloudFromQueue(
-    std::queue<sensor_msgs::PointCloud2::Ptr>* queue,
-    sensor_msgs::PointCloud2::Ptr* pointcloud_msg, Transformation* T_G_C) {
+    std::queue <sensor_msgs::PointCloud2::Ptr> *queue,
+    sensor_msgs::PointCloud2::Ptr *pointcloud_msg, Transformation *T_G_C) {
   const size_t kMaxQueueSize = 10;
   if (queue->empty()) {
     return false;
@@ -238,7 +223,7 @@ bool SubmapServer<SubmapType>::getNextPointcloudFromQueue(
   return false;
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 void SubmapServer<SubmapType>::processPointCloudMessageAndInsert(
     const sensor_msgs::PointCloud2::Ptr& pointcloud_msg,
     const Transformation& T_G_C, const bool is_freespace_pointcloud) {
@@ -265,57 +250,58 @@ void SubmapServer<SubmapType>::processPointCloudMessageAndInsert(
         "Finished integrating in %f seconds, have %lu blocks. %u frames "
         "integrated to current submap.",
         (end - start).toSec(), submap_collection_ptr_->getActiveTsdfMap()
-                                   .getTsdfLayer()
-                                   .getNumberOfAllocatedBlocks(),
+            .getTsdfLayer()
+            .getNumberOfAllocatedBlocks(),
         num_integrated_frames_current_submap_);
   }
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 void SubmapServer<SubmapType>::integratePointcloud(const Transformation& T_G_C,
-                                           const Pointcloud& ptcloud_C,
-                                           const Colors& colors,
-                                           const bool /*is_freespace_pointcloud*/) {
+                                                   const Pointcloud& ptcloud_C,
+                                                   const Colors& colors,
+                                                   const bool /*is_freespace_pointcloud*/) {
   // Note(alexmillane): Freespace pointcloud option left out for now.
   CHECK_EQ(ptcloud_C.size(), colors.size());
   tsdf_submap_collection_integrator_ptr_->integratePointCloud(T_G_C, ptcloud_C,
                                                               colors);
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 void SubmapServer<SubmapType>::intializeMap(const Transformation& T_G_C) {
   // Just creates the first submap
   createNewSubmap(T_G_C);
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 bool SubmapServer<SubmapType>::newSubmapRequired() const {
   return (num_integrated_frames_current_submap_ >
           num_integrated_frames_per_submap_);
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 inline void SubmapServer<SubmapType>::finishSubmap() {
   if (submap_collection_ptr_->exists(
       submap_collection_ptr_->getActiveSubmapID())) {
     // publishing the old submap
-    submap_collection_ptr_->getActiveSubmapPtr()->endRecordingTime();
+    submap_collection_ptr_->getActiveSubmapPtr()->stopMappingTime();
     publishSubmap(submap_collection_ptr_->getActiveSubmapID());
     // generating ESDF map
     submap_collection_ptr_->getActiveSubmapPtr()->generateEsdf();
   }
 }
+
 template<>
 inline void SubmapServer<TsdfSubmap>::finishSubmap() {
   if (submap_collection_ptr_->exists(
       submap_collection_ptr_->getActiveSubmapID())) {
     // publishing the old submap
-    submap_collection_ptr_->getActiveSubmapPtr()->endRecordingTime();
+    submap_collection_ptr_->getActiveSubmapPtr()->stopMappingTime();
     publishSubmap(submap_collection_ptr_->getActiveSubmapID());
   }
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C) {
   // finishing up the last submap
   finishSubmap();
@@ -335,16 +321,16 @@ void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C) {
   visualizeSubmapBaseframes();
 
   // Time the start of recording
-  submap_collection_ptr_->getActiveSubmapPtr()->startRecordingTime();
+  submap_collection_ptr_->getActiveSubmapPtr()->startMappingTime();
 
   if (verbose_) {
     ROS_INFO_STREAM("Created a new submap with id: "
-                    << submap_id << ". Total submap number: "
-                    << submap_collection_ptr_->size());
+                        << submap_id << ". Total submap number: "
+                        << submap_collection_ptr_->size());
   }
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 void SubmapServer<SubmapType>::visualizeActiveSubmapMesh() {
   // NOTE(alexmillane): For the time being only the mesh from the currently
   // active submap is updated. This breaks down when the pose of past submaps is
@@ -358,7 +344,7 @@ void SubmapServer<SubmapType>::visualizeActiveSubmapMesh() {
   active_submap_mesh_pub_.publish(marker);
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 void SubmapServer<SubmapType>::visualizeWholeMap() {
   // Looping through the whole map, meshing and publishing.
   ROS_INFO("[CbloxServer] visualizing submaps (#%lu)", submap_collection_ptr_->size());
@@ -366,14 +352,13 @@ void SubmapServer<SubmapType>::visualizeWholeMap() {
     submap_collection_ptr_->activateSubmap(submap_id);
     active_submap_visualizer_ptr_->switchToActiveSubmap();
     visualizeActiveSubmapMesh();
-    publishSubmap(submap_id);
   }
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 bool SubmapServer<SubmapType>::generateSeparatedMeshCallback(
-    std_srvs::Empty::Request& /*request*/,
-    std_srvs::Empty::Response& /*response*/) {  // NO LINT
+    std_srvs::Empty::Request&  /*request*/,
+    std_srvs::Empty::Response&  /*response*/) {  // NO LINT
   // Saving mesh to file if required
   if (!mesh_filename_.empty()) {
     // Getting the requested mesh type from the mesher
@@ -394,10 +379,10 @@ bool SubmapServer<SubmapType>::generateSeparatedMeshCallback(
   return false;
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 bool SubmapServer<SubmapType>::generateCombinedMeshCallback(
-    std_srvs::Empty::Request& /*request*/,
-    std_srvs::Empty::Response& /*response*/) {  // NO LINT
+    std_srvs::Empty::Request&  /*request*/,
+    std_srvs::Empty::Response&  /*response*/) {  // NO LINT
   // Saving mesh to file if required
   if (!mesh_filename_.empty()) {
     // Getting the requested mesh type from the mesher
@@ -418,14 +403,14 @@ bool SubmapServer<SubmapType>::generateCombinedMeshCallback(
   return false;
 }
 
-template <typename SubmapType>
-void SubmapServer<SubmapType>::updateMeshEvent(const ros::TimerEvent& /*event*/) {
+template<typename SubmapType>
+void SubmapServer<SubmapType>::updateMeshEvent(const ros::TimerEvent&  /*event*/) {
   if (mapIntialized()) {
     visualizeActiveSubmapMesh();
   }
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 void SubmapServer<SubmapType>::visualizeSubmapBaseframes() const {
   // Get poses
   TransformationVector submap_poses;
@@ -438,7 +423,7 @@ void SubmapServer<SubmapType>::visualizeSubmapBaseframes() const {
   submap_poses_pub_.publish(pose_array_msg);
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 void SubmapServer<SubmapType>::visualizeTrajectory() const {
   nav_msgs::Path path_msg;
   trajectory_visualizer_ptr_->getTrajectoryMsg(&path_msg);
@@ -446,58 +431,61 @@ void SubmapServer<SubmapType>::visualizeTrajectory() const {
   trajectory_pub_.publish(path_msg);
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 bool SubmapServer<SubmapType>::saveMap(const std::string& file_path) {
-  return cblox::io::SaveTsdfSubmapCollection(*submap_collection_ptr_,
-                                             file_path);
+  return cblox::io::SaveSubmapCollection(*submap_collection_ptr_,
+                                         file_path);
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 bool SubmapServer<SubmapType>::loadMap(const std::string& file_path) {
   ROS_INFO("[CbloxServer] loading map");
   bool success = io::LoadSubmapCollection<SubmapType>(
-      file_path, &submap_collection_ptr_);
+      file_path,& submap_collection_ptr_);
   if (success) {
     ROS_INFO("[CbloxServer] Successfully loaded TSDFSubmapCollection.");
     constexpr bool kVisualizeMapOnLoad = true;
-    if (kVisualizeMapOnLoad and verbose_) {
+    if (kVisualizeMapOnLoad) {
       ROS_INFO("[CbloxServer] Publishing loaded map's mesh.");
       visualizeWholeMap();
+    }
+    constexpr bool kPublishMapOnLoad = true;
+    if (kPublishMapOnLoad) {
+      ROS_INFO("[CbloxServer] Publishing loaded submaps.");
+      publishWholeMap();
     }
   }
   publishSubmap(submap_collection_ptr_->getActiveSubmapID(), true);
   return success;
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 bool SubmapServer<SubmapType>::saveMapCallback(voxblox_msgs::FilePath::Request& request,
-                                       voxblox_msgs::FilePath::Response&
-                                       /*response*/) {
+                                               voxblox_msgs::FilePath::Response& /*response*/) {
   return saveMap(request.file_path);
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 bool SubmapServer<SubmapType>::loadMapCallback(voxblox_msgs::FilePath::Request& request,
-                                       voxblox_msgs::FilePath::Response&
-                                       /*response*/) {
+                                               voxblox_msgs::FilePath::Response& /*response*/) {
   bool success = loadMap(request.file_path);
   return success;
 }
 
-
-template <>
+template<>
 inline const SubmapCollection<TsdfSubmap>::Ptr
-    SubmapServer<TsdfSubmap>::getSubmapCollectionPtr() const {
+SubmapServer<TsdfSubmap>::getSubmapCollectionPtr() const {
   return submap_collection_ptr_;
 }
+
 template<>
 inline const SubmapCollection<TsdfEsdfSubmap>::Ptr
-    SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() const {
+SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() const {
   return submap_collection_ptr_;
 }
 
-template <typename SubmapType>
-void SubmapServer<SubmapType>::publishSubmap(SubmapID submap_id, bool global_map) {
+template<typename SubmapType>
+void SubmapServer<SubmapType>::publishSubmap(SubmapID submap_id, bool global_map) const {
   if (submap_pub_.getNumSubscribers() > 0
       and submap_collection_ptr_->getSubmapConstPtr(submap_id)) {
     // set timer
@@ -515,8 +503,8 @@ void SubmapServer<SubmapType>::publishSubmap(SubmapID submap_id, bool global_map
 
       timing::Timer make_dummy_timer("cblox/2 - make dummy submap");
       TsdfSubmap::Ptr submap_ptr(new TsdfSubmap(T_M_S, submap_id,
-          submap_collection_ptr_->getConfig()));
-      // TODO: switch from copy to using layer
+                                                submap_collection_ptr_->getConfig()));
+      // TODO: switch from copy to moving layer
       submap_ptr->getTsdfMapPtr().reset(
           new voxblox::TsdfMap(tsdf_map->getTsdfLayer()));
       make_dummy_timer.Stop();
@@ -526,7 +514,7 @@ void SubmapServer<SubmapType>::publishSubmap(SubmapID submap_id, bool global_map
       serializeSubmapToMsg<TsdfSubmap>(submap_ptr, &submap_msg);
       serialize_timer.Stop();
     } else {
-      // Get latest submap for publishing
+      // Get submap for publishing
       TsdfSubmap::Ptr submap_ptr = submap_collection_ptr_->
           getSubmapPtr(submap_id);
       timing::Timer serialize_timer("cblox/3 - serialize");
@@ -541,12 +529,10 @@ void SubmapServer<SubmapType>::publishSubmap(SubmapID submap_id, bool global_map
 
     // stop timer
     publish_map_timer.Stop();
-    writeTimingToFile("sent", submap_collection_ptr_->size(),
-        ros::WallTime::now());
   }
 }
 
-template <typename SubmapType>
+template<typename SubmapType>
 void SubmapServer<SubmapType>::SubmapCallback(const cblox_msgs::Submap::Ptr& msg_in) {
   ros::WallTime time = ros::WallTime::now();
   timing::Timer read_map_timer("cblox/receive submap");
@@ -558,29 +544,14 @@ void SubmapServer<SubmapType>::SubmapCallback(const cblox_msgs::Submap::Ptr& msg
   submap_queue_.pop();
 
   read_map_timer.Stop();
-  writeTimingToFile("received", submap_collection_ptr_->size(), time);
 }
 
 template <typename SubmapType>
-void SubmapServer<SubmapType>::writeTimingToFile(std::string str, SubmapID id,
-                                         ros::WallTime time) {
-  if (!timing_path_name_.empty()) {
-    std::ofstream timing_file;
-    timing_file.open(timing_path_name_ + "network_timing_"
-        + timing_time_id_name_ + ".txt", std::ios::app);
-    timing_file << time.toNSec() << " " << id << " " << str;
-    timing_file << "\n";
-    timing_file.close();
-
-    timing_file.open(timing_path_name_ + "process_timing_"
-                     + timing_time_id_name_ + ".txt", std::ios::app);
-    timing_file << str << " " << id;
-    timing_file << "\n";
-    timing_file << timing::Timing::Print();
-    timing_file << "\n";
-    timing_file.close();
+void SubmapServer<SubmapType>::publishWholeMap() const {
+  for (const SubmapID submap_id : submap_collection_ptr_->getIDs()) {
+    publishSubmap(submap_id);
   }
 }
 
-}  // namespace cblox
-#endif  // CBLOX_ROS_SUBMAP_SERVER_TEMPLATE_INL_H_
+} // namespace cblox
+#endif  // CBLOX_ROS_SUBMAP_SERVER_INL_H_

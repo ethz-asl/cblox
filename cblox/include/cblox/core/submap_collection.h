@@ -60,8 +60,6 @@ class SubmapCollection : public SubmapCollectionInterface {
   //                           the global tracking frame (G).
   // NOTE(alexmillane): Creating a new submap automatically makes it active.
   void createNewSubmap(const Transformation& T_G_S, const SubmapID submap_id);
-  void createNewSubmap(const Transformation &T_G_S, const SubmapID submap_id,
-                       voxblox::TsdfMap::Ptr tsdf_map_ptr);
   SubmapID createNewSubmap(const Transformation& T_G_S);
 
   // Create a new submap which duplicates an existing source submap

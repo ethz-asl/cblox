@@ -73,7 +73,7 @@ inline void serializeSubmapToMsg(typename SubmapType::Ptr submap_ptr,
 
   // Write recording times
   const std::pair<ros::Time, ros::Time> record_time =
-      submap_ptr->getRecordingTime();
+      submap_ptr->getMappingInterval();
   msg->start_time = record_time.first;
   msg->end_time = record_time.second;
 }
@@ -111,9 +111,9 @@ inline bool deserializeMsgToSubmap(cblox_msgs::Submap::Ptr msg_ptr,
 
   // save recording time
   submap_collection_ptr->getSubmapPtr(submap_id)
-      ->startRecordingTime(msg_ptr->start_time);
+      ->startMappingTime(msg_ptr->start_time);
   submap_collection_ptr->getSubmapPtr(submap_id)
-      ->endRecordingTime(msg_ptr->end_time);
+      ->stopMappingTime(msg_ptr->end_time);
   return true;
 }
 

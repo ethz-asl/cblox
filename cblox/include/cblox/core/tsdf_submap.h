@@ -54,14 +54,16 @@ class TsdfSubmap {
     T_M_S_ = T_M_S;
   }
 
-  void startRecordingTime(ros::Time time = ros::Time::now()) {
-    recording_time_.first = time;
+  // Set interval in which submap was actively mapping
+  void startMappingTime(ros::Time time = ros::Time::now()) {
+    mapping_interval_.first = time;
   }
-  void endRecordingTime(ros::Time time = ros::Time::now()) {
-    recording_time_.second = time;
+  void stopMappingTime(ros::Time time = ros::Time::now()) {
+    mapping_interval_.second = time;
   }
-  const std::pair<ros::Time, ros::Time> getRecordingTime() const {
-    return recording_time_;
+  // Access mapping interval
+  const std::pair<ros::Time, ros::Time>& getMappingInterval() const {
+    return mapping_interval_;
   }
 
   SubmapID getID() const { return submap_id_; }
@@ -83,7 +85,7 @@ class TsdfSubmap {
   TsdfMap::Ptr tsdf_map_;
 
   Transformation T_M_S_;
-  std::pair<ros::Time, ros::Time> recording_time_;
+  std::pair<ros::Time, ros::Time> mapping_interval_;
 
  private:
   // The pose of this submap in the global map frame
