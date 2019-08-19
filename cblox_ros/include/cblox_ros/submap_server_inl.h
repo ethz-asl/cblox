@@ -84,7 +84,7 @@ void SubmapServer<SubmapType>::subscribeToTopics() {
   pointcloud_sub_ = nh_.subscribe("pointcloud", pointcloud_queue_size,
                                   &SubmapServer<SubmapType>::pointcloudCallback, this);
   //
-  int submap_queue_size = 1;
+  int submap_queue_size = 20;
   submap_sub_ = nh_.subscribe("tsdf_submap_in", submap_queue_size,
                               &SubmapServer<SubmapType>::SubmapCallback, this);
   //
@@ -442,21 +442,23 @@ bool SubmapServer<SubmapType>::loadMap(const std::string& file_path) {
   ROS_INFO("[CbloxServer] loading map");
   bool success = io::LoadSubmapCollection<SubmapType>(
       file_path,& submap_collection_ptr_);
-  if (success) {
-    ROS_INFO("[CbloxServer] Successfully loaded TSDFSubmapCollection.");
-    constexpr bool kVisualizeMapOnLoad = true;
-    if (kVisualizeMapOnLoad) {
-      ROS_INFO("[CbloxServer] Publishing loaded map's mesh.");
-      visualizeWholeMap();
-    }
-    constexpr bool kPublishMapOnLoad = true;
-    if (kPublishMapOnLoad) {
-      ROS_INFO("[CbloxServer] Publishing loaded submaps.");
-      publishWholeMap();
-    }
+  if (!success) {
+    return false;
   }
-  publishSubmap(submap_collection_ptr_->getActiveSubmapID(), true);
-  return success;
+
+  ROS_INFO("[CbloxServer] Successfully loaded TSDFSubmapCollection.");
+  constexpr bool kVisualizeMapOnLoad = true;
+  if (kVisualizeMapOnLoad) {
+    ROS_INFO("[CbloxServer] Publishing loaded map's mesh.");
+    visualizeWholeMap();
+  }
+  constexpr bool kPublishMapOnLoad = true;
+  if (kPublishMapOnLoad) {
+    ROS_INFO("[CbloxServer] Publishing loaded submaps.");
+    publishWholeMap();
+  }
+
+  return true;
 }
 
 template<typename SubmapType>
@@ -485,53 +487,63 @@ SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() const {
 }
 
 template<typename SubmapType>
-void SubmapServer<SubmapType>::publishSubmap(SubmapID submap_id, bool global_map) const {
-  if (submap_pub_.getNumSubscribers() > 0
-      and submap_collection_ptr_->getSubmapConstPtr(submap_id)) {
-    // set timer
-    timing::Timer publish_map_timer("cblox/0 - publish map");
-
-    cblox_msgs::MapLayer submap_msg;
-    if (global_map) {
-      // TODO: analyze necessity of this case
-      // Merge submaps to global TSDF map
-      Transformation T_M_S;
-      submap_id = 0;
-      timing::Timer get_global_timer("cblox/1 - get global map");
-      voxblox::TsdfMap::Ptr tsdf_map =
-          submap_collection_ptr_->getProjectedMap();
-      get_global_timer.Stop();
-
-      timing::Timer make_dummy_timer("cblox/2 - make dummy submap");
-      TsdfSubmap::Ptr submap_ptr(new TsdfSubmap(T_M_S, submap_id,
-                                                submap_collection_ptr_->getConfig()));
-      // TODO: switch from copy to moving layer
-      submap_ptr->getTsdfMapPtr().reset(
-          new voxblox::TsdfMap(tsdf_map->getTsdfLayer()));
-      make_dummy_timer.Stop();
-
-      // serialize into message
-      timing::Timer serialize_timer("cblox/3 - serialize");
-      submap_msg.map_header.is_submap = false;
-      serializeSubmapToMsg<TsdfSubmap>(submap_ptr, &submap_msg);
-      serialize_timer.Stop();
-    } else {
-      // Get submap for publishing
-      TsdfSubmap::Ptr submap_ptr = submap_collection_ptr_->
-          getSubmapPtr(submap_id);
-      timing::Timer serialize_timer("cblox/3 - serialize");
-      serializeSubmapToMsg<TsdfSubmap>(submap_ptr, &submap_msg);
-      serialize_timer.Stop();
-    }
-
-    // Publish message
-    timing::Timer publish_timer("cblox/4 - publish");
-    submap_pub_.publish(submap_msg);
-    publish_timer.Stop();
-
-    // stop timer
-    publish_map_timer.Stop();
+void SubmapServer<SubmapType>::publishSubmap(
+    SubmapID submap_id, bool global_map) const {
+  if (submap_pub_.getNumSubscribers() == 0) {
+    ROS_WARN("[CbloxServer] no subscribers to submaps");
+    return;
   }
+  if (!submap_collection_ptr_->getSubmapPtr(submap_id)) {
+    ROS_WARN("[CbloxServer] could not get submap pointer");
+    return;
+  }
+  if (verbose_) {
+    ROS_INFO("[CbloxServer] publishing submap %d", submap_id);
+  }
+
+  // set timer
+  timing::Timer publish_map_timer("cblox/0 - publish map");
+
+  cblox_msgs::MapLayer submap_msg;
+  if (global_map) {
+    // TODO: analyze necessity of this case
+    // Merge submaps to global TSDF map
+    Transformation T_M_S;
+    submap_id = 0;
+    timing::Timer get_global_timer("cblox/1 - get global map");
+    voxblox::TsdfMap::Ptr tsdf_map =
+        submap_collection_ptr_->getProjectedMap();
+    get_global_timer.Stop();
+
+    timing::Timer make_dummy_timer("cblox/2 - make dummy submap");
+    TsdfSubmap::Ptr submap_ptr(new TsdfSubmap(T_M_S, submap_id,
+                                              submap_collection_ptr_->getConfig()));
+    // TODO: switch from copy to moving layer
+    submap_ptr->getTsdfMapPtr().reset(
+        new voxblox::TsdfMap(tsdf_map->getTsdfLayer()));
+    make_dummy_timer.Stop();
+
+    // serialize into message
+    timing::Timer serialize_timer("cblox/3 - serialize");
+    submap_msg.map_header.is_submap = false;
+    serializeSubmapToMsg<TsdfSubmap>(submap_ptr, &submap_msg);
+    serialize_timer.Stop();
+  } else {
+    // Get submap for publishing
+    TsdfSubmap::Ptr submap_ptr = submap_collection_ptr_->
+        getSubmapPtr(submap_id);
+    timing::Timer serialize_timer("cblox/3 - serialize");
+    serializeSubmapToMsg<TsdfSubmap>(submap_ptr, &submap_msg);
+    serialize_timer.Stop();
+  }
+
+  // Publish message
+  timing::Timer publish_timer("cblox/4 - publish");
+  submap_pub_.publish(submap_msg);
+  publish_timer.Stop();
+
+  // stop timer
+  publish_map_timer.Stop();
 }
 
 template<typename SubmapType>
@@ -553,6 +565,8 @@ template <typename SubmapType>
 void SubmapServer<SubmapType>::publishWholeMap() const {
   for (const SubmapID submap_id : submap_collection_ptr_->getIDs()) {
     publishSubmap(submap_id);
+    ros::Duration sleepy(0.25);
+    sleepy.sleep();
   }
 }
 

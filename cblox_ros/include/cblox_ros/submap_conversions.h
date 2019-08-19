@@ -33,4 +33,5 @@ bool deserializeMsgToSubmap(cblox_msgs::MapLayer* msg_ptr,
 }
 
 #include "cblox_ros/submap_conversions_inl.h"
+
 #endif //CBLOX_ROS_SUBMAP_CONVERSIONS_H
