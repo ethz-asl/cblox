@@ -21,6 +21,7 @@
 #include <cblox/mesh/submap_mesher.h>
 #include <cblox_msgs/Submap.h>
 //#include <cblox_msgs/PoseUpdate.h>
+#include <cblox_msgs/MapLayer.h>
 
 #include "cblox_ros/active_submap_visualizer.h"
 #include "cblox_ros/trajectory_visualizer.h"
@@ -119,7 +120,7 @@ class SubmapServer {
 
   // Submap publishing
   void publishSubmap(SubmapID submap_id, bool global_map = false) const;
-  void SubmapCallback(const cblox_msgs::Submap::Ptr& msg);
+  void SubmapCallback(const cblox_msgs::MapLayerPtr& msg);
   void publishWholeMap() const;
 
   // Node handles
@@ -173,7 +174,7 @@ class SubmapServer {
 
   // The queue of unprocessed pointclouds
   std::queue<sensor_msgs::PointCloud2::Ptr> pointcloud_queue_;
-  std::queue<cblox_msgs::Submap::Ptr> submap_queue_;
+  std::queue<cblox_msgs::MapLayerPtr> submap_queue_;
 
   // Last message times for throttling input.
   ros::Duration min_time_between_msgs_;
