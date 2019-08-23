@@ -2,9 +2,12 @@
 #define CBLOX_ROS_SUBMAP_SERVER_INL_H_
 
 #include <thread>
+#include <mutex>
+#include <shared_mutex>
 
 #include <geometry_msgs/PoseArray.h>
 #include <nav_msgs/Path.h>
+#include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
 #include <cblox_msgs/Submap.h>
 
@@ -115,6 +118,8 @@ void SubmapServer<SubmapType>::advertiseTopics() {
   trajectory_pub_ = nh_private_.advertise<nav_msgs::Path>("trajectory", 1);
   // Publisher for submaps
   submap_pub_ = nh_private_.advertise<cblox_msgs::MapLayer>("tsdf_submap_out", 1);
+  sdf_slice_pub_ =
+      nh_private_.advertise<visualization_msgs::MarkerArray>("sdf_slice", 1);
 }
 
 template<typename SubmapType>
@@ -284,26 +289,26 @@ bool SubmapServer<SubmapType>::newSubmapRequired() const {
 template<typename SubmapType>
 inline void SubmapServer<SubmapType>::finishSubmap(const SubmapID& submap_id) {
   if (submap_collection_ptr_->exists(submap_id)) {
+    typename SubmapType::Ptr submap_ptr =
+        submap_collection_ptr_->getSubmapPtr(submap_id);
     // publishing the old submap
-    submap_collection_ptr_->getSubmapPtr(submap_id)->stopMappingTime();
-    publishSubmap(submap_id);
+    submap_ptr->stopMappingTime();
     // generating ESDF map
-    submap_collection_ptr_->getSubmapPtr(submap_id)->generateEsdf();
-  }
-}
+    // TODO: implement lock (segfault!!)
+    submap_ptr->generateEsdf();
+//    std::thread esdf_thread(&SubmapType::generateEsdf,
+//        submap_collection_ptr_->getSubmapPtr(submap_id));
+//    esdf_thread.detach();
 
-template<>
-inline void SubmapServer<TsdfSubmap>::finishSubmap(const SubmapID& submap_id) {
-  if (submap_collection_ptr_->exists(submap_id)) {
-    // publishing the old submap
-    submap_collection_ptr_->getSubmapPtr(submap_id)->stopMappingTime();
     publishSubmap(submap_id);
+    visualizeSlice(submap_id);
   }
 }
 
 template<typename SubmapType>
 void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C) {
   // finishing up the last submap
+//  finishSubmap(submap_collection_ptr_->getActiveSubmapID());
   std::thread finish_submap_thread(&SubmapServer<SubmapType>::finishSubmap,
       this, submap_collection_ptr_->getActiveSubmapID());
   finish_submap_thread.detach();
@@ -311,6 +316,7 @@ void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C) {
   // Creating the submap
   const SubmapID submap_id =
       submap_collection_ptr_->createNewSubmap(T_G_C);
+  ROS_INFO("[CbloxServer] creating submap %d", submap_id);
   // Activating the submap in the frame integrator
   tsdf_submap_collection_integrator_ptr_->switchToActiveSubmap();
   // Resetting current submap counters
@@ -476,18 +482,7 @@ bool SubmapServer<SubmapType>::loadMapCallback(voxblox_msgs::FilePath::Request& 
   return success;
 }
 
-template<>
-inline const SubmapCollection<TsdfSubmap>::Ptr
-SubmapServer<TsdfSubmap>::getSubmapCollectionPtr() const {
-  return submap_collection_ptr_;
-}
-
-template<>
-inline const SubmapCollection<TsdfEsdfSubmap>::Ptr
-SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() const {
-  return submap_collection_ptr_;
-}
-
+// note: specialized for TsdfSubmap
 template<typename SubmapType>
 void SubmapServer<SubmapType>::publishSubmap(
     SubmapID submap_id, bool global_map) const {
@@ -531,10 +526,10 @@ void SubmapServer<SubmapType>::publishSubmap(
     serialize_timer.Stop();
   } else {
     // Get submap for publishing
-    TsdfSubmap::Ptr submap_ptr = submap_collection_ptr_->
+    typename SubmapType::Ptr submap_ptr = submap_collection_ptr_->
         getSubmapPtr(submap_id);
     timing::Timer serialize_timer("cblox/3 - serialize");
-    serializeSubmapToMsg<TsdfSubmap>(submap_ptr, &submap_msg);
+    serializeSubmapToMsg<SubmapType>(submap_ptr, &submap_msg);
     serialize_timer.Stop();
   }
 
@@ -555,10 +550,13 @@ void SubmapServer<SubmapType>::SubmapCallback(
   // push newest message in queue to service
   submap_queue_.push(msg_in);
   // service message in queue
-  deserializeMsgToSubmap<SubmapType>(submap_queue_.front().get(),
-      getSubmapCollectionPtr());
-  submap_queue_.pop();
-
+  if (!submap_queue_.empty()) {
+    SubmapID submap_id =
+        deserializeMsgToSubmap<SubmapType>(submap_queue_.front().get(),
+            getSubmapCollectionPtr());
+    visualizeSlice(submap_id);
+    submap_queue_.pop();
+  }
   read_map_timer.Stop();
 }
 
@@ -569,6 +567,80 @@ void SubmapServer<SubmapType>::publishWholeMap() const {
     ros::Duration sleepy(0.25);
     sleepy.sleep();
   }
+}
+
+// note: specialized for TsdfSubmap
+template <typename SubmapType>
+void SubmapServer<SubmapType>::visualizeSlice(const SubmapID& submap_id) const {
+  if (!submap_collection_ptr_->exists(submap_id)) {
+    return;
+  }
+
+  ROS_INFO("[CbloxServer] Visualizing ESDF slice of submap %d at height %.2f",
+      submap_id, slice_height_);
+  float max_dist = 2;
+
+  visualization_msgs::MarkerArray marker_array;
+  visualization_msgs::Marker vertex_marker;
+  vertex_marker.header.frame_id = world_frame_;
+  vertex_marker.ns = std::string("esdf_slice_") + std::to_string(submap_id);
+  vertex_marker.ns = "esdf_slice";
+  vertex_marker.type = visualization_msgs::Marker::CUBE_LIST;
+  vertex_marker.pose.orientation.w = 1.0;
+  vertex_marker.scale.x =
+      submap_collection_ptr_->getActiveTsdfMapPtr()->voxel_size();
+  vertex_marker.scale.y = vertex_marker.scale.x;
+  vertex_marker.scale.z = vertex_marker.scale.x;
+  geometry_msgs::Point point_msg;
+  std_msgs::ColorRGBA color_msg;
+  color_msg.r = 0.0;
+  color_msg.g = 0.0;
+  color_msg.b = 0.0;
+  color_msg.a = 1.0;
+
+  typename SubmapType::Ptr submap_ptr =
+      submap_collection_ptr_->getSubmapPtr(submap_id);
+  voxblox::Layer<voxblox::EsdfVoxel> *layer =
+      submap_ptr->getEsdfMapPtr()->getEsdfLayerPtr();
+  voxblox::BlockIndexList block_list;
+  layer->getAllAllocatedBlocks(&block_list);
+  int block_num = 0;
+  for (const voxblox::BlockIndex& block_id : block_list) {
+    voxblox::Block<voxblox::EsdfVoxel>::Ptr block =
+        layer->getBlockPtrByIndex(block_id);
+    for (size_t voxel_id = 0; voxel_id < block->num_voxels(); voxel_id++) {
+      const voxblox::EsdfVoxel& voxel =
+          block->getVoxelByLinearIndex(voxel_id);
+      voxblox::Point position =
+          block->computeCoordinatesFromLinearIndex(voxel_id);
+
+      color_msg.r = 0.0;
+      color_msg.g = 0.0;
+
+      if (voxel.observed) {
+        color_msg.r = std::max(std::min((max_dist - voxel.distance) /
+                                        2.0 / max_dist, 1.0), 0.0);
+        color_msg.g = std::max(std::min((max_dist + voxel.distance) /
+                                        2.0 / max_dist, 1.0), 0.0);
+      }
+
+      if (std::abs(position.z() - slice_height_)
+          < submap_ptr->getEsdfMapPtr()->voxel_size()/2) {
+        vertex_marker.id = block_num + voxel_id *
+            std::pow(10, std::round(std::log10(block_list.size())));
+        tf::pointEigenToMsg(position.cast<double>(), point_msg);
+
+        vertex_marker.points.push_back(point_msg);
+        vertex_marker.colors.push_back(color_msg);
+        marker_array.markers.push_back(vertex_marker);
+        vertex_marker.points.clear();
+        vertex_marker.colors.clear();
+      }
+    }
+    block_num++;
+  }
+
+  sdf_slice_pub_.publish(marker_array);
 }
 
 } // namespace cblox

@@ -67,7 +67,7 @@ class SubmapServer {
   void updateMeshEvent(const ros::TimerEvent& /*event*/);
 
   // Access Submap Collection Pointer
-  inline const typename SubmapCollection<SubmapType>::Ptr
+  inline const typename SubmapCollection<SubmapType>::Ptr&
       getSubmapCollectionPtr() const;
   void visualizeActiveSubmapMesh();
   void visualizeWholeMap();
@@ -122,6 +122,11 @@ class SubmapServer {
   void publishSubmap(SubmapID submap_id, bool global_map = false) const;
   void SubmapCallback(const cblox_msgs::MapLayerPtr& msg);
   void publishWholeMap() const;
+
+  // visualization
+  void visualizeSlice(const SubmapID& submap_id) const;
+  float slice_height_ = 1.5;
+  ros::Publisher sdf_slice_pub_;
 
   // Node handles
   ros::NodeHandle nh_;

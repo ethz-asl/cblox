@@ -44,6 +44,7 @@ void serializeSubmapToMsg(typename SubmapType::Ptr submap_ptr,
   // fill in headers
   msg->header = generateHeaderMsg<SubmapType>(submap_ptr, timestamp);
   msg->map_header = generateSubmapHeaderMsg<SubmapType>(submap_ptr);
+  msg->type = 1;
   // fill in layers
   voxblox::serializeLayerAsMsg<voxblox::TsdfVoxel>(
       submap_ptr->getTsdfMapPtr()->getTsdfLayer(), false, &msg->tsdf_layer);
@@ -53,10 +54,14 @@ void serializeSubmapToMsg(typename SubmapType::Ptr submap_ptr,
       submap_ptr->getEsdfMapPtr()->getEsdfLayer(), false, &msg->esdf_layer);
   msg->esdf_layer.action =
       static_cast<uint8_t>(voxblox::MapDerializationAction::kReset);
+
+  ROS_INFO("SENT SUBMAP %d (%lu/%lu)", submap_ptr->getID(),
+      submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr()->getNumberOfAllocatedBlocks(),
+      submap_ptr->getEsdfMapPtr()->getEsdfLayerPtr()->getNumberOfAllocatedBlocks());
 }
 
 template <typename SubmapType>
-bool deserializeMsgToSubmap(cblox_msgs::MapLayer* msg_ptr,
+SubmapID deserializeMsgToSubmap(cblox_msgs::MapLayer* msg_ptr,
     typename SubmapCollection<SubmapType>::Ptr submap_collection_ptr) {
 
   CHECK_NOTNULL(submap_collection_ptr);
@@ -95,12 +100,11 @@ bool deserializeMsgToSubmap(cblox_msgs::MapLayer* msg_ptr,
         submap_ptr->getEsdfMapPtr()->getEsdfLayerPtr());
   }
 
-
   ROS_INFO("GOT SUBMAP %d (%lu/%lu)", submap_id,
       submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr()->getNumberOfAllocatedBlocks(),
       submap_ptr->getEsdfMapPtr()->getEsdfLayerPtr()->getNumberOfAllocatedBlocks());
 
-  return success;
+  return submap_id;
 }
 
 template<>
@@ -113,6 +117,7 @@ inline void serializeSubmapToMsg<TsdfSubmap>(TsdfSubmap::Ptr submap_ptr,
   // fill in headers
   msg->header = generateHeaderMsg<TsdfSubmap>(submap_ptr, timestamp);
   msg->map_header = generateSubmapHeaderMsg<TsdfSubmap>(submap_ptr);
+  msg->type = 0;
   // fill in layers
   voxblox::serializeLayerAsMsg<voxblox::TsdfVoxel>(
       submap_ptr->getTsdfMapPtr()->getTsdfLayer(), false, &msg->tsdf_layer);
@@ -121,12 +126,12 @@ inline void serializeSubmapToMsg<TsdfSubmap>(TsdfSubmap::Ptr submap_ptr,
 }
 
 template<>
-inline bool deserializeMsgToSubmap<TsdfSubmap>(cblox_msgs::MapLayer* msg_ptr,
+inline SubmapID deserializeMsgToSubmap<TsdfSubmap>(cblox_msgs::MapLayer* msg_ptr,
     typename SubmapCollection<TsdfSubmap>::Ptr submap_collection_ptr) {
 
   CHECK_NOTNULL(submap_collection_ptr);
   if (!msg_ptr->map_header.is_submap) {
-    return false;
+    return -1;
   }
 
   // read id
@@ -149,9 +154,11 @@ inline bool deserializeMsgToSubmap<TsdfSubmap>(cblox_msgs::MapLayer* msg_ptr,
   submap_ptr->stopMappingTime(msg_ptr->map_header.end_time);
 
   // read tsdf layer
-  return voxblox::deserializeMsgToLayer(msg_ptr->tsdf_layer,
+  voxblox::deserializeMsgToLayer(msg_ptr->tsdf_layer,
       submap_collection_ptr->getSubmapPtr(submap_id)
           ->getTsdfMapPtr()->getTsdfLayerPtr());
+
+  return submap_id;
 }
 
 }

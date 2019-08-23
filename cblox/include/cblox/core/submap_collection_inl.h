@@ -307,9 +307,11 @@ bool SubmapCollection<SubmapType>::saveToFile(
   }
   // Saving the tsdf submaps
   for (const auto& id_submap_pair : id_to_submap_) {
-    LOG(INFO) << "Saving tsdf_submap with ID: " << id_submap_pair.first;
+    LOG(INFO) << "Saving submap with ID: " << id_submap_pair.first;
     // Saving the submap
-    (id_submap_pair.second)->saveToStream(&outfile);
+    bool success = (id_submap_pair.second)->saveToStream(&outfile);
+    if (success) {LOG(INFO) << "Saving successful";}
+    else {LOG(WARNING) << "Saving unsuccessful";}
   }
   // Closing the file
   outfile.close();

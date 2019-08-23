@@ -27,7 +27,7 @@ void serializeSubmapToMsg(typename SubmapType::Ptr submap_ptr,
     cblox_msgs::MapLayer* msg);
 
 template <typename SubmapType>
-bool deserializeMsgToSubmap(cblox_msgs::MapLayer* msg_ptr,
+SubmapID deserializeMsgToSubmap(cblox_msgs::MapLayer* msg_ptr,
     typename SubmapCollection<SubmapType>::Ptr submap_collection_ptr);
 
 }
