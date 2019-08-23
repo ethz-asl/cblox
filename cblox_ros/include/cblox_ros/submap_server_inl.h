@@ -1,6 +1,8 @@
 #ifndef CBLOX_ROS_SUBMAP_SERVER_INL_H_
 #define CBLOX_ROS_SUBMAP_SERVER_INL_H_
 
+#include <thread>
+
 #include <geometry_msgs/PoseArray.h>
 #include <nav_msgs/Path.h>
 #include <visualization_msgs/Marker.h>
@@ -280,31 +282,31 @@ bool SubmapServer<SubmapType>::newSubmapRequired() const {
 }
 
 template<typename SubmapType>
-inline void SubmapServer<SubmapType>::finishSubmap() {
-  if (submap_collection_ptr_->exists(
-      submap_collection_ptr_->getActiveSubmapID())) {
+inline void SubmapServer<SubmapType>::finishSubmap(const SubmapID& submap_id) {
+  if (submap_collection_ptr_->exists(submap_id)) {
     // publishing the old submap
-    submap_collection_ptr_->getActiveSubmapPtr()->stopMappingTime();
-    publishSubmap(submap_collection_ptr_->getActiveSubmapID());
+    submap_collection_ptr_->getSubmapPtr(submap_id)->stopMappingTime();
+    publishSubmap(submap_id);
     // generating ESDF map
-    submap_collection_ptr_->getActiveSubmapPtr()->generateEsdf();
+    submap_collection_ptr_->getSubmapPtr(submap_id)->generateEsdf();
   }
 }
 
 template<>
-inline void SubmapServer<TsdfSubmap>::finishSubmap() {
-  if (submap_collection_ptr_->exists(
-      submap_collection_ptr_->getActiveSubmapID())) {
+inline void SubmapServer<TsdfSubmap>::finishSubmap(const SubmapID& submap_id) {
+  if (submap_collection_ptr_->exists(submap_id)) {
     // publishing the old submap
-    submap_collection_ptr_->getActiveSubmapPtr()->stopMappingTime();
-    publishSubmap(submap_collection_ptr_->getActiveSubmapID());
+    submap_collection_ptr_->getSubmapPtr(submap_id)->stopMappingTime();
+    publishSubmap(submap_id);
   }
 }
 
 template<typename SubmapType>
 void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C) {
   // finishing up the last submap
-  finishSubmap();
+  std::thread finish_submap_thread(&SubmapServer<SubmapType>::finishSubmap,
+      this, submap_collection_ptr_->getActiveSubmapID());
+  finish_submap_thread.detach();
 
   // Creating the submap
   const SubmapID submap_id =
@@ -490,7 +492,6 @@ template<typename SubmapType>
 void SubmapServer<SubmapType>::publishSubmap(
     SubmapID submap_id, bool global_map) const {
   if (submap_pub_.getNumSubscribers() == 0) {
-    ROS_WARN("[CbloxServer] no subscribers to submaps");
     return;
   }
   if (!submap_collection_ptr_->getSubmapPtr(submap_id)) {

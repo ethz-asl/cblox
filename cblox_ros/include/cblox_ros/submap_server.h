@@ -116,7 +116,7 @@ class SubmapServer {
   // Submap creation
   bool newSubmapRequired() const;
   void createNewSubmap(const Transformation& T_G_C);
-  inline void finishSubmap();
+  inline void finishSubmap(const SubmapID& submap_id);
 
   // Submap publishing
   void publishSubmap(SubmapID submap_id, bool global_map = false) const;
