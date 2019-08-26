@@ -12,6 +12,7 @@ add_definitions(-std=c++11 -Wall -Wextra)
 cs_add_library(${PROJECT_NAME}
   src/active_submap_visualizer.cc
   src/trajectory_visualizer.cc
+  src/submap_server.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
