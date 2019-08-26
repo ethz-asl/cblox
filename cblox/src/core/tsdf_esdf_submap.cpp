@@ -11,10 +11,13 @@ void TsdfEsdfSubmap::generateEsdf() {
   // Generate the ESDF
   LOG(INFO) << "Generating ESDF from TSDF for submap with ID: " << submap_id_;
   esdf_integrator.setFullEuclidean(false);
+
+  std::unique_lock<std::mutex> lock(submap_mutex);
   esdf_integrator.updateFromTsdfLayerBatch();
 }
 
 void TsdfEsdfSubmap::setTsdfMap(const voxblox::Layer<TsdfVoxel>& tsdf_layer) {
+  std::unique_lock<std::mutex> lock(submap_mutex);
   tsdf_map_.reset(new voxblox::TsdfMap(tsdf_layer));
 }
 
@@ -42,6 +45,7 @@ bool TsdfEsdfSubmap::saveToStream(std::fstream* outfile_ptr) const {
     outfile_ptr->close();
     return false;
   }
+
   // Success
   return true;
 }

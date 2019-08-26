@@ -296,9 +296,6 @@ inline void SubmapServer<SubmapType>::finishSubmap(const SubmapID& submap_id) {
     // generating ESDF map
     // TODO: implement lock (segfault!!)
     submap_ptr->generateEsdf();
-//    std::thread esdf_thread(&SubmapType::generateEsdf,
-//        submap_collection_ptr_->getSubmapPtr(submap_id));
-//    esdf_thread.detach();
 
     publishSubmap(submap_id);
     visualizeSlice(submap_id);

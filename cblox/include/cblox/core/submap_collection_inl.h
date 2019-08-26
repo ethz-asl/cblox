@@ -353,6 +353,9 @@ void SubmapCollection<SubmapType>::fuseSubmapPair(
     const Transformation& T_G_S2 = submap_ptr_2->getPose();
     const Transformation T_S1_S2 = T_G_S1.inverse() * T_G_S2;
     // Merging the submap layers
+
+    std::unique_lock<std::mutex> lock_1(submap_ptr_1->submap_mutex);
+    std::unique_lock<std::mutex> lock_2(submap_ptr_2->submap_mutex);
     mergeLayerAintoLayerB(submap_ptr_2->getTsdfMap().getTsdfLayer(), T_S1_S2,
                           submap_ptr_1->getTsdfMapPtr()->getTsdfLayerPtr());
 

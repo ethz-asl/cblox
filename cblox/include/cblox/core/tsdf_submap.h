@@ -80,6 +80,8 @@ class TsdfSubmap {
   // Save the submap to file
   virtual bool saveToStream(std::fstream* outfile_ptr) const;
 
+  mutable std::mutex submap_mutex;
+
  protected:
   SubmapID submap_id_;
   TsdfMap::Ptr tsdf_map_;
