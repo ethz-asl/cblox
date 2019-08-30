@@ -32,7 +32,8 @@ class ActiveSubmapVisualizer {
       : mesh_config_(mesh_config),
         tsdf_submap_collection_ptr_(tsdf_submap_collection_ptr),
         color_cycle_length_(kDefaultColorCycleLength),
-        current_color_idx_(0) {}
+        current_color_idx_(0),
+        verbose_(false) {}
 
   void switchToActiveSubmap();
 
@@ -40,6 +41,8 @@ class ActiveSubmapVisualizer {
 
   void getDisplayMesh(visualization_msgs::Marker* marker_ptr);
   MeshLayer::Ptr getDisplayMeshLayer();
+
+  void setVerbose(const bool& verbose) {verbose_ = verbose;};
 
  private:
   // Functions called when swapping active submaps
@@ -73,6 +76,8 @@ class ActiveSubmapVisualizer {
   // Color stuff
   const int color_cycle_length_;
   int current_color_idx_;
+
+  bool verbose_;
 };
 
 }  // namespace cblox

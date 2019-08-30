@@ -9,11 +9,15 @@ void ActiveSubmapVisualizer::switchToActiveSubmap() {
   // Getting the active submap ID
   const SubmapID submap_id = tsdf_submap_collection_ptr_->getActiveSubmapID();
   if (mesh_layers_.find(submap_id) == mesh_layers_.end()) {
-    ROS_INFO_STREAM("Creating mesh layer for submap id: " << submap_id);
+    if (verbose_) {
+      ROS_INFO_STREAM("Creating mesh layer for submap id: " << submap_id);
+    }
     createMeshLayer();
     updateIntegrator();
   } else {
-    ROS_INFO_STREAM("Recovering mesh layer for submap id: " << submap_id);
+    if (verbose_) {
+      ROS_INFO_STREAM("Recovering mesh layer for submap id: " << submap_id);
+    }
     recoverMeshLayer();
     updateIntegrator();
   }

@@ -75,6 +75,7 @@ SubmapServer<SubmapType>::SubmapServer(
   submap_mesher_ptr_.reset(new SubmapMesher(submap_config, mesh_config));
   active_submap_visualizer_ptr_.reset(
       new ActiveSubmapVisualizer(mesh_config, submap_collection_ptr_));
+  active_submap_visualizer_ptr_->setVerbose(verbose_);
 
   // An object to visualize the trajectory
   trajectory_visualizer_ptr_.reset(new TrajectoryVisualizer);
@@ -92,7 +93,9 @@ void SubmapServer<SubmapType>::subscribeToTopics() {
   int submap_queue_size = 20;
   submap_sub_ = nh_.subscribe("tsdf_submap_in", submap_queue_size,
                               &SubmapServer<SubmapType>::SubmapCallback, this);
-  //
+  int pose_queue_size = 20;
+  pose_sub_ = nh_.subscribe("submap_pose_in", pose_queue_size,
+      &SubmapServer::PoseCallback, this);
 }
 
 template<typename SubmapType>
@@ -112,7 +115,7 @@ void SubmapServer<SubmapType>::advertiseTopics() {
       "load_map", &SubmapServer<SubmapType>::loadMapCallback, this);
   // Real-time publishing for rviz
   active_submap_mesh_pub_ =
-      nh_private_.advertise<visualization_msgs::Marker>("separated_mesh", 1);
+      nh_private_.advertise<visualization_msgs::MarkerArray>("separated_mesh", 1);
   submap_poses_pub_ =
       nh_private_.advertise<geometry_msgs::PoseArray>("submap_baseframes", 1);
   trajectory_pub_ = nh_private_.advertise<nav_msgs::Path>("trajectory", 1);
@@ -317,6 +320,7 @@ void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C,
   const SubmapID submap_id =
       submap_collection_ptr_->createNewSubmap(T_G_C);
   ROS_INFO("[CbloxServer] creating submap %d", submap_id);
+
   // Activating the submap in the frame integrator
   tsdf_submap_collection_integrator_ptr_->switchToActiveSubmap();
   // Resetting current submap counters
