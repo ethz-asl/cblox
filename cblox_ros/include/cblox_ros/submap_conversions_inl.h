@@ -1,6 +1,9 @@
 #ifndef CBLOX_ROS_SUBMAP_CONVERSIONS_INL_H
 #define CBLOX_ROS_SUBMAP_CONVERSIONS_INL_H
 
+#include <cblox_msgs/MapHeader.h>
+#include <cblox_msgs/MapPoseEstimate.h>
+
 namespace cblox {
 
 template <typename SubmapType>
@@ -34,6 +37,45 @@ cblox_msgs::MapHeader generateSubmapHeaderMsg(
     return submap_header;
   }
 
+template<typename SubmapType>
+void serializePoseToMsg(typename SubmapType::Ptr submap_ptr,
+    cblox_msgs::MapPoseUpdate* msg) {
+  CHECK_NOTNULL(msg);
+  CHECK_NOTNULL(submap_ptr);
+
+  ros::Time timestamp = ros::Time::now();
+  // fill in headers
+  msg->header = generateHeaderMsg<SubmapType>(submap_ptr, timestamp);
+  msg->map_header = generateSubmapHeaderMsg<SubmapType>(submap_ptr);
+}
+
+template<typename SubmapType>
+SubmapID deserializeMsgToPose(const cblox_msgs::MapPoseUpdate* msg,
+    typename SubmapCollection<SubmapType>::Ptr submap_collection_ptr) {
+
+  CHECK_NOTNULL(submap_collection_ptr);
+  if (!msg->map_header.is_submap) {
+    return -1;
+  }
+
+  // read id
+  SubmapID submap_id = msg->map_header.id;
+  // read pose
+  kindr::minimal::QuatTransformationTemplate<double> pose;
+  tf::poseMsgToKindr(msg->map_header.pose_estimate.map_pose, &pose);
+  Transformation submap_pose = pose.cast<float>();
+
+  if (!submap_collection_ptr->exists(submap_id)) {
+    // create new submap
+    submap_collection_ptr->createNewSubmap(submap_pose, submap_id);
+  }
+  typename SubmapType::Ptr submap_ptr =
+      submap_collection_ptr->getSubmapPtr(submap_id);
+  submap_ptr->setPose(submap_pose);
+
+  return submap_id;
+}
+
 template <typename SubmapType>
 void serializeSubmapToMsg(typename SubmapType::Ptr submap_ptr,
     cblox_msgs::MapLayer* msg) {
@@ -44,20 +86,8 @@ void serializeSubmapToMsg(typename SubmapType::Ptr submap_ptr,
   // fill in headers
   msg->header = generateHeaderMsg<SubmapType>(submap_ptr, timestamp);
   msg->map_header = generateSubmapHeaderMsg<SubmapType>(submap_ptr);
-  msg->type = 1;
-  // fill in layers
-  voxblox::serializeLayerAsMsg<voxblox::TsdfVoxel>(
-      submap_ptr->getTsdfMapPtr()->getTsdfLayer(), false, &msg->tsdf_layer);
-  msg->tsdf_layer.action =
-      static_cast<uint8_t>(voxblox::MapDerializationAction::kReset);
-  voxblox::serializeLayerAsMsg<voxblox::EsdfVoxel>(
-      submap_ptr->getEsdfMapPtr()->getEsdfLayer(), false, &msg->esdf_layer);
-  msg->esdf_layer.action =
-      static_cast<uint8_t>(voxblox::MapDerializationAction::kReset);
 
-  ROS_INFO("SENT SUBMAP %d (%lu/%lu)", submap_ptr->getID(),
-      submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr()->getNumberOfAllocatedBlocks(),
-      submap_ptr->getEsdfMapPtr()->getEsdfLayerPtr()->getNumberOfAllocatedBlocks());
+  submap_ptr->serializeToMsg(msg);
 }
 
 template <typename SubmapType>
@@ -66,7 +96,7 @@ SubmapID deserializeMsgToSubmap(cblox_msgs::MapLayer* msg_ptr,
 
   CHECK_NOTNULL(submap_collection_ptr);
   if (!msg_ptr->map_header.is_submap) {
-    return false;
+    return -1;
   }
 
   // read id
@@ -88,75 +118,7 @@ SubmapID deserializeMsgToSubmap(cblox_msgs::MapLayer* msg_ptr,
   submap_ptr->startMappingTime(msg_ptr->map_header.start_time);
   submap_ptr->stopMappingTime(msg_ptr->map_header.end_time);
 
-  // read tsdf layer
-  bool success = voxblox::deserializeMsgToLayer(msg_ptr->tsdf_layer,
-      submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr());
-
-  // read esdf layer
-  if (msg_ptr->type != 0) {
-    // TODO: esdf dependent on tsdf
-    //       change at the same time, even if info not available?
-    success &= voxblox::deserializeMsgToLayer(msg_ptr->esdf_layer,
-        submap_ptr->getEsdfMapPtr()->getEsdfLayerPtr());
-  }
-
-  ROS_INFO("GOT SUBMAP %d (%lu/%lu)", submap_id,
-      submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr()->getNumberOfAllocatedBlocks(),
-      submap_ptr->getEsdfMapPtr()->getEsdfLayerPtr()->getNumberOfAllocatedBlocks());
-
-  return submap_id;
-}
-
-template<>
-inline void serializeSubmapToMsg<TsdfSubmap>(TsdfSubmap::Ptr submap_ptr,
-    cblox_msgs::MapLayer* msg) {
-  CHECK_NOTNULL(msg);
-  CHECK_NOTNULL(submap_ptr);
-
-  ros::Time timestamp = ros::Time::now();
-  // fill in headers
-  msg->header = generateHeaderMsg<TsdfSubmap>(submap_ptr, timestamp);
-  msg->map_header = generateSubmapHeaderMsg<TsdfSubmap>(submap_ptr);
-  msg->type = 0;
-  // fill in layers
-  voxblox::serializeLayerAsMsg<voxblox::TsdfVoxel>(
-      submap_ptr->getTsdfMapPtr()->getTsdfLayer(), false, &msg->tsdf_layer);
-  msg->tsdf_layer.action =
-      static_cast<uint8_t>(voxblox::MapDerializationAction::kReset);
-}
-
-template<>
-inline SubmapID deserializeMsgToSubmap<TsdfSubmap>(cblox_msgs::MapLayer* msg_ptr,
-    typename SubmapCollection<TsdfSubmap>::Ptr submap_collection_ptr) {
-
-  CHECK_NOTNULL(submap_collection_ptr);
-  if (!msg_ptr->map_header.is_submap) {
-    return -1;
-  }
-
-  // read id
-  SubmapID submap_id = msg_ptr->map_header.id;
-  // read pose
-  kindr::minimal::QuatTransformationTemplate<double> pose;
-  tf::poseMsgToKindr(msg_ptr->map_header.pose_estimate.map_pose, &pose);
-  Transformation submap_pose = pose.cast<float>();
-
-  // create submap if necessary
-  if (submap_collection_ptr->exists(submap_id)) {
-    submap_collection_ptr->createNewSubmap(submap_pose, submap_id);
-  }
-  TsdfSubmap::Ptr submap_ptr =
-      submap_collection_ptr->getSubmapPtr(submap_id);
-  submap_ptr->setPose(submap_pose);
-
-  // read mapping interval
-  submap_ptr->startMappingTime(msg_ptr->map_header.start_time);
-  submap_ptr->stopMappingTime(msg_ptr->map_header.end_time);
-
-  // read tsdf layer
-  voxblox::deserializeMsgToLayer(msg_ptr->tsdf_layer,
-      submap_collection_ptr->getSubmapPtr(submap_id)
-          ->getTsdfMapPtr()->getTsdfLayerPtr());
+  submap_ptr->deserializeFromMsg(msg_ptr);
 
   return submap_id;
 }

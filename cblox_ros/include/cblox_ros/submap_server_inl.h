@@ -116,7 +116,9 @@ void SubmapServer<SubmapType>::advertiseTopics() {
   submap_poses_pub_ =
       nh_private_.advertise<geometry_msgs::PoseArray>("submap_baseframes", 1);
   trajectory_pub_ = nh_private_.advertise<nav_msgs::Path>("trajectory", 1);
+
   // Publisher for submaps
+  pose_pub_ = nh_private_.advertise<cblox_msgs::MapPoseUpdate>("submap_pose_out", 1);
   submap_pub_ = nh_private_.advertise<cblox_msgs::MapLayer>("tsdf_submap_out", 1);
   sdf_slice_pub_ =
       nh_private_.advertise<visualization_msgs::MarkerArray>("sdf_slice", 1);
@@ -183,7 +185,7 @@ void SubmapServer<SubmapType>::servicePointcloudQueue() {
                                       is_freespace_pointcloud);
 
     if (newSubmapRequired()) {
-      createNewSubmap(T_G_C);
+      createNewSubmap(T_G_C, pointcloud_msg->header.stamp);
     }
 
     trajectory_visualizer_ptr_->addPose(T_G_C);
@@ -277,7 +279,7 @@ void SubmapServer<SubmapType>::integratePointcloud(const Transformation& T_G_C,
 template<typename SubmapType>
 void SubmapServer<SubmapType>::intializeMap(const Transformation& T_G_C) {
   // Just creates the first submap
-  createNewSubmap(T_G_C);
+  createNewSubmap(T_G_C, ros::Time::now());
 }
 
 template<typename SubmapType>
@@ -303,7 +305,8 @@ inline void SubmapServer<SubmapType>::finishSubmap(const SubmapID& submap_id) {
 }
 
 template<typename SubmapType>
-void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C) {
+void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C,
+    const ros::Time& timestamp) {
   // finishing up the last submap
 //  finishSubmap(submap_collection_ptr_->getActiveSubmapID());
   std::thread finish_submap_thread(&SubmapServer<SubmapType>::finishSubmap,
@@ -326,7 +329,11 @@ void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C) {
   visualizeSubmapBaseframes();
 
   // Time the start of recording
-  submap_collection_ptr_->getActiveSubmapPtr()->startMappingTime();
+  submap_collection_ptr_->getActiveSubmapPtr()->startMappingTime(timestamp);
+
+  // publish pose of new submap
+  publishPose(submap_id);
+  ROS_INFO("[CbloxServer] published submap pose %d", submap_id);
 
   if (verbose_) {
     ROS_INFO_STREAM("Created a new submap with id: "
@@ -346,7 +353,24 @@ void SubmapServer<SubmapType>::visualizeActiveSubmapMesh() {
   active_submap_visualizer_ptr_->getDisplayMesh(&marker);
   marker.header.frame_id = world_frame_;
   // Publishing
-  active_submap_mesh_pub_.publish(marker);
+  visualization_msgs::MarkerArray marker_array;
+  marker_array.markers.push_back(marker);
+  active_submap_mesh_pub_.publish(marker_array);
+}
+
+template<typename SubmapType>
+void SubmapServer<SubmapType>::visualizeSubmapMesh(const SubmapID& submap_id) {
+  std::lock_guard<std::mutex> lock(visualizer_mutex);
+  SubmapID active_submap_id = submap_collection_ptr_->getActiveSubmapID();
+  ROS_INFO("[CbloxServer] visualizing submap %d, active submap: %d",
+      submap_id, active_submap_id);
+
+  submap_collection_ptr_->activateSubmap(submap_id);
+  active_submap_visualizer_ptr_->switchToActiveSubmap();
+  visualizeActiveSubmapMesh();
+
+  submap_collection_ptr_->activateSubmap(active_submap_id);
+  active_submap_visualizer_ptr_->switchToActiveSubmap();
 }
 
 template<typename SubmapType>
@@ -354,6 +378,7 @@ void SubmapServer<SubmapType>::visualizeWholeMap() {
   // Looping through the whole map, meshing and publishing.
   ROS_INFO("[CbloxServer] visualizing submaps (#%lu)", submap_collection_ptr_->size());
   for (const SubmapID submap_id : submap_collection_ptr_->getIDs()) {
+    std::lock_guard<std::mutex> lock(visualizer_mutex);
     submap_collection_ptr_->activateSubmap(submap_id);
     active_submap_visualizer_ptr_->switchToActiveSubmap();
     visualizeActiveSubmapMesh();
@@ -411,6 +436,7 @@ bool SubmapServer<SubmapType>::generateCombinedMeshCallback(
 template<typename SubmapType>
 void SubmapServer<SubmapType>::updateMeshEvent(const ros::TimerEvent&  /*event*/) {
   if (mapIntialized()) {
+    std::lock_guard<std::mutex> lock(visualizer_mutex);
     visualizeActiveSubmapMesh();
   }
 }
@@ -479,7 +505,6 @@ bool SubmapServer<SubmapType>::loadMapCallback(voxblox_msgs::FilePath::Request& 
   return success;
 }
 
-// note: specialized for TsdfSubmap
 template<typename SubmapType>
 void SubmapServer<SubmapType>::publishSubmap(
     SubmapID submap_id, bool global_map) const {
@@ -539,10 +564,62 @@ void SubmapServer<SubmapType>::publishSubmap(
   publish_map_timer.Stop();
 }
 
+template <typename SubmapType>
+void SubmapServer<SubmapType>::publishPose(SubmapID submap_id) const {
+  if (pose_pub_.getNumSubscribers() == 0) {
+    return;
+  }
+  if (!submap_collection_ptr_->exists(submap_id)) {
+    ROS_WARN("[CbloxServer] could not get submap pointer");
+    return;
+  }
+
+  // set timer
+  timing::Timer publish_map_timer("cblox/publish_pose");
+  if (verbose_) {
+    ROS_INFO("[CbloxServer] publishing pose of submap %d", submap_id);
+  }
+
+  cblox_msgs::MapPoseUpdate pose_msg;
+  // Get submap for publishing
+  typename SubmapType::Ptr submap_ptr = submap_collection_ptr_->
+      getSubmapPtr(submap_id);
+  serializePoseToMsg<SubmapType>(submap_ptr, &pose_msg);
+
+  // Publish message
+  pose_pub_.publish(pose_msg);
+
+  // stop timer
+  publish_map_timer.Stop();
+}
+
+template <typename SubmapType>
+void SubmapServer<SubmapType>::PoseCallback(const cblox_msgs::MapPoseUpdate& msg) {
+  timing::Timer read_pose_timer("cblox/pose_callback");
+  if (verbose_) {
+    ROS_INFO("[CbloxServer] received pose update");
+  }
+  SubmapID submap_id =
+      deserializeMsgToPose<SubmapType>(&msg, submap_collection_ptr_);
+  if (!submap_collection_ptr_->exists(submap_id)) {
+    ROS_ERROR("[CbloxServer] not a submap");
+    return;
+  }
+
+  // visualizing mesh
+  if (verbose_ and true) {
+    ROS_INFO("[CbloxServer] visualizing mesh %d with new pose", submap_id);
+  }
+  std::thread vis_thread(
+      &SubmapServer<SubmapType>::visualizeSubmapMesh, this, submap_id);
+  vis_thread.detach();
+  read_pose_timer.Stop();
+}
+
 template<typename SubmapType>
 void SubmapServer<SubmapType>::SubmapCallback(
     const cblox_msgs::MapLayerPtr& msg_in) {
-  timing::Timer read_map_timer("cblox/receive submap");
+  timing::Timer read_map_timer("cblox/submap_callback");
 
   // push newest message in queue to service
   submap_queue_.push(msg_in);

@@ -50,4 +50,27 @@ bool TsdfEsdfSubmap::saveToStream(std::fstream* outfile_ptr) const {
   return true;
 }
 
+void TsdfEsdfSubmap::serializeToMsg(cblox_msgs::MapLayer* msg) const {
+  // set type to ESDF
+  msg->type = 0;
+
+  TsdfSubmap::serializeToMsg(msg);
+
+  voxblox::serializeLayerAsMsg<voxblox::EsdfVoxel>(
+      esdf_map_->getEsdfLayer(), false, &msg->esdf_layer);
+  msg->esdf_layer.action =
+      static_cast<uint8_t>(voxblox::MapDerializationAction::kReset);
+}
+bool TsdfEsdfSubmap::deserializeFromMsg(cblox_msgs::MapLayer* msg) {
+
+  // read tsdf layer
+  bool success = TsdfSubmap::deserializeFromMsg(msg);
+  // TODO: esdf dependent on tsdf
+  //       change at the same time, even if info not available?
+  success &= voxblox::deserializeMsgToLayer(msg->esdf_layer,
+      esdf_map_->getEsdfLayerPtr());
+
+  return success;
+}
+
 }  // namespace cblox

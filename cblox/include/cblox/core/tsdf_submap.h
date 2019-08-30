@@ -12,6 +12,9 @@
 #include "./Submap.pb.h"
 #include "cblox/core/common.h"
 
+#include <cblox_msgs/MapLayer.h>
+#include <voxblox_ros/conversions.h>
+
 namespace cblox {
 
 // Class representing TSDF submap
@@ -80,7 +83,8 @@ class TsdfSubmap {
   // Save the submap to file
   virtual bool saveToStream(std::fstream* outfile_ptr) const;
 
-  mutable std::mutex submap_mutex;
+  virtual void serializeToMsg(cblox_msgs::MapLayer* msg) const;
+  virtual bool deserializeFromMsg(cblox_msgs::MapLayer* msg);
 
  protected:
   SubmapID submap_id_;

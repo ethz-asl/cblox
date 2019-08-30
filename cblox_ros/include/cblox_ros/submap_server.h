@@ -5,6 +5,7 @@
 #include <queue>
 #include <string>
 #include <vector>
+#include <mutex>
 
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -20,8 +21,8 @@
 #include <cblox/integrator/tsdf_submap_collection_integrator.h>
 #include <cblox/mesh/submap_mesher.h>
 #include <cblox_msgs/Submap.h>
-//#include <cblox_msgs/PoseUpdate.h>
 #include <cblox_msgs/MapLayer.h>
+#include <cblox_msgs/MapPoseUpdate.h>
 
 #include "cblox_ros/active_submap_visualizer.h"
 #include "cblox_ros/trajectory_visualizer.h"
@@ -69,7 +70,10 @@ class SubmapServer {
   // Access Submap Collection Pointer
   inline const typename SubmapCollection<SubmapType>::Ptr&
       getSubmapCollectionPtr() const;
+
+  // Visualize mesh
   void visualizeActiveSubmapMesh();
+  void visualizeSubmapMesh(const SubmapID& submap_id);
   void visualizeWholeMap();
 
   // Visualize trajectory
@@ -115,10 +119,12 @@ class SubmapServer {
 
   // Submap creation
   bool newSubmapRequired() const;
-  void createNewSubmap(const Transformation& T_G_C);
+  void createNewSubmap(const Transformation& T_G_C, const ros::Time& timestamp);
   inline void finishSubmap(const SubmapID& submap_id);
 
   // Submap publishing
+  void publishPose(SubmapID submap_id) const;
+  void PoseCallback(const cblox_msgs::MapPoseUpdate& msg);
   void publishSubmap(SubmapID submap_id, bool global_map = false) const;
   void SubmapCallback(const cblox_msgs::MapLayerPtr& msg);
   void publishWholeMap() const;
@@ -135,12 +141,14 @@ class SubmapServer {
   // Subscribers
   ros::Subscriber pointcloud_sub_;
   ros::Subscriber submap_sub_;
+  ros::Subscriber pose_sub_;
 
   // Publishers
   ros::Publisher active_submap_mesh_pub_;
   ros::Publisher submap_poses_pub_;
   ros::Publisher trajectory_pub_;
   ros::Publisher submap_pub_;
+  ros::Publisher pose_pub_;
 
   // Services
   ros::ServiceServer generate_separated_mesh_srv_;
@@ -192,6 +200,8 @@ class SubmapServer {
   int num_integrated_frames_current_submap_;
   // The number of frames integrated into a submap before requesting a new one.
   int num_integrated_frames_per_submap_;
+
+  mutable std::mutex visualizer_mutex;
 };
 
 }  // namespace cblox
