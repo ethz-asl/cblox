@@ -315,15 +315,16 @@ template<typename SubmapType>
 void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C,
     const ros::Time& timestamp) {
   // finishing up the last submap
+  if (!submap_collection_ptr_->empty()) {
 //  finishSubmap(submap_collection_ptr_->getActiveSubmapID());
-  std::thread finish_submap_thread(&SubmapServer<SubmapType>::finishSubmap,
-      this, submap_collection_ptr_->getActiveSubmapID());
-  finish_submap_thread.detach();
+    std::thread finish_submap_thread(&SubmapServer<SubmapType>::finishSubmap,
+        this, submap_collection_ptr_->getActiveSubmapID());
+    finish_submap_thread.detach();
+  }
 
   // Creating the submap
   const SubmapID submap_id =
       submap_collection_ptr_->createNewSubmap(T_G_C);
-  ROS_INFO("[CbloxServer] creating submap %d", submap_id);
 
   // Activating the submap in the frame integrator
   tsdf_submap_collection_integrator_ptr_->switchToActiveSubmap();
@@ -341,13 +342,10 @@ void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C,
 
   // publish pose of new submap
   publishPose(submap_id);
-  ROS_INFO("[CbloxServer] published submap pose %d", submap_id);
 
-  if (verbose_) {
-    ROS_INFO_STREAM("Created a new submap with id: "
-                        << submap_id << ". Total submap number: "
+  ROS_INFO_STREAM("[CbloxServer] Created a new submap with id: "
+                      << submap_id << ". Total submap number: "
                         << submap_collection_ptr_->size());
-  }
 }
 
 template<typename SubmapType>
@@ -355,6 +353,8 @@ void SubmapServer<SubmapType>::visualizeActiveSubmapMesh() {
   // NOTE(alexmillane): For the time being only the mesh from the currently
   // active submap is updated. This breaks down when the pose of past submaps is
   // changed. We will need to handle this separately later.
+  std::lock_guard<std::mutex> lock(visualizer_mutex_);
+
   active_submap_visualizer_ptr_->updateMeshLayer();
   // Getting the display mesh
   visualization_msgs::Marker marker;
@@ -368,7 +368,8 @@ void SubmapServer<SubmapType>::visualizeActiveSubmapMesh() {
 
 template<typename SubmapType>
 void SubmapServer<SubmapType>::visualizeSubmapMesh(const SubmapID& submap_id) {
-  std::lock_guard<std::mutex> lock(visualizer_mutex);
+  std::lock_guard<std::mutex> lock(visualizer_mutex_);
+
   SubmapID active_submap_id = submap_collection_ptr_->getActiveSubmapID();
   ROS_INFO("[CbloxServer] visualizing submap %d, active submap: %d",
       submap_id, active_submap_id);
@@ -386,7 +387,7 @@ void SubmapServer<SubmapType>::visualizeWholeMap() {
   // Looping through the whole map, meshing and publishing.
   ROS_INFO("[CbloxServer] visualizing submaps (#%lu)", submap_collection_ptr_->size());
   for (const SubmapID submap_id : submap_collection_ptr_->getIDs()) {
-    std::lock_guard<std::mutex> lock(visualizer_mutex);
+    visualizeSubmapMesh(submap_id);
     submap_collection_ptr_->activateSubmap(submap_id);
     active_submap_visualizer_ptr_->switchToActiveSubmap();
     visualizeActiveSubmapMesh();
@@ -444,7 +445,6 @@ bool SubmapServer<SubmapType>::generateCombinedMeshCallback(
 template<typename SubmapType>
 void SubmapServer<SubmapType>::updateMeshEvent(const ros::TimerEvent&  /*event*/) {
   if (mapIntialized()) {
-    std::lock_guard<std::mutex> lock(visualizer_mutex);
     visualizeActiveSubmapMesh();
   }
 }
@@ -686,7 +686,7 @@ void SubmapServer<SubmapType>::SubmapCallback(
     SubmapID submap_id =
         deserializeMsgToSubmap<SubmapType>(submap_queue_.front().get(),
             getSubmapCollectionPtr());
-    visualizeSlice(submap_id);
+//    visualizeSlice(submap_id);
     submap_queue_.pop();
   }
   read_map_timer.Stop();

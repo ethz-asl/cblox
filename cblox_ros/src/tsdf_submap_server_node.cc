@@ -12,6 +12,8 @@ int main(int argc, char** argv) {
 
   cblox::SubmapServer<cblox::TsdfEsdfSubmap> node(nh, nh_private);
 
-  ros::spin();
+  ros::MultiThreadedSpinner spinner;
+  spinner.spin();
+//  ros::spin();
   return 0;
 }
