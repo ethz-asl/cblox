@@ -35,8 +35,10 @@ class ActiveSubmapVisualizer {
         current_color_idx_(0),
         verbose_(false) {}
 
+  void switchToSubmap(const SubmapID& submap_id);
   void switchToActiveSubmap();
 
+  void recreateSubmap(const SubmapID& submap_id);
   void updateMeshLayer();
 
   void getDisplayMesh(visualization_msgs::Marker* marker_ptr);

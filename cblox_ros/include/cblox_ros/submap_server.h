@@ -73,12 +73,11 @@ class SubmapServer {
   inline const typename SubmapCollection<SubmapType>::Ptr&
       getSubmapCollectionPtr() const;
 
-  // Visualize mesh
+  // Visualizing
+  void setVisualize(bool visualize) {visualize_ = visualize;};
   void visualizeActiveSubmapMesh();
   void visualizeSubmapMesh(const SubmapID& submap_id);
   void visualizeWholeMap();
-
-  // Visualize trajectory
   void visualizeSubmapBaseframes() const;
   void visualizeTrajectory() const;
 
@@ -91,6 +90,8 @@ class SubmapServer {
       std_srvs::Empty::Response& response);  // NOLINT
 
   void SubmapCallback(const cblox_msgs::MapLayerPtr& msg);
+
+  void setVerbose(bool verbose) {verbose_ = verbose;};
 
  protected:
   // Gets parameters
@@ -168,6 +169,7 @@ class SubmapServer {
   ros::Timer update_mesh_timer_;
 
   bool verbose_;
+  bool visualize_;
 
   // Global/map coordinate frame. Will always look up TF transforms to this
   std::string world_frame_;
@@ -209,7 +211,7 @@ class SubmapServer {
   // The number of frames integrated into a submap before requesting a new one.
   int num_integrated_frames_per_submap_;
 
-  mutable std::mutex visualizer_mutex;
+  std::mutex visualizer_mutex_;
 };
 
 }  // namespace cblox

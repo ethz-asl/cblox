@@ -4,10 +4,8 @@
 
 namespace cblox {
 
-void ActiveSubmapVisualizer::switchToActiveSubmap() {
+void ActiveSubmapVisualizer::switchToSubmap(const SubmapID& submap_id) {
   CHECK(tsdf_submap_collection_ptr_);
-  // Getting the active submap ID
-  const SubmapID submap_id = tsdf_submap_collection_ptr_->getActiveSubmapID();
   if (mesh_layers_.find(submap_id) == mesh_layers_.end()) {
     if (verbose_) {
       ROS_INFO_STREAM("Creating mesh layer for submap id: " << submap_id);
@@ -21,6 +19,18 @@ void ActiveSubmapVisualizer::switchToActiveSubmap() {
     recoverMeshLayer();
     updateIntegrator();
   }
+}
+
+void ActiveSubmapVisualizer::recreateSubmap(const SubmapID& submap_id) {
+  CHECK(tsdf_submap_collection_ptr_);
+  createMeshLayer();
+  updateIntegrator();
+}
+
+void ActiveSubmapVisualizer::switchToActiveSubmap() {
+  // Getting the active submap ID
+  const SubmapID submap_id = tsdf_submap_collection_ptr_->getActiveSubmapID();
+  switchToSubmap(submap_id);
 }
 
 void ActiveSubmapVisualizer::createMeshLayer() {

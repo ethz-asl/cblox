@@ -49,7 +49,8 @@ SubmapServer<SubmapType>::SubmapServer(
     const voxblox::MeshIntegratorConfig& mesh_config)
     : nh_(nh),
       nh_private_(nh_private),
-      verbose_(true),
+      verbose_(false),
+      visualize_(true),
       world_frame_("world"),
       transformer_(nh, nh_private),
       color_map_(new voxblox::GrayscaleColorMap()),
@@ -135,6 +136,7 @@ template<typename SubmapType>
 void SubmapServer<SubmapType>::getParametersFromRos() {
   ROS_DEBUG("Getting params from ROS");
   nh_private_.param("verbose", verbose_, verbose_);
+  nh_private_.param("visualize", visualize_, visualize_);
   nh_private_.param("world_frame", world_frame_, world_frame_);
   // Throttle frame integration
   double min_time_between_msgs_sec = 0.0;
@@ -249,11 +251,11 @@ void SubmapServer<SubmapType>::processPointCloudMessageAndInsert(
   convertPointcloudMsg(*color_map_, pointcloud_msg, &points_C, &colors);
 
   if (verbose_) {
-    ROS_INFO("Integrating a pointcloud with %lu points.", points_C.size());
+    ROS_INFO("[CbloxServer] Integrating a pointcloud with %lu points.", points_C.size());
   }
 
   if (!mapIntialized()) {
-    ROS_INFO("Intializing map.");
+    ROS_INFO("[CbloxServer] Initializing map.");
     intializeMap(T_G_C);
   }
 
@@ -263,8 +265,8 @@ void SubmapServer<SubmapType>::processPointCloudMessageAndInsert(
   num_integrated_frames_current_submap_++;
   if (verbose_) {
     ROS_INFO(
-        "Finished integrating in %f seconds, have %lu blocks. %u frames "
-        "integrated to current submap.",
+        "[CbloxServer] Finished integrating in %f seconds, have %lu blocks. "
+        "%u frames integrated to current submap.",
         (end - start).toSec(), submap_collection_ptr_->getActiveTsdfMap()
             .getTsdfLayer()
             .getNumberOfAllocatedBlocks(),
@@ -307,7 +309,7 @@ inline void SubmapServer<SubmapType>::finishSubmap(const SubmapID& submap_id) {
     submap_ptr->generateEsdf();
 
     publishSubmap(submap_id);
-    visualizeSlice(submap_id);
+//    visualizeSlice(submap_id);
   }
 }
 
@@ -355,6 +357,7 @@ void SubmapServer<SubmapType>::visualizeActiveSubmapMesh() {
   // changed. We will need to handle this separately later.
   std::lock_guard<std::mutex> lock(visualizer_mutex_);
 
+  active_submap_visualizer_ptr_->switchToActiveSubmap();
   active_submap_visualizer_ptr_->updateMeshLayer();
   // Getting the display mesh
   visualization_msgs::Marker marker;
@@ -371,15 +374,19 @@ void SubmapServer<SubmapType>::visualizeSubmapMesh(const SubmapID& submap_id) {
   std::lock_guard<std::mutex> lock(visualizer_mutex_);
 
   SubmapID active_submap_id = submap_collection_ptr_->getActiveSubmapID();
-  ROS_INFO("[CbloxServer] visualizing submap %d, active submap: %d",
-      submap_id, active_submap_id);
+  if (verbose_) {
+    ROS_INFO("[CbloxServer] visualizing submap %d, active submap: %d",
+        submap_id, active_submap_id);
+  }
 
-  submap_collection_ptr_->activateSubmap(submap_id);
-  active_submap_visualizer_ptr_->switchToActiveSubmap();
-  visualizeActiveSubmapMesh();
-
-  submap_collection_ptr_->activateSubmap(active_submap_id);
-  active_submap_visualizer_ptr_->switchToActiveSubmap();
+  active_submap_visualizer_ptr_->recreateSubmap(submap_id);
+  active_submap_visualizer_ptr_->updateMeshLayer();
+  visualization_msgs::Marker marker;
+  active_submap_visualizer_ptr_->getDisplayMesh(&marker);
+  marker.header.frame_id = world_frame_;
+  visualization_msgs::MarkerArray marker_array;
+  marker_array.markers.push_back(marker);
+  active_submap_mesh_pub_.publish(marker_array);
 }
 
 template<typename SubmapType>
@@ -388,9 +395,6 @@ void SubmapServer<SubmapType>::visualizeWholeMap() {
   ROS_INFO("[CbloxServer] visualizing submaps (#%lu)", submap_collection_ptr_->size());
   for (const SubmapID submap_id : submap_collection_ptr_->getIDs()) {
     visualizeSubmapMesh(submap_id);
-    submap_collection_ptr_->activateSubmap(submap_id);
-    active_submap_visualizer_ptr_->switchToActiveSubmap();
-    visualizeActiveSubmapMesh();
   }
 }
 
@@ -407,13 +411,13 @@ bool SubmapServer<SubmapType>::generateSeparatedMeshCallback(
                                               &seperated_mesh_layer);
     bool success = outputMeshLayerAsPly(mesh_filename_, seperated_mesh_layer);
     if (success) {
-      ROS_INFO("Output file as PLY: %s", mesh_filename_.c_str());
+      ROS_INFO("[CbloxServer] Output file as PLY: %s", mesh_filename_.c_str());
       return true;
     } else {
-      ROS_INFO("Failed to output mesh as PLY: %s", mesh_filename_.c_str());
+      ROS_INFO("[CbloxServer] Failed to output mesh as PLY: %s", mesh_filename_.c_str());
     }
   } else {
-    ROS_ERROR("No path to mesh specified in ros_params.");
+    ROS_ERROR("[CbloxServer] No path to mesh specified in ros_params.");
   }
   return false;
 }
@@ -431,13 +435,13 @@ bool SubmapServer<SubmapType>::generateCombinedMeshCallback(
                                              &combined_mesh_layer);
     bool success = outputMeshLayerAsPly(mesh_filename_, combined_mesh_layer);
     if (success) {
-      ROS_INFO("Output file as PLY: %s", mesh_filename_.c_str());
+      ROS_INFO("[CbloxServer] Output file as PLY: %s", mesh_filename_.c_str());
       return true;
     } else {
-      ROS_INFO("Failed to output mesh as PLY: %s", mesh_filename_.c_str());
+      ROS_INFO("[CbloxServer] Failed to output mesh as PLY: %s", mesh_filename_.c_str());
     }
   } else {
-    ROS_ERROR("No path to mesh specified in ros_params.");
+    ROS_ERROR("[CbloxServer] No path to mesh specified in ros_params.");
   }
   return false;
 }
@@ -465,6 +469,7 @@ void SubmapServer<SubmapType>::visualizeSubmapBaseframes() const {
 template<typename SubmapType>
 void SubmapServer<SubmapType>::visualizeTrajectory() const {
   nav_msgs::Path path_msg;
+  CHECK(trajectory_visualizer_ptr_);
   trajectory_visualizer_ptr_->getTrajectoryMsg(&path_msg);
   path_msg.header.frame_id = world_frame_;
   trajectory_pub_.publish(path_msg);
@@ -646,7 +651,6 @@ void SubmapServer<SubmapType>::publishPose(SubmapID submap_id) const {
 
   // Publish message
   pose_pub_.publish(pose_msg);
-
   // stop timer
   publish_map_timer.Stop();
 }
@@ -665,13 +669,15 @@ void SubmapServer<SubmapType>::PoseCallback(const cblox_msgs::MapPoseUpdate& msg
   }
 
   // visualizing mesh
-  if (verbose_ and true) {
-    ROS_INFO("[CbloxServer] visualizing mesh %d with new pose", submap_id);
+  if (visualize_) {
+    if (verbose_) {
+      ROS_INFO("[CbloxServer] visualizing mesh %d with new pose", submap_id);
+    }
+    visualizeSubmapMesh(submap_id);
+//    std::thread vis_thread(
+//        &SubmapServer<SubmapType>::visualizeSubmapMesh, this, submap_id);
+//    vis_thread.detach();
   }
-  std::thread vis_thread(
-      &SubmapServer<SubmapType>::visualizeSubmapMesh, this, submap_id);
-  vis_thread.detach();
-  read_pose_timer.Stop();
 }
 
 template<typename SubmapType>
