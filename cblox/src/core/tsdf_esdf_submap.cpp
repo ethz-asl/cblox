@@ -12,12 +12,11 @@ void TsdfEsdfSubmap::generateEsdf() {
   LOG(INFO) << "Generating ESDF from TSDF for submap with ID: " << submap_id_;
   esdf_integrator.setFullEuclidean(false);
 
-  std::unique_lock<std::mutex> lock(submap_mutex);
+  std::unique_lock<std::mutex> lock(esdf_mutex);
   esdf_integrator.updateFromTsdfLayerBatch();
 }
 
 void TsdfEsdfSubmap::setTsdfMap(const voxblox::Layer<TsdfVoxel>& tsdf_layer) {
-  std::unique_lock<std::mutex> lock(submap_mutex);
   tsdf_map_.reset(new voxblox::TsdfMap(tsdf_layer));
 }
 
@@ -69,6 +68,14 @@ bool TsdfEsdfSubmap::deserializeFromMsg(cblox_msgs::MapLayer* msg) {
   //       change at the same time, even if info not available?
   success &= voxblox::deserializeMsgToLayer(msg->esdf_layer,
       esdf_map_->getEsdfLayerPtr());
+
+  // generate ESDF layer if necessary
+  if (esdf_map_->getEsdfLayerPtr()->getNumberOfAllocatedBlocks() == 0) {
+    generateEsdf();
+  }
+
+//  ROS_INFO("[TsdfEsdfSubmap] received %lu blocks",
+//      esdf_map_->getEsdfLayerPtr()->getNumberOfAllocatedBlocks());
 
   return success;
 }

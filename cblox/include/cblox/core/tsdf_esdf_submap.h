@@ -62,10 +62,13 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   virtual void serializeToMsg(cblox_msgs::MapLayer* msg) const;
   virtual bool deserializeFromMsg(cblox_msgs::MapLayer* msg);
 
+
  protected:
   Config config_;
   EsdfMap::Ptr esdf_map_;
   voxblox::EsdfIntegrator::Config esdf_integrator_config_;
+
+  mutable std::mutex esdf_mutex;
 };
 }  // namespace cblox
 

@@ -33,7 +33,6 @@ class SubmapCollectionInterface {
   virtual size_t size() const = 0;
   virtual size_t num_patches() const = 0;
   virtual FloatingPoint block_size() const = 0;
-
 };
 
 // Collection of submaps
@@ -45,7 +44,8 @@ class SubmapCollection : public SubmapCollectionInterface {
 
   // Constructor. Constructs an empty submap collection map
   explicit SubmapCollection(const typename SubmapType::Config &submap_config)
-      : SubmapCollectionInterface(), submap_config_(submap_config) {}
+      : SubmapCollectionInterface(), submap_config_(submap_config),
+        active_submap_id_(-1) {}
 
   // Constructor. Constructs a submap collection from a list of submaps
   SubmapCollection(const typename SubmapType::Config& submap_config,
