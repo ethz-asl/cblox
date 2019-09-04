@@ -10,6 +10,8 @@
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <std_srvs/Empty.h>
+#include <cblox_msgs/SubmapSrvRequest.h>
+#include <cblox_msgs/SubmapSrvResponse.h>
 
 #include <voxblox/utils/color_maps.h>
 #include <voxblox_msgs/FilePath.h>
@@ -88,6 +90,8 @@ class SubmapServer {
       std_srvs::Empty::Request& request,     // NOLINT
       std_srvs::Empty::Response& response);  // NOLINT
 
+  void SubmapCallback(const cblox_msgs::MapLayerPtr& msg);
+
  protected:
   // Gets parameters
   void subscribeToTopics();
@@ -128,6 +132,9 @@ class SubmapServer {
   void publishSubmap(SubmapID submap_id, bool global_map = false) const;
   void SubmapCallback(const cblox_msgs::MapLayerPtr& msg);
   void publishWholeMap() const;
+  bool publishActiveSubmapCallback(
+      cblox_msgs::SubmapSrvRequest& request, cblox_msgs::SubmapSrvResponse& response);
+  bool publishActiveSubmap();
 
   // visualization
   void visualizeSlice(const SubmapID& submap_id) const;
@@ -155,6 +162,7 @@ class SubmapServer {
   ros::ServiceServer generate_combined_mesh_srv_;
   ros::ServiceServer save_map_srv_;
   ros::ServiceServer load_map_srv_;
+  ros::ServiceServer publish_active_submap_srv_;
 
   // Timers.
   ros::Timer update_mesh_timer_;

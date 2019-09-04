@@ -2,6 +2,40 @@
 
 namespace cblox {
 
+template <>
+bool SubmapServer<TsdfSubmap>::publishActiveSubmapCallback(
+    cblox_msgs::SubmapSrvRequest& /*request*/,
+    cblox_msgs::SubmapSrvResponse& response) {
+//    std_srvs::TriggerRequest& /*request*/, std_srvs::TriggerResponse& response) {
+
+//  std::thread process_thread(
+//      &SubmapServer<SubmapType>::publishActiveSubmap, this);
+//  process_thread.detach();
+//  return true;
+//  response.message =
+//      std::to_string(submap_collection_ptr_->getActiveSubmapID());
+//  return publishActiveSubmap();
+
+  SubmapID submap_id = submap_collection_ptr_->getActiveSubmapID();
+  TsdfSubmap::Ptr submap_ptr =
+      submap_collection_ptr_->getSubmapPtr(submap_id);
+  cblox_msgs::MapLayer submap_msg;
+  serializeSubmapToMsg<TsdfSubmap>(submap_ptr, &submap_msg);
+  response.submap_msg = submap_msg;
+  return true;
+}
+
+template<>
+bool SubmapServer<TsdfSubmap>::publishActiveSubmap() {
+  if (submap_collection_ptr_->empty()) {
+    ROS_WARN("[CbloxPlanner] no submaps initialized");
+    return false;
+  }
+  SubmapID submap_id = submap_collection_ptr_->getActiveSubmapID();
+  publishSubmap(submap_id);
+  return true;
+}
+
 template<>
 const SubmapCollection<TsdfSubmap>::Ptr&
     SubmapServer<TsdfSubmap>::getSubmapCollectionPtr() const {

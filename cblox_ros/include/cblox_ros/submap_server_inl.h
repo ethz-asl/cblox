@@ -9,7 +9,7 @@
 #include <nav_msgs/Path.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
-#include <cblox_msgs/Submap.h>
+#include <cblox_msgs/SubmapSrv.h>
 
 #include <pcl/conversions.h>
 #include <pcl/point_types.h>
@@ -125,6 +125,10 @@ void SubmapServer<SubmapType>::advertiseTopics() {
   submap_pub_ = nh_private_.advertise<cblox_msgs::MapLayer>("tsdf_submap_out", 1);
   sdf_slice_pub_ =
       nh_private_.advertise<visualization_msgs::MarkerArray>("sdf_slice", 1);
+  // Service for submaps
+  publish_active_submap_srv_ = nh_private_.advertiseService(
+      "publish_active_submap",
+      &SubmapServer<SubmapType>::publishActiveSubmapCallback, this);
 }
 
 template<typename SubmapType>
@@ -566,6 +570,56 @@ void SubmapServer<SubmapType>::publishSubmap(
 
   // stop timer
   publish_map_timer.Stop();
+}
+
+// Note: specialized for TsdfSubmap
+template <typename SubmapType>
+bool SubmapServer<SubmapType>::publishActiveSubmapCallback(
+    cblox_msgs::SubmapSrvRequest& /*request*/,
+    cblox_msgs::SubmapSrvResponse& response) {
+//    std_srvs::TriggerRequest& /*request*/, std_srvs::TriggerResponse& response) {
+
+//  std::thread process_thread(
+//      &SubmapServer<SubmapType>::publishActiveSubmap, this);
+//  process_thread.detach();
+//  return true;
+//  response.message =
+//      std::to_string(submap_collection_ptr_->getActiveSubmapID());
+//  return publishActiveSubmap();
+
+  SubmapID submap_id = submap_collection_ptr_->getActiveSubmapID();
+  if (!submap_collection_ptr_->exists(submap_id)) {
+    ROS_ERROR("[CbloxServer] Active submap does not exist");
+    return false;
+  }
+  TsdfSubmap::Ptr submap_ptr =
+      submap_collection_ptr_->getSubmapPtr(submap_id);
+
+  Eigen::Vector3d lower, upper;
+  voxblox::utils::computeMapBoundsFromLayer(
+      *submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr(), &lower, &upper);
+  ROS_INFO("[CbloxServer] submap %d: [%.2f %.2f %.2f] to [%.2f %.2f %.2f]", submap_id,
+      lower.x(), lower.y(), lower.z(), upper.x(), upper.y(), upper.z());
+
+  cblox_msgs::MapLayer submap_msg;
+  serializeSubmapToMsg<TsdfSubmap>(submap_ptr, &submap_msg);
+  response.submap_msg = submap_msg;
+  return true;
+}
+
+// Note: specialized for TsdfSubmap
+template<typename SubmapType>
+bool SubmapServer<SubmapType>::publishActiveSubmap() {
+  if (submap_collection_ptr_->empty()) {
+    ROS_WARN("[CbloxPlanner] no submaps initialized");
+    return false;
+  }
+  SubmapID submap_id = submap_collection_ptr_->getActiveSubmapID();
+  typename SubmapType::Ptr submap_ptr =
+      submap_collection_ptr_->getSubmapPtr(submap_id);
+  submap_ptr->generateEsdf();
+  publishSubmap(submap_id);
+  return true;
 }
 
 template <typename SubmapType>
