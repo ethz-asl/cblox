@@ -127,11 +127,13 @@ class SubmapServer {
   void createNewSubmap(const Transformation& T_G_C, const ros::Time& timestamp);
   inline void finishSubmap(const SubmapID& submap_id);
 
-  // Submap publishing
+  // Submap pose updates
   void publishPose(SubmapID submap_id) const;
   void PoseCallback(const cblox_msgs::MapPoseUpdate& msg);
+  void processPoseUpdate(const cblox_msgs::MapPoseUpdate& msg);
+
+  // Submap publishing
   void publishSubmap(SubmapID submap_id, bool global_map = false) const;
-  void SubmapCallback(const cblox_msgs::MapLayerPtr& msg);
   void publishWholeMap() const;
   bool publishActiveSubmapCallback(
       cblox_msgs::SubmapSrvRequest& request, cblox_msgs::SubmapSrvResponse& response);

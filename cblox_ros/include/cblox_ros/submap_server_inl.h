@@ -661,10 +661,18 @@ void SubmapServer<SubmapType>::PoseCallback(const cblox_msgs::MapPoseUpdate& msg
   if (verbose_) {
     ROS_INFO("[CbloxServer] received pose update");
   }
+  std::thread process_thread(
+      &SubmapServer<SubmapType>::processPoseUpdate, this, msg);
+  process_thread.detach();
+}
+
+template <typename SubmapType>
+void SubmapServer<SubmapType>::processPoseUpdate(
+    const cblox_msgs::MapPoseUpdate& msg) {
   SubmapID submap_id =
       deserializeMsgToPose<SubmapType>(&msg, submap_collection_ptr_);
   if (!submap_collection_ptr_->exists(submap_id)) {
-    ROS_ERROR("[CbloxServer] not a submap");
+    ROS_ERROR("[CbloxServer] not a submap (%d)", submap_id);
     return;
   }
 
