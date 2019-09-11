@@ -38,7 +38,6 @@ class ActiveSubmapVisualizer {
   void switchToSubmap(const SubmapID& submap_id);
   void switchToActiveSubmap();
 
-  void recreateSubmap(const SubmapID& submap_id);
   void updateMeshLayer();
 
   void getDisplayMesh(visualization_msgs::Marker* marker_ptr);
@@ -70,6 +69,7 @@ class ActiveSubmapVisualizer {
 
   // The submap collection
   std::shared_ptr<SubmapCollectionInterface> tsdf_submap_collection_ptr_;
+  SubmapID active_submap_id_;
 
   // Storing the mesh layers
   std::map<SubmapID, std::shared_ptr<MeshLayer>> mesh_layers_;

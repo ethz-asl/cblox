@@ -74,6 +74,7 @@ SubmapServer<SubmapType>::SubmapServer(
 
   // An object to visualize the submaps
   submap_mesher_ptr_.reset(new SubmapMesher(submap_config, mesh_config));
+  std::lock_guard<std::mutex> lock(visualizer_mutex_);
   active_submap_visualizer_ptr_.reset(
       new ActiveSubmapVisualizer(mesh_config, submap_collection_ptr_));
   active_submap_visualizer_ptr_->setVerbose(verbose_);
@@ -334,6 +335,7 @@ void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C,
   num_integrated_frames_current_submap_ = 0;
 
   // Updating the active submap mesher
+  std::lock_guard<std::mutex> lock(visualizer_mutex_);
   active_submap_visualizer_ptr_->switchToActiveSubmap();
 
   // Publish the baseframes
@@ -357,6 +359,13 @@ void SubmapServer<SubmapType>::visualizeActiveSubmapMesh() {
   // changed. We will need to handle this separately later.
   std::lock_guard<std::mutex> lock(visualizer_mutex_);
 
+  if (submap_collection_ptr_->getActiveTsdfMapPtr()->getTsdfLayerPtr()
+      ->getNumberOfAllocatedBlocks() == 0) {
+    ROS_WARN("CbloxServer] Submap %d has no allocated blocks yet to visualize",
+        submap_collection_ptr_->getActiveSubmapID());
+    return;
+  }
+
   active_submap_visualizer_ptr_->switchToActiveSubmap();
   active_submap_visualizer_ptr_->updateMeshLayer();
   // Getting the display mesh
@@ -379,7 +388,14 @@ void SubmapServer<SubmapType>::visualizeSubmapMesh(const SubmapID& submap_id) {
         submap_id, active_submap_id);
   }
 
-  active_submap_visualizer_ptr_->recreateSubmap(submap_id);
+  if (submap_collection_ptr_->getSubmapPtr(submap_id)->getTsdfMapPtr()
+          ->getTsdfLayerPtr()->getNumberOfAllocatedBlocks() == 0) {
+    ROS_WARN("CbloxServer] Submap %d has no allocated blocks yet to visualize",
+        submap_id);
+    return;
+  }
+
+  active_submap_visualizer_ptr_->switchToSubmap(submap_id);
   active_submap_visualizer_ptr_->updateMeshLayer();
   visualization_msgs::Marker marker;
   active_submap_visualizer_ptr_->getDisplayMesh(&marker);
@@ -392,7 +408,8 @@ void SubmapServer<SubmapType>::visualizeSubmapMesh(const SubmapID& submap_id) {
 template<typename SubmapType>
 void SubmapServer<SubmapType>::visualizeWholeMap() {
   // Looping through the whole map, meshing and publishing.
-  ROS_INFO("[CbloxServer] visualizing submaps (#%lu)", submap_collection_ptr_->size());
+  ROS_INFO("[CbloxServer] visualizing submaps (#%lu)",
+      submap_collection_ptr_->size());
   for (const SubmapID submap_id : submap_collection_ptr_->getIDs()) {
     visualizeSubmapMesh(submap_id);
   }
@@ -592,6 +609,8 @@ bool SubmapServer<SubmapType>::publishActiveSubmapCallback(
 //      std::to_string(submap_collection_ptr_->getActiveSubmapID());
 //  return publishActiveSubmap();
 
+  std::lock_guard<std::mutex> lock(visualizer_mutex_);
+
   SubmapID submap_id = submap_collection_ptr_->getActiveSubmapID();
   if (!submap_collection_ptr_->exists(submap_id)) {
     ROS_ERROR("[CbloxServer] Active submap does not exist");
@@ -599,12 +618,19 @@ bool SubmapServer<SubmapType>::publishActiveSubmapCallback(
   }
   TsdfSubmap::Ptr submap_ptr =
       submap_collection_ptr_->getSubmapPtr(submap_id);
+  if (submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr()
+          ->getNumberOfAllocatedBlocks() == 0) {
+    if (verbose_) {
+      ROS_WARN("[CbloxServer] Active submap has no allocated blocks yet");
+    }
+    return false;
+  }
 
-  Eigen::Vector3d lower, upper;
+  /*Eigen::Vector3d lower, upper;
   voxblox::utils::computeMapBoundsFromLayer(
       *submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr(), &lower, &upper);
   ROS_INFO("[CbloxServer] submap %d: [%.2f %.2f %.2f] to [%.2f %.2f %.2f]", submap_id,
-      lower.x(), lower.y(), lower.z(), upper.x(), upper.y(), upper.z());
+      lower.x(), lower.y(), lower.z(), upper.x(), upper.y(), upper.z());*/
 
   cblox_msgs::MapLayer submap_msg;
   serializeSubmapToMsg<TsdfSubmap>(submap_ptr, &submap_msg);
@@ -669,18 +695,39 @@ void SubmapServer<SubmapType>::PoseCallback(const cblox_msgs::MapPoseUpdate& msg
 template <typename SubmapType>
 void SubmapServer<SubmapType>::processPoseUpdate(
     const cblox_msgs::MapPoseUpdate& msg) {
-  SubmapID submap_id =
-      deserializeMsgToPose<SubmapType>(&msg, submap_collection_ptr_);
-  if (!submap_collection_ptr_->exists(submap_id)) {
-    ROS_ERROR("[CbloxServer] not a submap (%d)", submap_id);
-    return;
+  SubmapID submap_id;
+  {
+    std::lock_guard<std::mutex> lock(visualizer_mutex_);
+    submap_id =
+        deserializeMsgToPose<SubmapType>(&msg, submap_collection_ptr_);
+    if (!submap_collection_ptr_->exists(submap_id)) {
+      ROS_ERROR("[CbloxServer] not a submap (%d)", submap_id);
+      return;
+    }
+
+    typename SubmapType::Ptr submap_ptr =
+        submap_collection_ptr_->getSubmapPtr(submap_id);
+    if (submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr()
+            ->getNumberOfAllocatedBlocks() == 0) {
+      if (verbose_) {
+        ROS_WARN("[CbloxServer] Submap %d has no allocated blocks yet",
+            submap_id);
+      }
+      return;
+    }
   }
+
+  /*Eigen::Vector3d lower, upper;
+  voxblox::utils::computeMapBoundsFromLayer(
+      *submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr(), &lower, &upper);
+  ROS_INFO("[CbloxServer] submap %d: [%.2f %.2f %.2f] to [%.2f %.2f %.2f]", submap_id,
+      lower.x(), lower.y(), lower.z(), upper.x(), upper.y(), upper.z());*/
 
   // visualizing mesh
   if (visualize_) {
-    if (verbose_) {
+//    if (verbose_) {
       ROS_INFO("[CbloxServer] visualizing mesh %d with new pose", submap_id);
-    }
+//    }
     visualizeSubmapMesh(submap_id);
 //    std::thread vis_thread(
 //        &SubmapServer<SubmapType>::visualizeSubmapMesh, this, submap_id);
@@ -697,9 +744,8 @@ void SubmapServer<SubmapType>::SubmapCallback(
   submap_queue_.push(msg_in);
   // service message in queue
   if (!submap_queue_.empty()) {
-    SubmapID submap_id =
-        deserializeMsgToSubmap<SubmapType>(submap_queue_.front().get(),
-            getSubmapCollectionPtr());
+    deserializeMsgToSubmap<SubmapType>(submap_queue_.front().get(),
+        getSubmapCollectionPtr());
 //    visualizeSlice(submap_id);
     submap_queue_.pop();
   }

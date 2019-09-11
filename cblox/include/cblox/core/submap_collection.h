@@ -25,9 +25,12 @@ class SubmapCollectionInterface {
   // lazy.
   virtual const Transformation &getActiveSubmapPose() const = 0;
   virtual const SubmapID& getActiveSubmapID() const = 0;
+  virtual bool getSubmapPose(
+      const SubmapID submap_id, Transformation* pose_ptr) const = 0;
 
   virtual TsdfMap::Ptr getActiveTsdfMapPtr() = 0;
   virtual const TsdfMap &getActiveTsdfMap() const = 0;
+  virtual TsdfMap::Ptr getTsdfMapPtr(const SubmapID& submap_id) = 0;
 
   virtual bool empty() const = 0;
   virtual size_t size() const = 0;
@@ -90,6 +93,8 @@ class SubmapCollection : public SubmapCollectionInterface {
   // Access the tsdf_map member of the active submap
   TsdfMap::Ptr getActiveTsdfMapPtr();
   const TsdfMap& getActiveTsdfMap() const;
+
+  virtual TsdfMap::Ptr getTsdfMapPtr(const SubmapID& submap_id);
 
   // Activate a submap
   // NOTE(alexmillane): Note that creating a new submap automatically activates
