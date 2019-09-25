@@ -80,6 +80,7 @@ class SubmapServer {
   void visualizeWholeMap();
   void visualizeSubmapBaseframes() const;
   void visualizeTrajectory() const;
+  void visualizeSlice(const SubmapID& submap_id) const;
 
   // Mesh output
   bool generateSeparatedMeshCallback(
@@ -128,7 +129,7 @@ class SubmapServer {
   inline void finishSubmap(const SubmapID& submap_id);
 
   // Submap pose updates
-  void publishPose(SubmapID submap_id) const;
+  void publishPoses() const;
   void PoseCallback(const cblox_msgs::MapPoseUpdate& msg);
   void processPoseUpdate(const cblox_msgs::MapPoseUpdate& msg);
 
@@ -140,7 +141,6 @@ class SubmapServer {
   bool publishActiveSubmap();
 
   // visualization
-  void visualizeSlice(const SubmapID& submap_id) const;
   float slice_height_ = 1.5;
   ros::Publisher sdf_slice_pub_;
 

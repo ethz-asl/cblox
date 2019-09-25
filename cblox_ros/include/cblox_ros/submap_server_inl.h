@@ -28,6 +28,7 @@
 #include "cblox_ros/submap_conversions.h"
 
 #include "cblox_ros/submap_server.h"
+#include <voxblox/utils/planning_utils.h>
 
 namespace cblox {
 
@@ -81,6 +82,8 @@ SubmapServer<SubmapType>::SubmapServer(
 
   // An object to visualize the trajectory
   trajectory_visualizer_ptr_.reset(new TrajectoryVisualizer);
+
+  ROS_INFO("[CbloxServer] initialized");
 }
 
 template<typename SubmapType>
@@ -198,8 +201,17 @@ void SubmapServer<SubmapType>::servicePointcloudQueue() {
       createNewSubmap(T_G_C, pointcloud_msg->header.stamp);
     }
 
+    if (verbose_) {
+      ROS_INFO("adding pose.");
+    }
     trajectory_visualizer_ptr_->addPose(T_G_C);
+    if (verbose_) {
+      ROS_INFO("visualizing trajectory.");
+    }
     visualizeTrajectory();
+    if (verbose_) {
+      ROS_INFO("done.");
+    }
 
     processed_any = true;
   }
@@ -249,6 +261,9 @@ void SubmapServer<SubmapType>::processPointCloudMessageAndInsert(
   // Convert the PCL pointcloud into our awesome format.
   Pointcloud points_C;
   Colors colors;
+  if (verbose_) {
+    ROS_INFO("[CbloxServer] reading pointcloud message");
+  }
   convertPointcloudMsg(*color_map_, pointcloud_msg, &points_C, &colors);
 
   if (verbose_) {
@@ -300,6 +315,7 @@ bool SubmapServer<SubmapType>::newSubmapRequired() const {
 
 template<typename SubmapType>
 inline void SubmapServer<SubmapType>::finishSubmap(const SubmapID& submap_id) {
+  ROS_INFO("[CbloxServer] finishing submap %d", submap_id);
   if (submap_collection_ptr_->exists(submap_id)) {
     typename SubmapType::Ptr submap_ptr =
         submap_collection_ptr_->getSubmapPtr(submap_id);
@@ -312,6 +328,7 @@ inline void SubmapServer<SubmapType>::finishSubmap(const SubmapID& submap_id) {
     publishSubmap(submap_id);
 //    visualizeSlice(submap_id);
   }
+  ROS_INFO("[CbloxServer] finished submap %d", submap_id);
 }
 
 template<typename SubmapType>
@@ -345,7 +362,12 @@ void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C,
   submap_collection_ptr_->getActiveSubmapPtr()->startMappingTime(timestamp);
 
   // publish pose of new submap
-  publishPose(submap_id);
+  cblox_msgs::MapPoseUpdate pose_msg;
+  pose_msg.header.frame_id = world_frame_;
+  pose_msg.header.stamp = ros::Time::now();
+  pose_msg.map_headers.emplace_back(generateSubmapHeaderMsg<SubmapType>(
+      submap_collection_ptr_->getActiveSubmapPtr()));
+  pose_pub_.publish(pose_msg);
 
   ROS_INFO_STREAM("[CbloxServer] Created a new submap with id: "
                       << submap_id << ". Total submap number: "
@@ -361,7 +383,7 @@ void SubmapServer<SubmapType>::visualizeActiveSubmapMesh() {
 
   if (submap_collection_ptr_->getActiveTsdfMapPtr()->getTsdfLayerPtr()
       ->getNumberOfAllocatedBlocks() == 0) {
-    ROS_WARN("CbloxServer] Submap %d has no allocated blocks yet to visualize",
+    ROS_WARN("[CbloxServer] Submap %d has no allocated blocks yet to visualize",
         submap_collection_ptr_->getActiveSubmapID());
     return;
   }
@@ -390,7 +412,7 @@ void SubmapServer<SubmapType>::visualizeSubmapMesh(const SubmapID& submap_id) {
 
   if (submap_collection_ptr_->getSubmapPtr(submap_id)->getTsdfMapPtr()
           ->getTsdfLayerPtr()->getNumberOfAllocatedBlocks() == 0) {
-    ROS_WARN("CbloxServer] Submap %d has no allocated blocks yet to visualize",
+    ROS_WARN("[CbloxServer] Submap %d has no allocated blocks yet to visualize",
         submap_id);
     return;
   }
@@ -467,6 +489,7 @@ template<typename SubmapType>
 void SubmapServer<SubmapType>::updateMeshEvent(const ros::TimerEvent&  /*event*/) {
   if (mapIntialized()) {
     visualizeActiveSubmapMesh();
+    visualizeSlice(submap_collection_ptr_->getActiveSubmapID());
   }
 }
 
@@ -513,7 +536,7 @@ bool SubmapServer<SubmapType>::loadMap(const std::string& file_path) {
     ROS_INFO("[CbloxServer] Publishing loaded map's mesh.");
     visualizeWholeMap();
   }
-  constexpr bool kPublishMapOnLoad = true;
+  constexpr bool kPublishMapOnLoad = false;
   if (kPublishMapOnLoad) {
     ROS_INFO("[CbloxServer] Publishing loaded submaps.");
     publishWholeMap();
@@ -654,26 +677,31 @@ bool SubmapServer<SubmapType>::publishActiveSubmap() {
 }
 
 template <typename SubmapType>
-void SubmapServer<SubmapType>::publishPose(SubmapID submap_id) const {
+void SubmapServer<SubmapType>::publishPoses() const {
   if (pose_pub_.getNumSubscribers() == 0) {
-    return;
-  }
-  if (!submap_collection_ptr_->exists(submap_id)) {
-    ROS_WARN("[CbloxServer] could not get submap pointer");
     return;
   }
 
   // set timer
   timing::Timer publish_map_timer("cblox/publish_pose");
   if (verbose_) {
-    ROS_INFO("[CbloxServer] publishing pose of submap %d", submap_id);
+    ROS_INFO("[CbloxServer] publishing submap poses");
   }
 
+  // prep map header
   cblox_msgs::MapPoseUpdate pose_msg;
-  // Get submap for publishing
-  typename SubmapType::Ptr submap_ptr = submap_collection_ptr_->
-      getSubmapPtr(submap_id);
-  serializePoseToMsg<SubmapType>(submap_ptr, &pose_msg);
+  pose_msg.header.frame_id = world_frame_;
+  pose_msg.header.stamp = ros::Time::now();
+  // fill pose array
+  for (SubmapID submap_id : submap_collection_ptr_->getIDs()) {
+    ROS_INFO("map %d", submap_id);
+    typename SubmapType::Ptr submap_ptr =
+        submap_collection_ptr_->getSubmapPtr(submap_id);
+    ROS_INFO(".");
+    pose_msg.map_headers.emplace_back(
+        generateSubmapHeaderMsg<SubmapType>(submap_ptr));
+    ROS_INFO(".");
+  }
 
   // Publish message
   pose_pub_.publish(pose_msg);
@@ -695,43 +723,14 @@ void SubmapServer<SubmapType>::PoseCallback(const cblox_msgs::MapPoseUpdate& msg
 template <typename SubmapType>
 void SubmapServer<SubmapType>::processPoseUpdate(
     const cblox_msgs::MapPoseUpdate& msg) {
-  SubmapID submap_id;
   {
     std::lock_guard<std::mutex> lock(visualizer_mutex_);
-    submap_id =
-        deserializeMsgToPose<SubmapType>(&msg, submap_collection_ptr_);
-    if (!submap_collection_ptr_->exists(submap_id)) {
-      ROS_ERROR("[CbloxServer] not a submap (%d)", submap_id);
-      return;
-    }
-
-    typename SubmapType::Ptr submap_ptr =
-        submap_collection_ptr_->getSubmapPtr(submap_id);
-    if (submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr()
-            ->getNumberOfAllocatedBlocks() == 0) {
-      if (verbose_) {
-        ROS_WARN("[CbloxServer] Submap %d has no allocated blocks yet",
-            submap_id);
-      }
-      return;
-    }
+    SubmapID submap_id;
+    deserializeMsgToPose<SubmapType>(&msg, submap_collection_ptr_);
   }
 
-  /*Eigen::Vector3d lower, upper;
-  voxblox::utils::computeMapBoundsFromLayer(
-      *submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr(), &lower, &upper);
-  ROS_INFO("[CbloxServer] submap %d: [%.2f %.2f %.2f] to [%.2f %.2f %.2f]", submap_id,
-      lower.x(), lower.y(), lower.z(), upper.x(), upper.y(), upper.z());*/
-
-  // visualizing mesh
   if (visualize_) {
-//    if (verbose_) {
-      ROS_INFO("[CbloxServer] visualizing mesh %d with new pose", submap_id);
-//    }
-    visualizeSubmapMesh(submap_id);
-//    std::thread vis_thread(
-//        &SubmapServer<SubmapType>::visualizeSubmapMesh, this, submap_id);
-//    vis_thread.detach();
+    visualizeWholeMap();
   }
 }
 
@@ -742,11 +741,12 @@ void SubmapServer<SubmapType>::SubmapCallback(
 
   // push newest message in queue to service
   submap_queue_.push(msg_in);
+
   // service message in queue
   if (!submap_queue_.empty()) {
+    ROS_INFO("[CbloxPlanner] received submap msg");
     deserializeMsgToSubmap<SubmapType>(submap_queue_.front().get(),
         getSubmapCollectionPtr());
-//    visualizeSlice(submap_id);
     submap_queue_.pop();
   }
   read_map_timer.Stop();
@@ -804,7 +804,7 @@ void SubmapServer<SubmapType>::visualizeSlice(const SubmapID& submap_id) const {
       const voxblox::EsdfVoxel& voxel =
           block->getVoxelByLinearIndex(voxel_id);
       voxblox::Point position =
-          block->computeCoordinatesFromLinearIndex(voxel_id);
+          submap_ptr->getPose() * block->computeCoordinatesFromLinearIndex(voxel_id);
 
       color_msg.r = 0.0;
       color_msg.g = 0.0;
@@ -824,14 +824,14 @@ void SubmapServer<SubmapType>::visualizeSlice(const SubmapID& submap_id) const {
 
         vertex_marker.points.push_back(point_msg);
         vertex_marker.colors.push_back(color_msg);
-        marker_array.markers.push_back(vertex_marker);
-        vertex_marker.points.clear();
-        vertex_marker.colors.clear();
       }
     }
     block_num++;
   }
 
+  marker_array.markers.push_back(vertex_marker);
+  vertex_marker.points.clear();
+  vertex_marker.colors.clear();
   sdf_slice_pub_.publish(marker_array);
 }
 

@@ -15,11 +15,11 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   typedef std::shared_ptr<const TsdfEsdfSubmap> ConstPtr;
 
   struct Config : TsdfSubmap::Config, EsdfMap::Config {
+    Config() : TsdfSubmap::Config(), EsdfMap::Config() {};
     Config(const TsdfSubmap::Config& tsdf_map_config,
-           const EsdfMap::Config& esdf_map_config)
+        const EsdfMap::Config& esdf_map_config)
         : TsdfSubmap::Config(tsdf_map_config),
           EsdfMap::Config(esdf_map_config) {};
-    Config() : TsdfSubmap::Config(), EsdfMap::Config() {};
   };
   TsdfEsdfSubmap(Config config) : TsdfSubmap(config), config_(config) {
     esdf_map_.reset(new EsdfMap(config));

@@ -63,21 +63,26 @@ void TsdfEsdfSubmap::serializeToMsg(cblox_msgs::MapLayer* msg) const {
 bool TsdfEsdfSubmap::deserializeFromMsg(cblox_msgs::MapLayer* msg) {
 
   // read tsdf layer
-  bool success = TsdfSubmap::deserializeFromMsg(msg);
+  bool tsdf_success = TsdfSubmap::deserializeFromMsg(msg);
   // TODO: esdf dependent on tsdf
   //       change at the same time, even if info not available?
-  success &= voxblox::deserializeMsgToLayer(msg->esdf_layer,
+  bool esdf_success = voxblox::deserializeMsgToLayer(msg->esdf_layer,
       esdf_map_->getEsdfLayerPtr());
 
+//  ROS_INFO("[TsdfEsdfSubmap] deserialized from msg (%d & %d : %ld)",
+//      tsdf_success, esdf_success,
+//      esdf_map_->getEsdfLayerPtr()->getNumberOfAllocatedBlocks());
+
   // generate ESDF layer if necessary
-  if (esdf_map_->getEsdfLayerPtr()->getNumberOfAllocatedBlocks() == 0) {
+  if (tsdf_success and !esdf_success) {
+//    ROS_INFO("[TsdfEsdfSubmap] generating esdf");
     generateEsdf();
   }
 
-//  ROS_INFO("[TsdfEsdfSubmap] received %lu blocks",
-//      esdf_map_->getEsdfLayerPtr()->getNumberOfAllocatedBlocks());
+  ROS_INFO("[TsdfEsdfSubmap] received %lu blocks",
+      esdf_map_->getEsdfLayerPtr()->getNumberOfAllocatedBlocks());
 
-  return success;
+  return tsdf_success && esdf_success;
 }
 
 }  // namespace cblox

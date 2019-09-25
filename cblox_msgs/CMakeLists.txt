@@ -22,7 +22,9 @@ add_service_files(
 )
 
 generate_messages(
-    DEPENDENCIES geometry_msgs voxblox_msgs
+    DEPENDENCIES
+    geometry_msgs
+    voxblox_msgs
 )
 
 catkin_package(
