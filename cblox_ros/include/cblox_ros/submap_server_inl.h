@@ -381,6 +381,10 @@ void SubmapServer<SubmapType>::visualizeActiveSubmapMesh() {
   // changed. We will need to handle this separately later.
   std::lock_guard<std::mutex> lock(visualizer_mutex_);
 
+  if (active_submap_mesh_pub_.getNumSubscribers() < 1) {
+    return;
+  }
+
   if (submap_collection_ptr_->getActiveTsdfMapPtr()->getTsdfLayerPtr()
       ->getNumberOfAllocatedBlocks() == 0) {
     ROS_WARN("[CbloxServer] Submap %d has no allocated blocks yet to visualize",
@@ -403,6 +407,10 @@ void SubmapServer<SubmapType>::visualizeActiveSubmapMesh() {
 template<typename SubmapType>
 void SubmapServer<SubmapType>::visualizeSubmapMesh(const SubmapID& submap_id) {
   std::lock_guard<std::mutex> lock(visualizer_mutex_);
+
+  if (active_submap_mesh_pub_.getNumSubscribers() < 1) {
+    return;
+  }
 
   SubmapID active_submap_id = submap_collection_ptr_->getActiveSubmapID();
   if (verbose_) {
@@ -767,10 +775,12 @@ void SubmapServer<SubmapType>::visualizeSlice(const SubmapID& submap_id) const {
   if (!submap_collection_ptr_->exists(submap_id)) {
     return;
   }
+  if (sdf_slice_pub_.getNumSubscribers() < 1) {
+    return;
+  }
 
   ROS_INFO("[CbloxServer] Visualizing ESDF slice of submap %d at height %.2f",
       submap_id, slice_height_);
-  float max_dist = 2;
 
   visualization_msgs::MarkerArray marker_array;
   visualization_msgs::Marker vertex_marker;
@@ -790,12 +800,23 @@ void SubmapServer<SubmapType>::visualizeSlice(const SubmapID& submap_id) const {
   color_msg.b = 0.0;
   color_msg.a = 1.0;
 
+  float max_dist = 0;
   typename SubmapType::Ptr submap_ptr =
       submap_collection_ptr_->getSubmapPtr(submap_id);
   voxblox::Layer<voxblox::EsdfVoxel> *layer =
       submap_ptr->getEsdfMapPtr()->getEsdfLayerPtr();
   voxblox::BlockIndexList block_list;
   layer->getAllAllocatedBlocks(&block_list);
+  for (const voxblox::BlockIndex& block_id : block_list) {
+    voxblox::Block<voxblox::EsdfVoxel>::Ptr block =
+        layer->getBlockPtrByIndex(block_id);
+    for (size_t voxel_id = 0; voxel_id < block->num_voxels(); voxel_id++) {
+      const voxblox::EsdfVoxel& voxel =
+          block->getVoxelByLinearIndex(voxel_id);
+      max_dist = std::max(max_dist, voxel.distance);
+    }
+  }
+
   int block_num = 0;
   for (const voxblox::BlockIndex& block_id : block_list) {
     voxblox::Block<voxblox::EsdfVoxel>::Ptr block =
