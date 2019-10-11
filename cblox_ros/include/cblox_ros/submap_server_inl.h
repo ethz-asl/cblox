@@ -375,47 +375,11 @@ void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C,
 }
 
 template<typename SubmapType>
-void SubmapServer<SubmapType>::visualizeActiveSubmapMesh() {
-  // NOTE(alexmillane): For the time being only the mesh from the currently
-  // active submap is updated. This breaks down when the pose of past submaps is
-  // changed. We will need to handle this separately later.
-  std::lock_guard<std::mutex> lock(visualizer_mutex_);
-
-  if (active_submap_mesh_pub_.getNumSubscribers() < 1) {
-    return;
-  }
-
-  if (submap_collection_ptr_->getActiveTsdfMapPtr()->getTsdfLayerPtr()
-      ->getNumberOfAllocatedBlocks() == 0) {
-    ROS_WARN("[CbloxServer] Submap %d has no allocated blocks yet to visualize",
-        submap_collection_ptr_->getActiveSubmapID());
-    return;
-  }
-
-  active_submap_visualizer_ptr_->switchToActiveSubmap();
-  active_submap_visualizer_ptr_->updateMeshLayer();
-  // Getting the display mesh
-  visualization_msgs::Marker marker;
-  active_submap_visualizer_ptr_->getDisplayMesh(&marker);
-  marker.header.frame_id = world_frame_;
-  // Publishing
-  visualization_msgs::MarkerArray marker_array;
-  marker_array.markers.push_back(marker);
-  active_submap_mesh_pub_.publish(marker_array);
-}
-
-template<typename SubmapType>
 void SubmapServer<SubmapType>::visualizeSubmapMesh(const SubmapID& submap_id) {
   std::lock_guard<std::mutex> lock(visualizer_mutex_);
 
   if (active_submap_mesh_pub_.getNumSubscribers() < 1) {
     return;
-  }
-
-  SubmapID active_submap_id = submap_collection_ptr_->getActiveSubmapID();
-  if (verbose_) {
-    ROS_INFO("[CbloxServer] visualizing submap %d, active submap: %d",
-        submap_id, active_submap_id);
   }
 
   if (submap_collection_ptr_->getSubmapPtr(submap_id)->getTsdfMapPtr()
@@ -496,7 +460,7 @@ bool SubmapServer<SubmapType>::generateCombinedMeshCallback(
 template<typename SubmapType>
 void SubmapServer<SubmapType>::updateMeshEvent(const ros::TimerEvent&  /*event*/) {
   if (mapIntialized()) {
-    visualizeActiveSubmapMesh();
+    visualizeSubmapMesh(submap_collection_ptr_->getActiveSubmapID());
     visualizeSlice(submap_collection_ptr_->getActiveSubmapID());
   }
 }
@@ -854,6 +818,53 @@ void SubmapServer<SubmapType>::visualizeSlice(const SubmapID& submap_id) const {
   vertex_marker.points.clear();
   vertex_marker.colors.clear();
   sdf_slice_pub_.publish(marker_array);
+}
+
+template <typename SubmapType>
+TsdfMap::Ptr SubmapServer<SubmapType>::projectAndVisualizeIteratively() {
+  // prep global map
+  TsdfMap::Ptr projected_tsdf_map_ptr =
+      TsdfMap::Ptr(new TsdfMap(submap_collection_ptr_->getConfig()));
+  Layer<voxblox::TsdfVoxel>* combined_tsdf_layer_ptr =
+      projected_tsdf_map_ptr->getTsdfLayerPtr();
+  // prep visualizing
+  voxblox::MeshIntegratorConfig mesh_config =
+      voxblox::getMeshIntegratorConfigFromRosParam(nh_private_);
+
+  // Looping over the current submaps
+  for (const SubmapID submap_id : submap_collection_ptr_->getIDs()) {
+    // Getting the tsdf submap and its pose
+    const TsdfMap& tsdf_map =
+        submap_collection_ptr_->getSubmapPtr(submap_id)->getTsdfMap();
+    const Transformation& T_G_S =
+        submap_collection_ptr_->getSubmapPtr(submap_id)->getPose();
+    // Merging layers the submap into the global layer
+    mergeLayerAintoLayerB(tsdf_map.getTsdfLayer(), T_G_S,
+        combined_tsdf_layer_ptr);
+
+    // visualize
+    voxblox::MeshLayer::Ptr mesh_layer;
+    mesh_layer.reset(new voxblox::MeshLayer(combined_tsdf_layer_ptr->block_size()));
+    voxblox::MeshIntegrator<TsdfVoxel> mesh_integrator(mesh_config,
+            combined_tsdf_layer_ptr, mesh_layer.get());
+    constexpr bool only_mesh_updated_blocks = false;
+    constexpr bool clear_updated_flag = true;
+    mesh_integrator.generateMesh(only_mesh_updated_blocks,
+        clear_updated_flag);
+
+    visualization_msgs::Marker marker;
+    SubmapMesher::colorMeshLayer(voxblox::Color::Gray(), mesh_layer.get());
+    const voxblox::ColorMode color_mode = voxblox::ColorMode::kLambertColor;
+    voxblox::fillMarkerWithMesh(mesh_layer, color_mode, &marker);
+    marker.id = -1;
+    marker.header.frame_id = world_frame_;
+    visualization_msgs::MarkerArray marker_array;
+    marker_array.markers.push_back(marker);
+    active_submap_mesh_pub_.publish(marker_array);
+  }
+
+  // Returning the new map
+  return projected_tsdf_map_ptr;
 }
 
 } // namespace cblox

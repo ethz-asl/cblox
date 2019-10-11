@@ -75,12 +75,13 @@ class SubmapServer {
 
   // Visualizing
   void setVisualize(bool visualize) {visualize_ = visualize;};
-  void visualizeActiveSubmapMesh();
   void visualizeSubmapMesh(const SubmapID& submap_id);
   void visualizeWholeMap();
   void visualizeSubmapBaseframes() const;
   void visualizeTrajectory() const;
   void visualizeSlice(const SubmapID& submap_id) const;
+
+  TsdfMap::Ptr projectAndVisualizeIteratively();
 
   // Mesh output
   bool generateSeparatedMeshCallback(
