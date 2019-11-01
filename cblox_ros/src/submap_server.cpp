@@ -84,6 +84,7 @@ void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID& submap_id) const {
   layer->getAllAllocatedBlocks(&block_list);
   int block_num = 0;
   for (const voxblox::BlockIndex& block_id : block_list) {
+    if (!layer->hasBlock(block_id)) continue;
     voxblox::Block<voxblox::TsdfVoxel>::Ptr block =
         layer->getBlockPtrByIndex(block_id);
     for (size_t voxel_id = 0; voxel_id < block->num_voxels(); voxel_id++) {

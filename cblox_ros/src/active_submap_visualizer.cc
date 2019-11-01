@@ -108,6 +108,42 @@ void ActiveSubmapVisualizer::getDisplayMesh(
   CHECK_NOTNULL(marker_ptr);
   // Getting the mesh layer
   std::shared_ptr<MeshLayer> mesh_layer_ptr = getDisplayMeshLayer();
+
+  timing::Timer crop_mesh_timer("visualize/crop_normals");
+  /*voxblox::BlockIndexList block_indices;
+  mesh_layer_ptr->getAllAllocatedMeshes(&block_indices);
+  int n_kept = 0, n_all = 0;
+  for (const voxblox::BlockIndex& block_idx : block_indices) {
+    voxblox::Mesh::Ptr mesh_ptr = mesh_layer_ptr->getMeshPtrByIndex(block_idx);
+    if (!mesh_ptr) continue;
+    if (!mesh_ptr->hasNormals()) {
+      ROS_WARN("[SubmapVisualizer] no normals");
+      continue;
+    }
+    size_t i = 0u;
+    n_all += mesh_ptr->normals.size();
+    while (i < mesh_ptr->normals.size()) {
+      if (mesh_ptr->normals[i].dot(voxblox::Point(0,0,-1)) > cos(M_PI_4)) {
+        if (mesh_ptr->hasNormals() and mesh_ptr->normals.size() > i) {
+          mesh_ptr->normals.erase(mesh_ptr->normals.begin() + i);
+        }
+        if (mesh_ptr->hasColors() and mesh_ptr->colors.size() > i) {
+          mesh_ptr->colors.erase(mesh_ptr->colors.begin() + i);
+        }
+        if (mesh_ptr->hasTriangles() and mesh_ptr->indices.size() > i) {
+          mesh_ptr->indices.erase(mesh_ptr->indices.begin() + i);
+        }
+        if (mesh_ptr->hasVertices() and mesh_ptr->vertices.size() > i) {
+          mesh_ptr->vertices.erase(mesh_ptr->vertices.begin() + i);
+        }
+      } else {
+        i++;
+      }
+    }
+    n_kept += mesh_ptr->normals.size();
+  }*/
+  crop_mesh_timer.Stop();
+
   // Filling the marker
   const voxblox::ColorMode color_mode = voxblox::ColorMode::kLambertColor;
   voxblox::fillMarkerWithMesh(mesh_layer_ptr, color_mode, marker_ptr);

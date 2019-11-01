@@ -394,6 +394,15 @@ void SubmapServer<SubmapType>::visualizeSubmapMesh(const SubmapID& submap_id) {
   visualization_msgs::Marker marker;
   active_submap_visualizer_ptr_->getDisplayMesh(&marker);
   marker.header.frame_id = world_frame_;
+
+  // see-through
+  /*float brightness = 0.5;
+  for (std_msgs::ColorRGBA& color : marker.colors) {
+    color.r = 1 - (1 - color.r) * brightness;
+    color.g = 1 - (1 - color.g) * brightness;
+    color.b = 1 - (1 - color.b) * brightness;
+  }*/
+
   visualization_msgs::MarkerArray marker_array;
   marker_array.markers.push_back(marker);
   active_submap_mesh_pub_.publish(marker_array);
@@ -717,9 +726,10 @@ void SubmapServer<SubmapType>::SubmapCallback(
   // service message in queue
   if (!submap_queue_.empty()) {
     ROS_INFO("[CbloxPlanner] received submap msg");
-    deserializeMsgToSubmap<SubmapType>(submap_queue_.front().get(),
-        getSubmapCollectionPtr());
+    SubmapID submap_id = deserializeMsgToSubmap<SubmapType>(
+        submap_queue_.front().get(), getSubmapCollectionPtr());
     submap_queue_.pop();
+    visualizeSubmapMesh(submap_id);
   }
   read_map_timer.Stop();
 }
@@ -752,6 +762,7 @@ void SubmapServer<SubmapType>::visualizeSlice(const SubmapID& submap_id) const {
   vertex_marker.ns = std::string("esdf_slice_") + std::to_string(submap_id);
   vertex_marker.ns = "esdf_slice";
   vertex_marker.type = visualization_msgs::Marker::CUBE_LIST;
+  Transformation pose = submap_collection_ptr_->getSubmapPtr(submap_id)->getPose();
   vertex_marker.pose.orientation.w = 1.0;
   vertex_marker.scale.x =
       submap_collection_ptr_->getActiveTsdfMapPtr()->voxel_size();
@@ -772,6 +783,7 @@ void SubmapServer<SubmapType>::visualizeSlice(const SubmapID& submap_id) const {
   voxblox::BlockIndexList block_list;
   layer->getAllAllocatedBlocks(&block_list);
   for (const voxblox::BlockIndex& block_id : block_list) {
+    if (!layer->hasBlock(block_id)) continue;
     voxblox::Block<voxblox::EsdfVoxel>::Ptr block =
         layer->getBlockPtrByIndex(block_id);
     for (size_t voxel_id = 0; voxel_id < block->num_voxels(); voxel_id++) {
@@ -783,6 +795,7 @@ void SubmapServer<SubmapType>::visualizeSlice(const SubmapID& submap_id) const {
 
   int block_num = 0;
   for (const voxblox::BlockIndex& block_id : block_list) {
+    if (!layer->hasBlock(block_id)) continue;
     voxblox::Block<voxblox::EsdfVoxel>::Ptr block =
         layer->getBlockPtrByIndex(block_id);
     for (size_t voxel_id = 0; voxel_id < block->num_voxels(); voxel_id++) {
@@ -791,9 +804,12 @@ void SubmapServer<SubmapType>::visualizeSlice(const SubmapID& submap_id) const {
       voxblox::Point position =
           submap_ptr->getPose() * block->computeCoordinatesFromLinearIndex(voxel_id);
 
+      if (!voxel.observed) {
+        continue;
+      }
+
       color_msg.r = 0.0;
       color_msg.g = 0.0;
-
       if (voxel.observed) {
         color_msg.r = std::max(std::min((max_dist - voxel.distance) /
                                         2.0 / max_dist, 1.0), 0.0);
@@ -856,8 +872,17 @@ TsdfMap::Ptr SubmapServer<SubmapType>::projectAndVisualizeIteratively() {
     SubmapMesher::colorMeshLayer(voxblox::Color::Gray(), mesh_layer.get());
     const voxblox::ColorMode color_mode = voxblox::ColorMode::kLambertColor;
     voxblox::fillMarkerWithMesh(mesh_layer, color_mode, &marker);
-    marker.id = -1;
+    marker.id = submap_id;
     marker.header.frame_id = world_frame_;
+
+    // see-through
+    /*float brightness = 0.5;
+    for (std_msgs::ColorRGBA& color : marker.colors) {
+      color.r = 1 - (1 - color.r) * brightness;
+      color.g = 1 - (1 - color.g) * brightness;
+      color.b = 1 - (1 - color.b) * brightness;
+    }*/
+
     visualization_msgs::MarkerArray marker_array;
     marker_array.markers.push_back(marker);
     active_submap_mesh_pub_.publish(marker_array);

@@ -10,6 +10,7 @@
 #include <voxblox_ros/mesh_vis.h>
 
 #include <cblox/core/submap_collection.h>
+#include <cblox/mesh/submap_mesher.h>
 
 namespace cblox {
 
@@ -17,8 +18,6 @@ using voxblox::MeshLayer;
 using voxblox::MeshIntegrator;
 using voxblox::MeshIntegratorConfig;
 using voxblox::Color;
-
-constexpr int kDefaultColorCycleLength = 20;
 
 class ActiveSubmapVisualizer {
  public:

@@ -93,7 +93,10 @@ class SubmapServer {
 
   void SubmapCallback(const cblox_msgs::MapLayerPtr& msg);
 
-  void setVerbose(bool verbose) {verbose_ = verbose;};
+  void setVerbose(bool verbose) {
+    verbose_ = verbose;
+    active_submap_visualizer_ptr_->setVerbose(verbose_);
+  };
 
  protected:
   // Gets parameters
