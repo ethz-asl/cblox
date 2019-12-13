@@ -22,7 +22,6 @@
 #include <cblox/core/tsdf_submap.h>
 #include <cblox/integrator/tsdf_submap_collection_integrator.h>
 #include <cblox/mesh/submap_mesher.h>
-#include <cblox_msgs/Submap.h>
 #include <cblox_msgs/MapLayer.h>
 #include <cblox_msgs/MapPoseUpdate.h>
 
