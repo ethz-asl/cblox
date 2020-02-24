@@ -16,6 +16,18 @@ void TsdfEsdfSubmap::generateEsdf() {
   esdf_integrator.updateFromTsdfLayerBatch();
 }
 
+void TsdfEsdfSubmap::updateEsdf(){
+    // Instantiate the integrator
+    voxblox::EsdfIntegrator esdf_integrator(esdf_integrator_config_,
+                                            tsdf_map_->getTsdfLayerPtr(),
+                                            esdf_map_->getEsdfLayerPtr());
+    // Update the ESDF
+    esdf_integrator.setFullEuclidean(false);
+
+    std::unique_lock<std::mutex> lock(esdf_mutex);
+    esdf_integrator.updateFromTsdfLayer(true);
+}
+
 void TsdfEsdfSubmap::setTsdfMap(const voxblox::Layer<TsdfVoxel>& tsdf_layer) {
   tsdf_map_.reset(new voxblox::TsdfMap(tsdf_layer));
 }

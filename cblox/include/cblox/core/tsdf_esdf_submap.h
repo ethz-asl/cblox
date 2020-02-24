@@ -44,6 +44,8 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   // Generate the ESDF from the TSDF
   void generateEsdf();
 
+  void updateEsdf();
+
   void setTsdfMap(const voxblox::Layer<TsdfVoxel>& tsdf_layer);
 
   // Returns the underlying ESDF map pointers

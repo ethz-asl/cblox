@@ -52,9 +52,15 @@ class TsdfSubmap {
     return T_M_S_;
   }
 
+  const Transformation& getInversePose() const{
+      std::unique_lock<std::mutex> lock(transformation_mutex);
+      return T_S_M_;
+  }
+
   void setPose(const Transformation& T_M_S) {
     std::unique_lock<std::mutex> lock(transformation_mutex);
     T_M_S_ = T_M_S;
+    T_S_M_ = T_M_S_.inverse();
   }
 
   // Set interval in which submap was actively mapping
@@ -91,6 +97,7 @@ class TsdfSubmap {
   TsdfMap::Ptr tsdf_map_;
 
   Transformation T_M_S_;
+  Transformation T_S_M_;
   std::pair<ros::Time, ros::Time> mapping_interval_;
 
  private:
