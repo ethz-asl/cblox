@@ -6,15 +6,6 @@ template <>
 bool SubmapServer<TsdfSubmap>::publishActiveSubmapCallback(
     cblox_msgs::SubmapSrvRequest& /*request*/,
     cblox_msgs::SubmapSrvResponse& response) {
-//    std_srvs::TriggerRequest& /*request*/, std_srvs::TriggerResponse& response) {
-
-//  std::thread process_thread(
-//      &SubmapServer<SubmapType>::publishActiveSubmap, this);
-//  process_thread.detach();
-//  return true;
-//  response.message =
-//      std::to_string(submap_collection_ptr_->getActiveSubmapID());
-//  return publishActiveSubmap();
 
   SubmapID submap_id = submap_collection_ptr_->getActiveSubmapID();
   TsdfSubmap::Ptr submap_ptr =

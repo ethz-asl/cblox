@@ -69,18 +69,10 @@ bool TsdfEsdfSubmap::deserializeFromMsg(cblox_msgs::MapLayer* msg) {
   bool esdf_success = voxblox::deserializeMsgToLayer(msg->esdf_layer,
       esdf_map_->getEsdfLayerPtr());
 
-//  ROS_INFO("[TsdfEsdfSubmap] deserialized from msg (%d & %d : %ld)",
-//      tsdf_success, esdf_success,
-//      esdf_map_->getEsdfLayerPtr()->getNumberOfAllocatedBlocks());
-
   // generate ESDF layer if necessary
   if (tsdf_success and !esdf_success) {
-//    ROS_INFO("[TsdfEsdfSubmap] generating esdf");
     generateEsdf();
   }
-
-  ROS_INFO("[TsdfEsdfSubmap] received %lu blocks",
-      esdf_map_->getEsdfLayerPtr()->getNumberOfAllocatedBlocks());
 
   return tsdf_success && esdf_success;
 }

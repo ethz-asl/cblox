@@ -15,10 +15,9 @@ include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 # Taken from voxblox
 # General idea: first check if we have protobuf catkin, then use that.
 # Otherwise use system protobuf.
-set(PROTO_DEFNS
-  proto/cblox/QuatTransformation.proto
-  proto/cblox/Submap.proto
-  proto/cblox/SubmapCollection.proto)
+set(PROTO_DEFNS proto/cblox/QuatTransformation.proto
+                proto/cblox/Submap.proto
+                proto/cblox/SubmapCollection.proto)
 set(ADDITIONAL_LIBRARIES "")
 
 find_package(protobuf_catkin QUIET)

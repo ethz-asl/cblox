@@ -49,15 +49,6 @@ inline typename TsdfSubmap::Config getSubmapConfigFromRosParam<TsdfSubmap>(
   return voxblox::getTsdfMapConfigFromRosParam(nh_private);
 }
 
-/*template <>
-inline typename TsdfEsdfSubmap::Config
-getSubmapConfigFromRosParam<TsdfEsdfSubmap>(
-    const ros::NodeHandle& nh_private) {
-  auto tsdf_map_config = voxblox::getTsdfMapConfigFromRosParam(nh_private);
-  auto esdf_map_config = voxblox::getEsdfMapConfigFromRosParam(nh_private);
-  return TsdfEsdfSubmap::Config(tsdf_map_config, esdf_map_config);
-}*/
-
 }  // namespace cblox
 
 #endif  // CBLOX_ROS_ROS_PARAMS_H_

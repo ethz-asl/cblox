@@ -14,6 +14,5 @@ int main(int argc, char** argv) {
 
   ros::MultiThreadedSpinner spinner;
   spinner.spin();
-//  ros::spin();
   return 0;
 }
