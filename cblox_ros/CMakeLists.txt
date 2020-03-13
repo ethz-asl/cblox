@@ -24,7 +24,11 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 cs_add_executable(tsdf_submap_server
   src/tsdf_submap_server_node.cc
 )
+cs_add_executable(esdf_submap_server
+  src/esdf_submap_server_node.cc
+)
 target_link_libraries(tsdf_submap_server ${PROJECT_NAME})
+target_link_libraries(esdf_submap_server ${PROJECT_NAME})
 
 ##########
 # EXPORT #

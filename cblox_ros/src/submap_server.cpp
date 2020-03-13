@@ -14,6 +14,18 @@ SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() const {
   return submap_collection_ptr_;
 }
 
+template<>
+void SubmapServer<TsdfSubmap>::finishSubmap(const SubmapID& submap_id) {
+  ROS_INFO("[CbloxServer] finishing submap %d", submap_id);
+  if (submap_collection_ptr_->exists(submap_id)) {
+    TsdfSubmap::Ptr submap_ptr =
+        submap_collection_ptr_->getSubmapPtr(submap_id);
+    // publishing the old submap
+    submap_ptr->stopMappingTime(ros::Time::now().toSec());
+    publishSubmap(submap_id);
+  }
+}
+
 template <>
 bool SubmapServer<TsdfSubmap>::publishActiveSubmapCallback(
     cblox_msgs::SubmapSrvRequest& /*request*/,
@@ -41,13 +53,18 @@ bool SubmapServer<TsdfSubmap>::publishActiveSubmap() {
 
 template <>
 void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID& submap_id) const {
+  if (sdf_slice_pub_.getNumSubscribers() < 1) {
+    return;
+  }
   if (!submap_collection_ptr_->exists(submap_id)) {
+    ROS_WARN("[CbloxServer] Submap %d does not exist.", submap_id);
     return;
   }
 
-  ROS_INFO("[CbloxServer] Visualizing ESDF slice of submap %d at height %.2f",
-      submap_id, slice_height_);
-  float max_dist = 0.5;
+  if (verbose_) {
+    ROS_INFO("[CbloxServer] Visualizing TSDF slice of submap %d at height %.2f",
+             submap_id, slice_height_);
+  }
 
   visualization_msgs::MarkerArray marker_array;
   visualization_msgs::Marker vertex_marker;
@@ -55,6 +72,7 @@ void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID& submap_id) const {
   vertex_marker.ns = std::string("esdf_slice_") + std::to_string(submap_id);
   vertex_marker.ns = "esdf_slice";
   vertex_marker.type = visualization_msgs::Marker::CUBE_LIST;
+  Transformation pose = submap_collection_ptr_->getSubmapPtr(submap_id)->getPose();
   vertex_marker.pose.orientation.w = 1.0;
   vertex_marker.scale.x =
       submap_collection_ptr_->getActiveTsdfMapPtr()->voxel_size();
@@ -67,6 +85,8 @@ void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID& submap_id) const {
   color_msg.b = 0.0;
   color_msg.a = 1.0;
 
+  float max_dist = 0.6;
+  nh_private_.param("truncation_distance", max_dist, max_dist);
   TsdfSubmap::Ptr submap_ptr =
       submap_collection_ptr_->getSubmapPtr(submap_id);
   voxblox::Layer<voxblox::TsdfVoxel> *layer =
@@ -82,12 +102,15 @@ void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID& submap_id) const {
       const voxblox::TsdfVoxel& voxel =
           block->getVoxelByLinearIndex(voxel_id);
       voxblox::Point position =
-          block->computeCoordinatesFromLinearIndex(voxel_id);
+          submap_ptr->getPose() * block->computeCoordinatesFromLinearIndex(voxel_id);
+
+      if (voxel.weight < 1e-6) {
+        continue;
+      }
 
       color_msg.r = 0.0;
       color_msg.g = 0.0;
-
-      if (voxel.weight > 0) {
+      if (voxel.weight >= 1e-6) {
         color_msg.r = std::max(std::min((max_dist - voxel.distance) /
                                         2.0 / max_dist, 1.0), 0.0);
         color_msg.g = std::max(std::min((max_dist + voxel.distance) /
@@ -102,26 +125,13 @@ void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID& submap_id) const {
 
         vertex_marker.points.push_back(point_msg);
         vertex_marker.colors.push_back(color_msg);
-        marker_array.markers.push_back(vertex_marker);
-        vertex_marker.points.clear();
-        vertex_marker.colors.clear();
       }
     }
     block_num++;
   }
 
+  marker_array.markers.push_back(vertex_marker);
   sdf_slice_pub_.publish(marker_array);
-}
-
-template<>
-void SubmapServer<TsdfSubmap>::finishSubmap(const SubmapID& submap_id) {
-  if (submap_collection_ptr_->exists(submap_id)) {
-    // publishing the old submap
-    submap_collection_ptr_->getSubmapPtr(submap_id)
-        ->stopMappingTime(ros::Time::now().toSec());
-    publishSubmap(submap_id);
-    visualizeSlice(submap_id);
-  }
 }
 
 }
