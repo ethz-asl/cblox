@@ -132,12 +132,12 @@ class SubmapServer {
   inline void finishSubmap(const SubmapID& submap_id);
 
   // Submap pose updates
-  void publishPoses() const;
+  void publishSubmapPoses() const;
   void PoseCallback(const cblox_msgs::MapPoseUpdate& msg);
   void processPoseUpdate(const cblox_msgs::MapPoseUpdate& msg);
 
   // Submap publishing
-  void publishSubmap(SubmapID submap_id, bool global_map = false) const;
+  void publishSubmap(SubmapID submap_id) const;
   void publishWholeMap() const;
   bool publishActiveSubmapCallback(
       cblox_msgs::SubmapSrvRequest& request, cblox_msgs::SubmapSrvResponse& response);
@@ -174,7 +174,6 @@ class SubmapServer {
   ros::Timer update_mesh_timer_;
 
   bool verbose_;
-  bool visualize_;
 
   // Global/map coordinate frame. Will always look up TF transforms to this
   std::string world_frame_;
