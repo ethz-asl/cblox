@@ -5,15 +5,11 @@
 #include <mutex>
 
 #include <Eigen/Geometry>
-#include <ros/ros.h>
 
 #include <glog/logging.h>
 
 #include "./Submap.pb.h"
 #include "cblox/core/common.h"
-
-#include <cblox_msgs/MapLayer.h>
-#include <voxblox_ros/conversions.h>
 
 namespace cblox {
 
@@ -58,14 +54,14 @@ class TsdfSubmap {
   }
 
   // Set interval in which submap was actively mapping
-  void startMappingTime(ros::Time time = ros::Time::now()) {
+  void startMappingTime(int32_t time) {
     mapping_interval_.first = time;
   }
-  void stopMappingTime(ros::Time time = ros::Time::now()) {
+  void stopMappingTime(int32_t time) {
     mapping_interval_.second = time;
   }
   // Access mapping interval
-  const std::pair<ros::Time, ros::Time>& getMappingInterval() const {
+  const std::pair<int32_t, int32_t>& getMappingInterval() const {
     return mapping_interval_;
   }
 
@@ -83,15 +79,12 @@ class TsdfSubmap {
   // Save the submap to file
   virtual bool saveToStream(std::fstream* outfile_ptr) const;
 
-  virtual void serializeToMsg(cblox_msgs::MapLayer* msg) const;
-  virtual bool deserializeFromMsg(cblox_msgs::MapLayer* msg);
-
  protected:
   SubmapID submap_id_;
   TsdfMap::Ptr tsdf_map_;
 
   Transformation T_M_S_;
-  std::pair<ros::Time, ros::Time> mapping_interval_;
+  std::pair<int32_t, int32_t> mapping_interval_;
 
  private:
   // The pose of this submap in the global map frame

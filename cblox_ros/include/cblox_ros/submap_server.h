@@ -73,7 +73,6 @@ class SubmapServer {
       getSubmapCollectionPtr() const;
 
   // Visualizing
-  void setVisualize(bool visualize) {visualize_ = visualize;};
   void visualizeSubmapMesh(const SubmapID& submap_id);
   void visualizeWholeMap();
   void visualizeSubmapBaseframes() const;

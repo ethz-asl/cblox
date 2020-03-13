@@ -2,6 +2,18 @@
 
 namespace cblox {
 
+template<>
+const SubmapCollection<TsdfSubmap>::Ptr&
+SubmapServer<TsdfSubmap>::getSubmapCollectionPtr() const {
+  return submap_collection_ptr_;
+}
+
+template<>
+const SubmapCollection<TsdfEsdfSubmap>::Ptr&
+SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() const {
+  return submap_collection_ptr_;
+}
+
 template <>
 bool SubmapServer<TsdfSubmap>::publishActiveSubmapCallback(
     cblox_msgs::SubmapSrvRequest& /*request*/,
@@ -25,18 +37,6 @@ bool SubmapServer<TsdfSubmap>::publishActiveSubmap() {
   SubmapID submap_id = submap_collection_ptr_->getActiveSubmapID();
   publishSubmap(submap_id);
   return true;
-}
-
-template<>
-const SubmapCollection<TsdfSubmap>::Ptr&
-    SubmapServer<TsdfSubmap>::getSubmapCollectionPtr() const {
-  return submap_collection_ptr_;
-}
-
-template<>
-const SubmapCollection<TsdfEsdfSubmap>::Ptr&
-    SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() const {
-  return submap_collection_ptr_;
 }
 
 template <>
@@ -117,7 +117,8 @@ template<>
 void SubmapServer<TsdfSubmap>::finishSubmap(const SubmapID& submap_id) {
   if (submap_collection_ptr_->exists(submap_id)) {
     // publishing the old submap
-    submap_collection_ptr_->getSubmapPtr(submap_id)->stopMappingTime();
+    submap_collection_ptr_->getSubmapPtr(submap_id)
+        ->stopMappingTime(ros::Time::now().toSec());
     publishSubmap(submap_id);
     visualizeSlice(submap_id);
   }

@@ -40,24 +40,4 @@ bool TsdfSubmap::saveToStream(std::fstream* outfile_ptr) const {
   return true;
 }
 
-void TsdfSubmap::serializeToMsg(cblox_msgs::MapLayer* msg) const {
-  // set type to TSDF
-  msg->type = 0;
-
-  // fill in TSDF layer
-  voxblox::serializeLayerAsMsg<voxblox::TsdfVoxel>(
-      tsdf_map_->getTsdfLayer(), false, &msg->tsdf_layer);
-  msg->tsdf_layer.action =
-      static_cast<uint8_t>(voxblox::MapDerializationAction::kReset);
-}
-
-bool TsdfSubmap::deserializeFromMsg(cblox_msgs::MapLayer* msg) {
-
-  // read tsdf layer
-  bool success = voxblox::deserializeMsgToLayer(msg->tsdf_layer,
-      tsdf_map_->getTsdfLayerPtr());
-
-  return success;
-}
-
 }  // namespace cblox

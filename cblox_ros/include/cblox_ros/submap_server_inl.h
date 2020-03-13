@@ -303,7 +303,7 @@ inline void SubmapServer<SubmapType>::finishSubmap(const SubmapID& submap_id) {
     typename SubmapType::Ptr submap_ptr =
         submap_collection_ptr_->getSubmapPtr(submap_id);
     // publishing the old submap
-    submap_ptr->stopMappingTime();
+    submap_ptr->stopMappingTime(ros::Time::now().toSec());
     // generating ESDF map
     // TODO: implement lock (segfault!!)
     submap_ptr->generateEsdf();
@@ -339,7 +339,7 @@ void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C,
   visualizeSubmapBaseframes();
 
   // Time the start of recording
-  submap_collection_ptr_->getActiveSubmapPtr()->startMappingTime(timestamp);
+  submap_collection_ptr_->getActiveSubmapPtr()->startMappingTime(timestamp.toSec());
 
   if (verbose_) {
     ROS_INFO_STREAM("Created a new submap with id: "
@@ -592,7 +592,6 @@ void SubmapServer<SubmapType>::processPoseUpdate(
     const cblox_msgs::MapPoseUpdate& msg) {
   {
     std::lock_guard<std::mutex> lock(visualizer_mutex_);
-    SubmapID submap_id;
     deserializeMsgToPose<SubmapType>(&msg, submap_collection_ptr_);
   }
 

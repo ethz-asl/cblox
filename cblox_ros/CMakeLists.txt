@@ -13,6 +13,7 @@ cs_add_library(${PROJECT_NAME}
   src/submap_server.cpp
   src/active_submap_visualizer.cc
   src/trajectory_visualizer.cc
+  src/submap_conversions.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 

@@ -11,7 +11,6 @@
 #include <cblox_msgs/MapPoseUpdate.h>
 
 namespace cblox {
-
 template <typename SubmapType>
 std_msgs::Header generateHeaderMsg(
     const typename SubmapType::Ptr& submap_ptr, const ros::Time &timestamp);
@@ -35,6 +34,18 @@ void serializeSubmapToMsg(typename SubmapType::Ptr submap_ptr,
 template <typename SubmapType>
 SubmapID deserializeMsgToSubmap(cblox_msgs::MapLayer* msg_ptr,
     typename SubmapCollection<SubmapType>::Ptr submap_collection_ptr);
+
+template <typename SubmapType>
+typename SubmapType::Ptr deserializeMsgToSubmapPtr(
+    cblox_msgs::MapLayer* msg_ptr,
+    typename SubmapCollection<SubmapType>::Ptr submap_collection_ptr);
+
+template <typename SubmapType>
+bool deserializeMsgToSubmapContent(cblox_msgs::MapLayer* msg_ptr,
+                                   typename SubmapType::Ptr submap_ptr);
+
+SubmapID deserializeMsgToSubmapID(cblox_msgs::MapLayer* msg_ptr);
+Transformation deserializeMsgToSubmapPose(cblox_msgs::MapLayer* msg_ptr);
 
 }
 
