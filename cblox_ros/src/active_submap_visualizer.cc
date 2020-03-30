@@ -113,6 +113,11 @@ void ActiveSubmapVisualizer::getDisplayMesh(
   const voxblox::ColorMode color_mode = voxblox::ColorMode::kLambertColor;
   voxblox::fillMarkerWithMesh(mesh_layer_ptr, color_mode, marker_ptr);
   marker_ptr->id = active_submap_id_;
+
+  marker_ptr->color.a = opacity_;
+  for (std_msgs::ColorRGBA& color : marker_ptr->colors) {
+    color.a = opacity_;
+  }
 }
 
 }  // namespace cblox

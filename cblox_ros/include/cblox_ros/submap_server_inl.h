@@ -78,6 +78,9 @@ SubmapServer<SubmapType>::SubmapServer(
   active_submap_visualizer_ptr_.reset(
       new ActiveSubmapVisualizer(mesh_config, submap_collection_ptr_));
   active_submap_visualizer_ptr_->setVerbose(verbose_);
+  float opacity = 1.0;
+  nh_private_.param("mesh_opacity", opacity, opacity);
+  active_submap_visualizer_ptr_->setOpacity(opacity);
 
   // An object to visualize the trajectory
   trajectory_visualizer_ptr_.reset(new TrajectoryVisualizer);
