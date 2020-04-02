@@ -103,6 +103,9 @@ class SubmapCollection {
   // Flattens the collection map down to a normal TSDF map
   TsdfMap::Ptr getProjectedMap() const;
 
+  // Gets the combined memory size of the layers in this collection.
+  size_t getMemorySize() const;
+
  private:
   // TODO(alexmillane): Get some concurrency guards
 
