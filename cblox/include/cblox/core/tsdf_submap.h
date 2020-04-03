@@ -58,6 +58,10 @@ class TsdfSubmap {
     return tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks();
   }
 
+  size_t getMemorySize() const {
+    return tsdf_map_->getTsdfLayer().getMemorySize();
+  }
+
   // Getting the proto for this submap
   void getProto(TsdfSubmapProto* proto) const;
 

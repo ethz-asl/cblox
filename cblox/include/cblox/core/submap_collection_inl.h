@@ -364,6 +364,16 @@ size_t SubmapCollection<SubmapType>::getNumberAllocatedBlocks() const {
   return total_blocks;
 }
 
+template <typename SubmapType>
+size_t SubmapCollection<SubmapType>::getMemorySize() const {
+  // Looping over the submaps totalling the sizes
+  size_t size = 0u;
+  for (const auto& id_submap_pair : id_to_submap_) {
+    size += (id_submap_pair.second)->getMemorySize();
+  }
+  return size;
+}
+
 }  // namespace cblox
 
 #endif  // CBLOX_CORE_SUBMAP_COLLECTION_INL_H_
