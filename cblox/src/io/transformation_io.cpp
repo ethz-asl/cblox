@@ -2,7 +2,7 @@
 
 #include <voxblox/utils/protobuf_utils.h>
 
-#include "./QuatTransformation.pb.h"
+#include "cblox/QuatTransformation.pb.h"
 
 #include "cblox/utils/quat_transformation_protobuf_utils.h"
 
@@ -65,7 +65,7 @@ bool LoadTransformationArray(
   }
 
   // Unused byte offset result.
-  uint32_t tmp_byte_offset = 0u;
+  uint64_t tmp_byte_offset = 0u;
 
   // Get number of messages
   uint32_t num_protos;

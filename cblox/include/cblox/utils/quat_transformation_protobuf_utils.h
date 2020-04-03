@@ -1,7 +1,7 @@
 #ifndef CBLOX_UTILS_QUAT_TRANSFORMATION_PROTOBUF_UTILS_H_
 #define CBLOX_UTILS_QUAT_TRANSFORMATION_PROTOBUF_UTILS_H_
 
-#include "./QuatTransformation.pb.h"
+#include "cblox/QuatTransformation.pb.h"
 
 #include "cblox/core/common.h"
 

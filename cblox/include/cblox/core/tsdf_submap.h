@@ -8,7 +8,7 @@
 
 #include <glog/logging.h>
 
-#include "./TsdfSubmap.pb.h"
+#include "cblox/TsdfSubmap.pb.h"
 #include "cblox/core/common.h"
 
 namespace cblox {

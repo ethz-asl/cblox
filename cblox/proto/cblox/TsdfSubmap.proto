@@ -1,6 +1,7 @@
+syntax = "proto2";
 package cblox;
 
-import public "QuatTransformation.proto";
+import public "cblox/QuatTransformation.proto";
 
 message TsdfSubmapProto {
   optional uint32 id = 1;
