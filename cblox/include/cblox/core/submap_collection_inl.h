@@ -162,7 +162,7 @@ const Transformation& SubmapCollection<SubmapType>::getActiveSubmapPose()
   return getActiveSubmap().getPose();
 }
 template <typename SubmapType>
-const SubmapID SubmapCollection<SubmapType>::getActiveSubmapID() const {
+SubmapID SubmapCollection<SubmapType>::getActiveSubmapID() const {
   return active_submap_id_;
 }
 
