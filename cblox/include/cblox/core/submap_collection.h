@@ -59,7 +59,7 @@ class SubmapCollection {
   const SubmapType& getActiveSubmap() const;
   typename SubmapType::Ptr getActiveSubmapPtr();
   const Transformation& getActiveSubmapPose() const;
-  const SubmapID getActiveSubmapID() const;
+  SubmapID getActiveSubmapID() const;
 
   // Access the tsdf_map member of the active submap
   TsdfMap::Ptr getActiveTsdfMapPtr();

@@ -19,8 +19,8 @@ class TsdfSubmapCollectionIntegrator {
       const voxblox::TsdfIntegratorType& tsdf_integrator_type,
       const std::shared_ptr<SubmapCollection<TsdfSubmap>>&
           tsdf_submap_collection_ptr)
-      : tsdf_integrator_config_(tsdf_integrator_config),
-        tsdf_submap_collection_ptr_(tsdf_submap_collection_ptr),
+      : tsdf_submap_collection_ptr_(tsdf_submap_collection_ptr),
+        tsdf_integrator_config_(tsdf_integrator_config),
         method_(tsdf_integrator_type) {}
 
   // Integrate a pointcloud to the currently active submap.

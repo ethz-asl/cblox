@@ -39,10 +39,10 @@ TsdfSubmapServer::TsdfSubmapServer(
       nh_private_(nh_private),
       verbose_(true),
       world_frame_("world"),
-      num_integrated_frames_current_submap_(0),
-      num_integrated_frames_per_submap_(kDefaultNumFramesPerSubmap),
+      transformer_(nh, nh_private),
       color_map_(new voxblox::GrayscaleColorMap()),
-      transformer_(nh, nh_private) {
+      num_integrated_frames_current_submap_(0),
+      num_integrated_frames_per_submap_(kDefaultNumFramesPerSubmap) {
   ROS_DEBUG("Creating a TSDF Server");
 
   // Initial interaction with ROS
@@ -299,7 +299,7 @@ void TsdfSubmapServer::visualizeWholeMap() {
 }
 
 bool TsdfSubmapServer::generateSeparatedMeshCallback(
-    std_srvs::Empty::Request& request,
+    std_srvs::Empty::Request& /*request*/,      // NO LINT
     std_srvs::Empty::Response& /*response*/) {  // NO LINT
   // Saving mesh to file if required
   if (!mesh_filename_.empty()) {
@@ -322,7 +322,7 @@ bool TsdfSubmapServer::generateSeparatedMeshCallback(
 }
 
 bool TsdfSubmapServer::generateCombinedMeshCallback(
-    std_srvs::Empty::Request& request,
+    std_srvs::Empty::Request& /*request*/,      // NO LINT
     std_srvs::Empty::Response& /*response*/) {  // NO LINT
   // Saving mesh to file if required
   if (!mesh_filename_.empty()) {
