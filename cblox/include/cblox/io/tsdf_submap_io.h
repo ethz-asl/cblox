@@ -17,7 +17,7 @@ template <typename SubmapType>
 bool LoadSubmapFromStream(
     std::fstream* proto_file_ptr,
     typename SubmapCollection<SubmapType>::Ptr tsdf_submap_collection_ptr,
-    uint32_t* tmp_byte_offset_ptr);
+    uint64_t* tmp_byte_offset_ptr);
 
 template <typename SubmapType>
 bool LoadSubmapCollection(

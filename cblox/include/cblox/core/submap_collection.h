@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "./TsdfSubmapCollection.pb.h"
+#include "cblox/TsdfSubmapCollection.pb.h"
 #include "cblox/core/common.h"
 #include "cblox/core/tsdf_esdf_submap.h"
 

@@ -7,9 +7,9 @@
 
 #include <glog/logging.h>
 
-#include "./QuatTransformation.pb.h"
-#include "./TsdfSubmap.pb.h"
-#include "./TsdfSubmapCollection.pb.h"
+#include "cblox/QuatTransformation.pb.h"
+#include "cblox/TsdfSubmap.pb.h"
+#include "cblox/TsdfSubmapCollection.pb.h"
 
 #include "cblox/utils/quat_transformation_protobuf_utils.h"
 
@@ -20,7 +20,7 @@ template <typename SubmapType>
 bool LoadSubmapFromStream(
     std::fstream* proto_file_ptr,
     typename SubmapCollection<SubmapType>::Ptr tsdf_submap_collection_ptr,
-    uint32_t* tmp_byte_offset_ptr) {
+    uint64_t* tmp_byte_offset_ptr) {
   CHECK_NOTNULL(proto_file_ptr);
   CHECK(tsdf_submap_collection_ptr);
   CHECK_NOTNULL(tmp_byte_offset_ptr);
@@ -44,7 +44,7 @@ bool LoadSubmapFromStream(
   Eigen::Vector3 t = T_M_S.getPosition();
   Quaternion q = T_M_S.getRotation();
   LOG(INFO) << "[ " << t.x() << ", " << t.y() << ", " << t.z() << ", " << q.w()
-            << q.x() << ", " << q.y() << ", " << q.z() << " ]";
+            << ", " << q.x() << ", " << q.y() << ", " << q.z() << " ]";
 
   // Creating a new submap to hold the data
   tsdf_submap_collection_ptr->createNewSubmap(T_M_S, tsdf_sub_map_proto.id());
@@ -75,7 +75,7 @@ bool LoadSubmapCollection(
     return false;
   }
   // Unused byte offset result.
-  uint32_t tmp_byte_offset = 0;
+  uint64_t tmp_byte_offset = 0;
   // Loading the header
   TsdfSubmapCollectionProto tsdf_submap_collection_proto;
   if (!voxblox::utils::readProtoMsgFromStream(
