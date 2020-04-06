@@ -24,7 +24,11 @@ PROTOBUF_CATKIN_GENERATE_CPP2(${BASE_PATH} PROTO_SRCS PROTO_HDRS ${PROTO_DEFNS})
 #############
 # LIBRARIES #
 #############
-cs_add_library(cblox_lib
+cs_add_library(${PROJECT_NAME}_proto
+  ${PROTO_SRCS}
+)
+
+cs_add_library(${PROJECT_NAME}_lib
   src/core/tsdf_submap.cpp
   src/core/tsdf_esdf_submap.cpp
   src/integrator/tsdf_submap_collection_integrator.cpp
@@ -32,13 +36,11 @@ cs_add_library(cblox_lib
   src/mesh/submap_mesher.cpp
   src/io/tsdf_submap_io.cpp
   src/io/transformation_io.cpp
-  ${PROTO_SRCS}
 )
-target_link_libraries(cblox_lib ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_lib ${PROJECT_NAME}_proto)
 
 ##########
 # EXPORT #
 ##########
-
 cs_install()
-cs_export()
+cs_export(INCLUDE_DIRS ${CATKIN_DEVEL_PREFIX}/include)
