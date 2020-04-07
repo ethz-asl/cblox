@@ -140,6 +140,9 @@ void SubmapServer<SubmapType>::advertiseTopics() {
   publish_active_submap_srv_ = nh_private_.advertiseService(
       "publish_active_submap",
       &SubmapServer<SubmapType>::publishActiveSubmapCallback, this);
+  publish_submap_poses_srv_ = nh_private_.advertiseService(
+      "publish_submap_poses",
+      &SubmapServer<SubmapType>::publishSubmapPosesCallback, this);
 }
 
 template<typename SubmapType>
@@ -633,6 +636,13 @@ void SubmapServer<SubmapType>::SubmapCallback(
     visualizeSubmapMesh(submap_id);
   }
   read_map_timer.Stop();
+}
+
+template<typename SubmapType>
+bool SubmapServer<SubmapType>::publishSubmapPosesCallback(
+    std_srvs::EmptyRequest&, std_srvs::EmptyResponse&) {
+  publishSubmapPoses();
+  return true;
 }
 
 template <typename SubmapType>

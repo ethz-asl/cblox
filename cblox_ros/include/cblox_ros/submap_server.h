@@ -90,6 +90,8 @@ class SubmapServer {
       std_srvs::Empty::Response& response);  // NOLINT
 
   void SubmapCallback(const cblox_msgs::MapLayerPtr& msg);
+  bool publishSubmapPosesCallback(std_srvs::EmptyRequest&,
+                                  std_srvs::EmptyResponse&);
 
   void setVerbose(bool verbose) {
     verbose_ = verbose;
@@ -168,6 +170,7 @@ class SubmapServer {
   ros::ServiceServer save_map_srv_;
   ros::ServiceServer load_map_srv_;
   ros::ServiceServer publish_active_submap_srv_;
+  ros::ServiceServer publish_submap_poses_srv_;
 
   // Timers.
   ros::Timer update_mesh_timer_;
