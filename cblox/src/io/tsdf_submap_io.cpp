@@ -9,7 +9,7 @@ template<>
 bool LoadSubmapFromStream<cblox::TsdfSubmap>(
     std::fstream* proto_file_ptr,
     typename SubmapCollection<cblox::TsdfSubmap>::Ptr submap_collection_ptr,
-    uint32_t* tmp_byte_offset_ptr) {
+    uint64_t* tmp_byte_offset_ptr) {
   CHECK_NOTNULL(proto_file_ptr);
   CHECK(submap_collection_ptr);
   CHECK_NOTNULL(tmp_byte_offset_ptr);

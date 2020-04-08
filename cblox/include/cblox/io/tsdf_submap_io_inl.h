@@ -19,7 +19,7 @@ template<typename SubmapType>
 bool LoadSubmapFromStream(
     std::fstream* proto_file_ptr,
     typename SubmapCollection<SubmapType>::Ptr submap_collection_ptr,
-    uint32_t* tmp_byte_offset_ptr) {
+    uint64_t* tmp_byte_offset_ptr) {
   CHECK_NOTNULL(proto_file_ptr);
   CHECK(submap_collection_ptr);
   CHECK_NOTNULL(tmp_byte_offset_ptr);
@@ -93,7 +93,7 @@ bool LoadSubmapCollection(
     return false;
   }
   // Unused byte offset result.
-  uint32_t tmp_byte_offset = 0;
+  uint64_t tmp_byte_offset = 0;
   // Loading the header
   SubmapCollectionProto submap_collection_proto;
   if (!voxblox::utils::readProtoMsgFromStream(
