@@ -90,6 +90,10 @@ class SubmapServer {
       std_srvs::Empty::Request& request,     // NOLINT
       std_srvs::Empty::Response& response);  // NOLINT
 
+  // Submap publishing
+  void SubmapCallback(const cblox_msgs::MapLayerPtr& msg);
+
+  // Parameters
   void setVerbose(bool verbose) {
     verbose_ = verbose;
     active_submap_visualizer_ptr_->setVerbose(verbose_);
@@ -137,7 +141,6 @@ class SubmapServer {
   void processPoseUpdate(const cblox_msgs::MapPoseUpdate& msg);
 
   // Submap publishing
-  void SubmapCallback(const cblox_msgs::MapLayerPtr& msg);
   void publishSubmap(SubmapID submap_id) const;
   void publishWholeMap() const;
   bool publishActiveSubmapCallback(

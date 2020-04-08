@@ -28,34 +28,21 @@ SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() const {
 
 template<>
 void SubmapServer<TsdfSubmap>::finishSubmap(const SubmapID& submap_id) {
-  ROS_INFO("[CbloxServer] finishing submap %d", submap_id);
   if (submap_collection_ptr_->exists(submap_id)) {
     TsdfSubmap::Ptr submap_ptr =
         submap_collection_ptr_->getSubmapPtr(submap_id);
-    // publishing the old submap
+    // stopping the mapping interval
     submap_ptr->stopMappingTime(ros::Time::now().toSec());
+    // publishing the old submap
     publishSubmap(submap_id);
+    ROS_INFO("[CbloxServer] Finished submap %d", submap_id);
   }
-}
-
-template <>
-bool SubmapServer<TsdfSubmap>::publishActiveSubmapCallback(
-    cblox_msgs::SubmapSrvRequest& /*request*/,
-    cblox_msgs::SubmapSrvResponse& response) {
-
-  SubmapID submap_id = submap_collection_ptr_->getActiveSubmapID();
-  TsdfSubmap::Ptr submap_ptr =
-      submap_collection_ptr_->getSubmapPtr(submap_id);
-  cblox_msgs::MapLayer submap_msg;
-  serializeSubmapToMsg<TsdfSubmap>(submap_ptr, &submap_msg);
-  response.submap_msg = submap_msg;
-  return true;
 }
 
 template<>
 bool SubmapServer<TsdfSubmap>::publishActiveSubmap() {
   if (submap_collection_ptr_->empty()) {
-    ROS_WARN("[CbloxPlanner] no submaps initialized");
+    ROS_WARN("[CbloxPlanner] Active submap does not exist!");
     return false;
   }
   SubmapID submap_id = submap_collection_ptr_->getActiveSubmapID();
