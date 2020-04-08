@@ -87,11 +87,17 @@ SubmapServer<SubmapType>::SubmapServer(
 }
 
 template<>
-const SubmapCollection<TsdfSubmap>::Ptr&
-    SubmapServer<TsdfSubmap>::getSubmapCollectionPtr() const;
+SubmapCollection<TsdfSubmap>::Ptr
+    SubmapServer<TsdfSubmap>::getSubmapCollectionPtr();
 template<>
-const SubmapCollection<TsdfEsdfSubmap>::Ptr&
-    SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() const;
+SubmapCollection<TsdfSubmap>::ConstPtr
+SubmapServer<TsdfSubmap>::getSubmapCollectionPtr() const;
+template<>
+SubmapCollection<TsdfEsdfSubmap>::Ptr
+    SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr();
+template<>
+SubmapCollection<TsdfEsdfSubmap>::ConstPtr
+SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() const;
 
 template<typename SubmapType>
 void SubmapServer<SubmapType>::subscribeToTopics() {
@@ -693,16 +699,16 @@ void SubmapServer<SubmapType>::visualizeSlice(const SubmapID& submap_id) const {
   float max_dist = 0;
   typename SubmapType::Ptr submap_ptr =
       submap_collection_ptr_->getSubmapPtr(submap_id);
-  voxblox::Layer<voxblox::EsdfVoxel> *layer =
+  voxblox::Layer<EsdfVoxel> *layer =
       submap_ptr->getEsdfMapPtr()->getEsdfLayerPtr();
   voxblox::BlockIndexList block_list;
   layer->getAllAllocatedBlocks(&block_list);
   for (const voxblox::BlockIndex& block_id : block_list) {
     if (!layer->hasBlock(block_id)) continue;
-    voxblox::Block<voxblox::EsdfVoxel>::Ptr block =
+    voxblox::Block<EsdfVoxel>::Ptr block =
         layer->getBlockPtrByIndex(block_id);
     for (size_t voxel_id = 0; voxel_id < block->num_voxels(); voxel_id++) {
-      const voxblox::EsdfVoxel& voxel =
+      const EsdfVoxel& voxel =
           block->getVoxelByLinearIndex(voxel_id);
       max_dist = std::max(max_dist, voxel.distance);
     }
@@ -711,10 +717,10 @@ void SubmapServer<SubmapType>::visualizeSlice(const SubmapID& submap_id) const {
   int block_num = 0;
   for (const voxblox::BlockIndex& block_id : block_list) {
     if (!layer->hasBlock(block_id)) continue;
-    voxblox::Block<voxblox::EsdfVoxel>::Ptr block =
+    voxblox::Block<EsdfVoxel>::Ptr block =
         layer->getBlockPtrByIndex(block_id);
     for (size_t voxel_id = 0; voxel_id < block->num_voxels(); voxel_id++) {
-      const voxblox::EsdfVoxel& voxel =
+      const EsdfVoxel& voxel =
           block->getVoxelByLinearIndex(voxel_id);
       voxblox::Point position =
           submap_ptr->getPose() * block->computeCoordinatesFromLinearIndex(voxel_id);

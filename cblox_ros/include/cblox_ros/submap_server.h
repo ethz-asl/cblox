@@ -69,7 +69,9 @@ class SubmapServer {
   void updateMeshEvent(const ros::TimerEvent& /*event*/);
 
   // Access Submap Collection Pointer
-  inline const typename SubmapCollection<SubmapType>::Ptr&
+  inline typename SubmapCollection<SubmapType>::Ptr
+      getSubmapCollectionPtr();
+  inline typename SubmapCollection<SubmapType>::ConstPtr
       getSubmapCollectionPtr() const;
 
   // Visualizing
@@ -78,7 +80,6 @@ class SubmapServer {
   void visualizeSubmapBaseframes() const;
   void visualizeTrajectory() const;
   void visualizeSlice(const SubmapID& submap_id) const;
-
   TsdfMap::Ptr projectAndVisualizeIteratively();
 
   // Mesh output
@@ -88,10 +89,6 @@ class SubmapServer {
   bool generateCombinedMeshCallback(
       std_srvs::Empty::Request& request,     // NOLINT
       std_srvs::Empty::Response& response);  // NOLINT
-
-  void SubmapCallback(const cblox_msgs::MapLayerPtr& msg);
-  bool publishSubmapPosesCallback(std_srvs::EmptyRequest&,
-                                  std_srvs::EmptyResponse&);
 
   void setVerbose(bool verbose) {
     verbose_ = verbose;
@@ -133,11 +130,14 @@ class SubmapServer {
   inline void finishSubmap(const SubmapID& submap_id);
 
   // Submap pose updates
+  bool publishSubmapPosesCallback(std_srvs::EmptyRequest&,
+                                  std_srvs::EmptyResponse&);
   void publishSubmapPoses() const;
   void PoseCallback(const cblox_msgs::MapPoseUpdate& msg);
   void processPoseUpdate(const cblox_msgs::MapPoseUpdate& msg);
 
   // Submap publishing
+  void SubmapCallback(const cblox_msgs::MapLayerPtr& msg);
   void publishSubmap(SubmapID submap_id) const;
   void publishWholeMap() const;
   bool publishActiveSubmapCallback(
@@ -203,6 +203,8 @@ class SubmapServer {
 
   // The queue of unprocessed pointclouds
   std::queue<sensor_msgs::PointCloud2::Ptr> pointcloud_queue_;
+
+  // The queue of unprocessed submaps
   std::queue<cblox_msgs::MapLayerPtr> submap_queue_;
 
   // Last message times for throttling input.

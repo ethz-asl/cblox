@@ -47,6 +47,7 @@ using voxblox::EsdfMap;
 using voxblox::Layer;
 using voxblox::Block;
 using voxblox::TsdfVoxel;
+using voxblox::EsdfVoxel;
 
 // Taking timing from voxblox
 namespace timing {

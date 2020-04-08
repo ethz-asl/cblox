@@ -29,7 +29,6 @@ cblox_msgs::MapHeader generateSubmapHeaderMsg(
   submap_header.end_time = ros::Time(submap_ptr->getMappingInterval().second);
 
   // Set the pose estimate and indicate what frame it's in
-  // TODO(victorr): Get the world frame name from FrameNames once implemented
   submap_header.pose_estimate.frame_id =
       "submap_" + std::to_string(submap_ptr->getID());
   tf::poseKindrToMsg(submap_ptr->getPose().template cast<double>(),

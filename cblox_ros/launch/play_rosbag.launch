@@ -4,9 +4,6 @@
 
   <!-- Path to dataset -->
   <arg name="dataset_path" default="/home/darpa/bags/big_maze.bag" />
-  <!--
-  <arg name="dataset_path" default="/home/darpa/bags/darpa_edgar.bag" />
-  -->
   <arg name="play_rate" default="2.0" />
 
   <arg name="mav_name" default="firefly"/>

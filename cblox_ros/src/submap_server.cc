@@ -3,13 +3,25 @@
 namespace cblox {
 
 template<>
-const SubmapCollection<TsdfSubmap>::Ptr&
+SubmapCollection<TsdfSubmap>::Ptr
+SubmapServer<TsdfSubmap>::getSubmapCollectionPtr() {
+  return submap_collection_ptr_;
+}
+
+template<>
+SubmapCollection<TsdfSubmap>::ConstPtr
 SubmapServer<TsdfSubmap>::getSubmapCollectionPtr() const {
   return submap_collection_ptr_;
 }
 
 template<>
-const SubmapCollection<TsdfEsdfSubmap>::Ptr&
+SubmapCollection<TsdfEsdfSubmap>::Ptr
+SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() {
+  return submap_collection_ptr_;
+}
+
+template<>
+SubmapCollection<TsdfEsdfSubmap>::ConstPtr
 SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() const {
   return submap_collection_ptr_;
 }

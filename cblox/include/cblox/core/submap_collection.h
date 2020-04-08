@@ -79,7 +79,6 @@ class SubmapCollection : public SubmapCollectionInterface {
   typename SubmapType::Ptr getSubmapPtr(const SubmapID submap_id);
   typename SubmapType::ConstPtr getSubmapConstPtr(
       const SubmapID submap_id) const;
-  typename SubmapType::Ptr getSubmapPtr(const SubmapID submap_id) const;
   // A list of the submaps
   const std::vector<typename SubmapType::Ptr> getSubmapPtrs() const;
   const std::vector<typename SubmapType::ConstPtr> getSubmapConstPtrs() const;
@@ -93,7 +92,7 @@ class SubmapCollection : public SubmapCollectionInterface {
   // Access the tsdf_map member of the active submap
   TsdfMap::Ptr getActiveTsdfMapPtr();
   const TsdfMap& getActiveTsdfMap() const;
-
+  // Access the tsdf_map member of any submap
   virtual TsdfMap::Ptr getTsdfMapPtr(const SubmapID& submap_id);
 
   // Activate a submap
@@ -111,7 +110,7 @@ class SubmapCollection : public SubmapCollectionInterface {
   void clear() { id_to_submap_.clear(); }
 
   // Size information
-  virtual bool empty() const { return id_to_submap_.empty(); }
+  bool empty() const { return id_to_submap_.empty(); }
   size_t size() const { return id_to_submap_.size(); }
   size_t num_patches() const { return id_to_submap_.size(); }
   FloatingPoint block_size() const {

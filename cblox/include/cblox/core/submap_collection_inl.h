@@ -283,17 +283,6 @@ typename SubmapType::ConstPtr SubmapCollection<SubmapType>::getSubmapConstPtr(
 }
 
 template <typename SubmapType>
-typename SubmapType::Ptr SubmapCollection<
-    SubmapType>::getSubmapPtr(const SubmapID submap_id) const {
-  const auto tsdf_submap_ptr_it = id_to_submap_.find(submap_id);
-  if (tsdf_submap_ptr_it != id_to_submap_.end()) {
-    return tsdf_submap_ptr_it->second;
-  } else {
-    return typename SubmapType::Ptr();
-  }
-}
-
-template <typename SubmapType>
 bool SubmapCollection<SubmapType>::saveToFile(
     const std::string& file_path) const {
   // Opening the file (if we can)
@@ -363,8 +352,8 @@ void SubmapCollection<SubmapType>::fuseSubmapPair(
     const Transformation T_S1_S2 = T_G_S1.inverse() * T_G_S2;
     // Merging the submap layers
 
-    std::unique_lock<std::mutex> lock_1(submap_ptr_1->submap_mutex);
-    std::unique_lock<std::mutex> lock_2(submap_ptr_2->submap_mutex);
+    std::unique_lock<std::mutex> lock_submap_1(submap_ptr_1->submap_mutex);
+    std::unique_lock<std::mutex> lock_submap_2(submap_ptr_2->submap_mutex);
     mergeLayerAintoLayerB(submap_ptr_2->getTsdfMap().getTsdfLayer(), T_S1_S2,
                           submap_ptr_1->getTsdfMapPtr()->getTsdfLayerPtr());
 

@@ -15,15 +15,14 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   typedef std::shared_ptr<const TsdfEsdfSubmap> ConstPtr;
 
   struct Config : TsdfSubmap::Config, EsdfMap::Config {
+    // default constructor
     Config() : TsdfSubmap::Config(), EsdfMap::Config() {};
+    // constructor based on tsdf and esdf config
     Config(const TsdfSubmap::Config& tsdf_map_config,
-        const EsdfMap::Config& esdf_map_config)
+           const EsdfMap::Config& esdf_map_config)
         : TsdfSubmap::Config(tsdf_map_config),
           EsdfMap::Config(esdf_map_config) {};
   };
-  TsdfEsdfSubmap(Config config) : TsdfSubmap(config), config_(config) {
-    esdf_map_.reset(new EsdfMap(config));
-  }
   TsdfEsdfSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config,
                  voxblox::EsdfIntegrator::Config esdf_integrator_config =
                      voxblox::EsdfIntegrator::Config())
@@ -64,8 +63,6 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   Config config_;
   EsdfMap::Ptr esdf_map_;
   voxblox::EsdfIntegrator::Config esdf_integrator_config_;
-
-  mutable std::mutex esdf_mutex;
 };
 }  // namespace cblox
 

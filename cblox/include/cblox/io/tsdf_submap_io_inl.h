@@ -27,7 +27,7 @@ bool LoadSubmapFromStream(
   // Getting the header for this submap
   SubmapProto submap_proto;
   if (!voxblox::utils::readProtoMsgFromStream(
-      proto_file_ptr, &submap_proto, tmp_byte_offset_ptr)) {
+          proto_file_ptr, &submap_proto, tmp_byte_offset_ptr)) {
     LOG(ERROR) << "Could not read tsdf sub map protobuf message.";
     return false;
   }
@@ -50,10 +50,10 @@ bool LoadSubmapFromStream(
   LOG(INFO) << "Tsdf number of allocated blocks: "
             << submap_proto.num_blocks();
   if (!voxblox::io::LoadBlocksFromStream(
-      submap_proto.num_blocks(),
-      Layer<TsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
-      submap_collection_ptr->getActiveTsdfMapPtr()->getTsdfLayerPtr(),
-      tmp_byte_offset_ptr)) {
+          submap_proto.num_blocks(),
+          Layer<TsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
+          submap_collection_ptr->getActiveTsdfMapPtr()->getTsdfLayerPtr(),
+          tmp_byte_offset_ptr)) {
     LOG(ERROR) << "Could not load the tsdf blocks from stream.";
     return false;
   }
@@ -62,10 +62,10 @@ bool LoadSubmapFromStream(
   LOG(INFO) << "Esdf number of allocated blocks: "
             << submap_proto.num_esdf_blocks();
   if (!voxblox::io::LoadBlocksFromStream(
-      submap_proto.num_esdf_blocks(),
-      Layer<voxblox::EsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
-      submap_collection_ptr->getActiveSubmapPtr()->getEsdfMapPtr()->getEsdfLayerPtr(),
-      tmp_byte_offset_ptr)) {
+          submap_proto.num_esdf_blocks(),
+          Layer<EsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
+          submap_collection_ptr->getActiveSubmapPtr()->getEsdfMapPtr()->getEsdfLayerPtr(),
+          tmp_byte_offset_ptr)) {
     LOG(ERROR) << "Could not load the esdf blocks from stream.";
     return false;
   }
@@ -97,7 +97,7 @@ bool LoadSubmapCollection(
   // Loading the header
   SubmapCollectionProto submap_collection_proto;
   if (!voxblox::utils::readProtoMsgFromStream(
-      &proto_file, &submap_collection_proto, &tmp_byte_offset)) {
+          &proto_file, &submap_collection_proto, &tmp_byte_offset)) {
     LOG(ERROR) << "Could not read tsdf submap collection map protobuf message.";
     return false;
   }
@@ -112,7 +112,7 @@ bool LoadSubmapCollection(
     LOG(INFO) << "Loading submap number: " << sub_map_index;
     // Loading the submaps
     if (!LoadSubmapFromStream<SubmapType>(
-        &proto_file, *submap_collection_ptr, &tmp_byte_offset)) {
+            &proto_file, *submap_collection_ptr, &tmp_byte_offset)) {
       LOG(ERROR) << "Could not load the submap from stream.";
       return false;
     }

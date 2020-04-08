@@ -108,12 +108,11 @@ void ActiveSubmapVisualizer::getDisplayMesh(
   CHECK_NOTNULL(marker_ptr);
   // Getting the mesh layer
   std::shared_ptr<MeshLayer> mesh_layer_ptr = getDisplayMeshLayer();
-
   // Filling the marker
   const voxblox::ColorMode color_mode = voxblox::ColorMode::kLambertColor;
   voxblox::fillMarkerWithMesh(mesh_layer_ptr, color_mode, marker_ptr);
   marker_ptr->id = active_submap_id_;
-
+  // Setting opacity of marker
   marker_ptr->color.a = opacity_;
   for (std_msgs::ColorRGBA& color : marker_ptr->colors) {
     color.a = opacity_;

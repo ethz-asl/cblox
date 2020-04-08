@@ -11,8 +11,6 @@ void TsdfEsdfSubmap::generateEsdf() {
   // Generate the ESDF
   LOG(INFO) << "Generating ESDF from TSDF for submap with ID: " << submap_id_;
   esdf_integrator.setFullEuclidean(false);
-
-  std::unique_lock<std::mutex> lock(esdf_mutex);
   esdf_integrator.updateFromTsdfLayerBatch();
 }
 
@@ -37,7 +35,7 @@ bool TsdfEsdfSubmap::saveToStream(std::fstream* outfile_ptr) const {
 
   // Saving ESDF layer
   constexpr bool kIncludeAllBlocks = true;
-  const Layer<voxblox::EsdfVoxel>& esdf_layer = esdf_map_->getEsdfLayer();
+  const Layer<EsdfVoxel>& esdf_layer = esdf_map_->getEsdfLayer();
   if (!esdf_layer.saveBlocksToStream(kIncludeAllBlocks,
                                      voxblox::BlockIndexList(), outfile_ptr)) {
     LOG(ERROR) << "Could not write sub map blocks to stream.";
