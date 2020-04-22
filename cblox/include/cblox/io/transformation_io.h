@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "cblox/core/common.h"
+
 namespace cblox {
 namespace io {
 

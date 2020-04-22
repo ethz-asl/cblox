@@ -1,14 +1,14 @@
+#include "cblox/mesh/submap_mesher.h"
+
 #include <vector>
 
 #include <glog/logging.h>
 
-#include "cblox/mesh/submap_mesher.h"
-
 namespace cblox {
 
-using voxblox::IndexElement;
 using voxblox::BlockIndex;
 using voxblox::BlockIndexList;
+using voxblox::IndexElement;
 using voxblox::Point;
 
 void SubmapMesher::generatePatchMeshes(

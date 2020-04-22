@@ -13,10 +13,10 @@
 
 namespace cblox {
 
-using voxblox::MeshLayer;
+using voxblox::Color;
 using voxblox::MeshIntegrator;
 using voxblox::MeshIntegratorConfig;
-using voxblox::Color;
+using voxblox::MeshLayer;
 
 constexpr int kDefaultColorCycleLength = 20;
 

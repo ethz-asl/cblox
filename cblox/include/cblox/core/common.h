@@ -38,19 +38,19 @@ using AlignedDeque = std::deque<Type, Eigen::aligned_allocator<Type>>;
 typedef AlignedVector<Transformation> TransformationVector;
 
 // Taking some voxblox datatypes
-using voxblox::Pointcloud;
-using voxblox::Point;
-using voxblox::Colors;
+using voxblox::Block;
 using voxblox::Color;
-using voxblox::TsdfMap;
+using voxblox::Colors;
 using voxblox::EsdfMap;
 using voxblox::Layer;
-using voxblox::Block;
+using voxblox::Point;
+using voxblox::Pointcloud;
+using voxblox::TsdfMap;
 using voxblox::TsdfVoxel;
 
 // Taking timing from voxblox
 namespace timing {
- using namespace voxblox::timing;
+using namespace voxblox::timing;
 }  // namespace timing
 
 }  // namespace cblox

@@ -9,6 +9,7 @@
 
 #include <voxblox/integrator/merge_integration.h>
 #include <voxblox/utils/protobuf_utils.h>
+
 #include "cblox/core/tsdf_submap.h"
 
 namespace cblox {

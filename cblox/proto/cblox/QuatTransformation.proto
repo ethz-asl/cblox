@@ -11,5 +11,4 @@ message QuatTransformationProto {
   optional float qx = 5;
   optional float qy = 6;
   optional float qz = 7;
-  
 }

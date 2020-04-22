@@ -27,6 +27,6 @@ bool LoadSubmapCollection(
 }  // namespace io
 }  // namespace cblox
 
-#include "cblox/io/tsdf_submap_io_inl.h"
-
 #endif  // CBLOX_IO_TSDF_SUBMAP_IO_H_
+
+#include "cblox/io/tsdf_submap_io_inl.h"

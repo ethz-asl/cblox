@@ -11,8 +11,8 @@
 #include <std_srvs/Empty.h>
 
 #include <voxblox/utils/color_maps.h>
-#include <voxblox_ros/transformer.h>
 #include <voxblox_msgs/FilePath.h>
+#include <voxblox_ros/transformer.h>
 
 #include <cblox/core/common.h>
 #include <cblox/core/submap_collection.h>
