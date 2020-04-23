@@ -121,6 +121,6 @@ class SubmapCollection {
 
 }  // namespace cblox
 
-#include "cblox/core/submap_collection_inl.h"
-
 #endif  // CBLOX_CORE_SUBMAP_COLLECTION_H_
+
+#include "cblox/core/submap_collection_inl.h"

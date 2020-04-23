@@ -3,14 +3,13 @@
 
 #include <string>
 
-#include <voxblox/io/layer_io.h>
-
 #include <glog/logging.h>
+
+#include <voxblox/io/layer_io.h>
 
 #include "cblox/QuatTransformation.pb.h"
 #include "cblox/TsdfSubmap.pb.h"
 #include "cblox/TsdfSubmapCollection.pb.h"
-
 #include "cblox/utils/quat_transformation_protobuf_utils.h"
 
 namespace cblox {

@@ -2,7 +2,6 @@
 #define CBLOX_UTILS_QUAT_TRANSFORMATION_PROTOBUF_UTILS_H_
 
 #include "cblox/QuatTransformation.pb.h"
-
 #include "cblox/core/common.h"
 
 namespace cblox {

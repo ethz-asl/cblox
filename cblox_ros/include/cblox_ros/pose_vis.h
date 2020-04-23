@@ -2,7 +2,6 @@
 #define CBLOX_ROS_POSE_VIS_H_
 
 #include <geometry_msgs/PoseArray.h>
-
 #include <minkindr_conversions/kindr_msg.h>
 
 #include <cblox/core/common.h>

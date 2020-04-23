@@ -227,9 +227,10 @@ void TsdfSubmapServer::processPointCloudMessageAndInsert(
     ROS_INFO(
         "Finished integrating in %f seconds, have %lu blocks. %u frames "
         "integrated to current submap.",
-        (end - start).toSec(), tsdf_submap_collection_ptr_->getActiveTsdfMap()
-                                   .getTsdfLayer()
-                                   .getNumberOfAllocatedBlocks(),
+        (end - start).toSec(),
+        tsdf_submap_collection_ptr_->getActiveTsdfMap()
+            .getTsdfLayer()
+            .getNumberOfAllocatedBlocks(),
         num_integrated_frames_current_submap_);
   }
 }
