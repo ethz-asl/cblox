@@ -14,7 +14,6 @@ include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 ############
 # Taken from voxblox
 set(PROTO_DEFNS proto/cblox/QuatTransformation.proto
-=======
                 proto/cblox/Submap.proto
                 proto/cblox/SubmapCollection.proto)
 set(BASE_PATH "proto")
