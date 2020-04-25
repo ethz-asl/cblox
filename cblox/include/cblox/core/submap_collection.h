@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "./SubmapCollection.pb.h"
+#include "cblox/SubmapCollection.pb.h"
 #include "cblox/core/common.h"
 #include "cblox/core/tsdf_esdf_submap.h"
 
@@ -133,6 +133,9 @@ class SubmapCollection : public SubmapCollectionInterface {
   // Flattens the collection map down to a normal TSDF map
   TsdfMap::Ptr getProjectedMap() const;
 
+  // Gets the combined memory size of the layers in this collection.
+  size_t getMemorySize() const;
+
  private:
   // TODO(alexmillane): Get some concurrency guards
 
@@ -148,6 +151,6 @@ class SubmapCollection : public SubmapCollectionInterface {
 
 }  // namespace cblox
 
-#include "cblox/core/submap_collection_inl.h"
-
 #endif  // CBLOX_CORE_SUBMAP_COLLECTION_H_
+
+#include "cblox/core/submap_collection_inl.h"

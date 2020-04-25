@@ -9,6 +9,7 @@
 
 #include <voxblox/integrator/merge_integration.h>
 #include <voxblox/utils/protobuf_utils.h>
+
 #include "cblox/core/tsdf_submap.h"
 
 namespace cblox {
@@ -19,11 +20,12 @@ SubmapCollection<SubmapType>::SubmapCollection(
     const std::vector<typename SubmapType::Ptr>& tsdf_sub_maps)
     : submap_config_(submap_config) {
   // Constructing from a list of existing submaps
-  // NOTE(alexmillane): assigning arbitrary SubmapIDs
-  SubmapID submap_id = 0;
+  // NOTE(alexmillane): Relies on the submaps having unique submap IDs...
   for (const auto& tsdf_submap_ptr : tsdf_sub_maps) {
-    id_to_submap_[submap_id] = tsdf_submap_ptr;
-    submap_id++;
+    const auto ret =
+        id_to_submap_.insert({tsdf_submap_ptr->getID(), tsdf_submap_ptr});
+    CHECK(ret.second) << "Attempted to construct collection from vector of "
+                         "submaps containing at least one duplicate ID.";
   }
 }
 
@@ -376,6 +378,16 @@ size_t SubmapCollection<SubmapType>::getNumberAllocatedBlocks() const {
     total_blocks += (id_submap_pair.second)->getNumberAllocatedBlocks();
   }
   return total_blocks;
+}
+
+template <typename SubmapType>
+size_t SubmapCollection<SubmapType>::getMemorySize() const {
+  // Looping over the submaps totalling the sizes
+  size_t size = 0u;
+  for (const auto& id_submap_pair : id_to_submap_) {
+    size += (id_submap_pair.second)->getMemorySize();
+  }
+  return size;
 }
 
 }  // namespace cblox

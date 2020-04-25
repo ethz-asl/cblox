@@ -3,13 +3,14 @@
 
 #include <string>
 
-#include <voxblox/io/layer_io.h>
-
 #include <glog/logging.h>
 
-#include "./QuatTransformation.pb.h"
-#include "./Submap.pb.h"
-#include "./SubmapCollection.pb.h"
+#include <voxblox/io/layer_io.h>
+
+#include "cblox/QuatTransformation.pb.h"
+#include "cblox/Submap.pb.h"
+#include "cblox/SubmapCollection.pb.h"
+#include "cblox/utils/quat_transformation_protobuf_utils.h"
 
 namespace cblox {
 namespace io {
@@ -41,7 +42,7 @@ bool LoadSubmapFromStream(
   Eigen::Vector3 t = T_M_S.getPosition();
   Quaternion q = T_M_S.getRotation();
   LOG(INFO) << "[ " << t.x() << ", " << t.y() << ", " << t.z() << ", " << q.w()
-            << q.x() << ", " << q.y() << ", " << q.z() << " ]";
+            << ", " << q.x() << ", " << q.y() << ", " << q.z() << " ]";
 
   // Creating a new submap to hold the data
   submap_collection_ptr->createNewSubmap(T_M_S, submap_proto.id());

@@ -15,15 +15,15 @@
   <buildtool_depend>catkin_simple</buildtool_depend>
 
   <!-- Dependencies. -->
-  <depend>roscpp</depend>
+  <depend>cblox_msgs</depend>
+  <depend>cblox</depend>
   <depend>cmake_modules</depend>
   <depend>glog_catkin</depend>
-  <depend>voxblox</depend>
-  <depend>voxblox_ros</depend>
-  <depend>voxblox_msgs</depend>
-  <depend>cblox</depend>
-  <depend>cblox_msgs</depend>
-  <depend>minkindr</depend>
   <depend>minkindr_conversions</depend>
+  <depend>minkindr</depend>
+  <depend>roscpp</depend>
+  <depend>voxblox_msgs</depend>
+  <depend>voxblox_ros</depend>
+  <depend>voxblox</depend>
 
 </package>

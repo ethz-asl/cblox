@@ -8,7 +8,7 @@
 
 #include <glog/logging.h>
 
-#include "./Submap.pb.h"
+#include "cblox/Submap.pb.h"
 #include "cblox/core/common.h"
 
 namespace cblox {
@@ -68,6 +68,10 @@ class TsdfSubmap {
 
   size_t getNumberAllocatedBlocks() const {
     return tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks();
+  }
+
+  size_t getMemorySize() const {
+    return tsdf_map_->getTsdfLayer().getMemorySize();
   }
 
   // Getting the proto for this submap

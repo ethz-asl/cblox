@@ -13,37 +13,23 @@ include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 # PROTOBUF #
 ############
 # Taken from voxblox
-# General idea: first check if we have protobuf catkin, then use that.
-# Otherwise use system protobuf.
 set(PROTO_DEFNS proto/cblox/QuatTransformation.proto
+=======
                 proto/cblox/Submap.proto
                 proto/cblox/SubmapCollection.proto)
-set(ADDITIONAL_LIBRARIES "")
+set(BASE_PATH "proto")
+set(PROTOBUF_COMPILE_PYTHON true)
 
-find_package(protobuf_catkin QUIET)
-if (protobuf_catkin_FOUND)
-    message(STATUS "Using protobuf_catkin")
-    list(APPEND catkin_INCLUDE_DIRS ${protobuf_catkin_INCLUDE_DIRS})
-    list(APPEND catkin_LIBRARIES ${protobuf_catkin_LIBRARIES})
-    include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
-    set(BASE_PATH "proto/cblox")
-    PROTOBUF_CATKIN_GENERATE_CPP2(${BASE_PATH} PROTO_SRCS PROTO_HDRS ${PROTO_DEFNS})
-    set(ADDITIONAL_LIBRARIES ${protobuf_catkin_LIBRARIES})
-else()
-  message(STATUS "Using system protobuf")
-  find_package(Protobuf REQUIRED)
-  include_directories(${PROTOBUF_INCLUDE_DIRS})
-  include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
-  PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_DEFNS})
-  set(ADDITIONAL_LIBRARIES ${PROTOBUF_LIBRARY})
-endif()
+PROTOBUF_CATKIN_GENERATE_CPP2(${BASE_PATH} PROTO_SRCS PROTO_HDRS ${PROTO_DEFNS})
 
 #############
 # LIBRARIES #
 #############
-cs_add_library(cblox_lib
+cs_add_library(${PROJECT_NAME}_proto
+  ${PROTO_SRCS}
+)
+
+cs_add_library(${PROJECT_NAME}_lib
   src/core/tsdf_submap.cpp
   src/core/tsdf_esdf_submap.cpp
   src/integrator/tsdf_submap_collection_integrator.cpp
@@ -51,15 +37,11 @@ cs_add_library(cblox_lib
   src/mesh/submap_mesher.cpp
   src/io/tsdf_submap_io.cpp
   src/io/transformation_io.cpp
-  ${PROTO_SRCS}
-  ${PROTO_HDRS}
 )
-target_link_libraries(cblox_lib ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_lib ${PROJECT_NAME}_proto)
 
 ##########
 # EXPORT #
 ##########
-
 cs_install()
-cs_export(INCLUDE_DIRS include ${CMAKE_CURRENT_BINARY_DIR}
-          CFG_EXTRAS cblox-extras.cmake)
+cs_export(INCLUDE_DIRS ${CATKIN_DEVEL_PREFIX}/include)

@@ -1,6 +1,8 @@
-#include "cblox/core/tsdf_submap.h"
-#include <string>
 #include "cblox/io/tsdf_submap_io.h"
+
+#include <string>
+
+#include "cblox/core/tsdf_submap.h"
 
 namespace cblox {
 namespace io {

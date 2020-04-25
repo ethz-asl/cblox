@@ -15,7 +15,7 @@
 
     <!-- Topics -->
     <remap from="pointcloud" to="/velodyne_points" />
-    
+
     <!-- Voxblox params -->
     <param name="tsdf_voxel_size" value="$(arg voxel_size)" />
     <param name="truncation_distance" value="$(eval arg('truncation_distance_vox') * arg('voxel_size'))"/>
@@ -33,7 +33,7 @@
 
     <!-- Cblox params -->
     <param name="num_integrated_frames_per_submap" value="$(arg num_integrated_frames_per_submap)" />
-    
+
     <!-- Output -->
     <param name="mesh_filename" value="$(find cblox_ros)/mesh_results/$(anon kitti).ply" />
   </node>

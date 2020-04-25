@@ -1,4 +1,5 @@
 #include "cblox/core/tsdf_submap.h"
+
 #include "cblox/utils/quat_transformation_protobuf_utils.h"
 
 namespace cblox {

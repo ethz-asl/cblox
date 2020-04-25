@@ -1,9 +1,10 @@
+#include "cblox/io/transformation_io.h"
+
 #include <string>
 
 #include <voxblox/utils/protobuf_utils.h>
 
-#include "./QuatTransformation.pb.h"
-
+#include "cblox/QuatTransformation.pb.h"
 #include "cblox/utils/quat_transformation_protobuf_utils.h"
 
 namespace cblox {
