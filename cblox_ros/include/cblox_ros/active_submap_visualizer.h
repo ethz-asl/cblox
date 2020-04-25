@@ -35,7 +35,7 @@ class ActiveSubmapVisualizer {
         verbose_(false),
         opacity_(1.0) {}
 
-  void switchToSubmap(const SubmapID& submap_id);
+  void switchToSubmap(const SubmapID submap_id);
   void switchToActiveSubmap();
 
   void updateMeshLayer();

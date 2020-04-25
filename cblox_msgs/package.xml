@@ -4,12 +4,13 @@
   <version>0.0.0</version>
   <description>Message definitions for Cblox ROS interface.</description>
 
-  <author email="helen.oleynikova@mavt.ethz.ch">Helen Oleynikova</author>
   <author email="marius.fehr@mavt.ethz.ch">Marius Fehr</author>
   <author email="gasserl@student.ethz.ch">Laura Gasser</author>
+  <author email="alex.millane@gmail.com">Alex Millane</author>
+  <author email="helen.oleynikova@mavt.ethz.ch">Helen Oleynikova</author>
 
-  <maintainer email="helen.oleynikova@mavt.ethz.ch">Helen Oleynikova</maintainer>
-  <maintainer email="marius.fehr@mavt.ethz.ch">Marius Fehr</maintainer>
+  <maintainer email="gasserl@student.ethz.ch">Laura Gasser</maintainer>
+  <maintainer email="alex.millane@gmail.com">Alex Millane</maintainer>
 
   <license>BSD</license>
 

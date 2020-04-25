@@ -4,6 +4,14 @@
 
 namespace cblox {
 
+void TsdfSubmap::finishSubmap() {
+  // Empty implementation.
+}
+
+void TsdfSubmap::prepareForPublish() {
+  // Empty implementation.
+}
+
 void TsdfSubmap::getProto(SubmapProto* proto) const {
   CHECK_NOTNULL(proto);
   // Getting the relevant data

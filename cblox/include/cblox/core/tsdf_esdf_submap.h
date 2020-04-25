@@ -44,8 +44,6 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   // Generate the ESDF from the TSDF
   void generateEsdf();
 
-  void setTsdfMap(const voxblox::Layer<TsdfVoxel>& tsdf_layer);
-
   // Returns the underlying ESDF map pointers
   EsdfMap::Ptr getEsdfMapPtr() { return esdf_map_; }
   const EsdfMap& getEsdfMap() const { return *esdf_map_; }
@@ -55,6 +53,10 @@ class TsdfEsdfSubmap : public TsdfSubmap {
    *       If you'd like to also store the ESDF, override the getProto() and
    *       saveToStream() methods from tsdf_submap.
    */
+
+  virtual void finishSubmap();
+
+  virtual void prepareForPublish();
 
   virtual void getProto(cblox::SubmapProto* proto) const;
   virtual bool saveToStream(std::fstream* outfile_ptr) const;

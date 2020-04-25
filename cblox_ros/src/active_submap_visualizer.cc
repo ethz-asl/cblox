@@ -4,7 +4,7 @@
 
 namespace cblox {
 
-void ActiveSubmapVisualizer::switchToSubmap(const SubmapID& submap_id) {
+void ActiveSubmapVisualizer::switchToSubmap(const SubmapID submap_id) {
   CHECK(tsdf_submap_collection_ptr_);
   active_submap_id_ = submap_id;
   if (mesh_layers_.find(submap_id) == mesh_layers_.end()) {

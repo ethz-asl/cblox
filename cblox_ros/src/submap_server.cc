@@ -3,55 +3,7 @@
 namespace cblox {
 
 template <>
-SubmapCollection<TsdfSubmap>::Ptr
-SubmapServer<TsdfSubmap>::getSubmapCollectionPtr() {
-  return submap_collection_ptr_;
-}
-
-template <>
-SubmapCollection<TsdfSubmap>::ConstPtr
-SubmapServer<TsdfSubmap>::getSubmapCollectionPtr() const {
-  return submap_collection_ptr_;
-}
-
-template <>
-SubmapCollection<TsdfEsdfSubmap>::Ptr
-SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() {
-  return submap_collection_ptr_;
-}
-
-template <>
-SubmapCollection<TsdfEsdfSubmap>::ConstPtr
-SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() const {
-  return submap_collection_ptr_;
-}
-
-template <>
-void SubmapServer<TsdfSubmap>::finishSubmap(const SubmapID& submap_id) {
-  if (submap_collection_ptr_->exists(submap_id)) {
-    TsdfSubmap::Ptr submap_ptr =
-        submap_collection_ptr_->getSubmapPtr(submap_id);
-    // stopping the mapping interval
-    submap_ptr->stopMappingTime(ros::Time::now().toSec());
-    // publishing the old submap
-    publishSubmap(submap_id);
-    ROS_INFO("[CbloxServer] Finished submap %d", submap_id);
-  }
-}
-
-template <>
-bool SubmapServer<TsdfSubmap>::publishActiveSubmap() {
-  if (submap_collection_ptr_->empty()) {
-    ROS_WARN("[CbloxPlanner] Active submap does not exist!");
-    return false;
-  }
-  SubmapID submap_id = submap_collection_ptr_->getActiveSubmapID();
-  publishSubmap(submap_id);
-  return true;
-}
-
-template <>
-void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID& submap_id) const {
+void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID submap_id) const {
   if (sdf_slice_pub_.getNumSubscribers() < 1) {
     return;
   }

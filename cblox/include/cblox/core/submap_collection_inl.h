@@ -40,7 +40,7 @@ std::vector<SubmapID> SubmapCollection<SubmapType>::getIDs() const {
 }
 
 template <typename SubmapType>
-bool SubmapCollection<SubmapType>::exists(const SubmapID& submap_id) const {
+bool SubmapCollection<SubmapType>::exists(const SubmapID submap_id) const {
   // Searching for the passed submap ID
   const auto it = id_to_submap_.find(submap_id);
   return (it != id_to_submap_.end());
@@ -139,7 +139,7 @@ TsdfMap::Ptr SubmapCollection<SubmapType>::getActiveTsdfMapPtr() {
 
 template <typename SubmapType>
 TsdfMap::Ptr SubmapCollection<SubmapType>::getTsdfMapPtr(
-    const SubmapID& submap_id) {
+    const SubmapID submap_id) {
   const auto it = id_to_submap_.find(submap_id);
   CHECK(it != id_to_submap_.end());
   return (it->second)->getTsdfMapPtr();
@@ -173,7 +173,7 @@ const Transformation& SubmapCollection<SubmapType>::getActiveSubmapPose()
   return getActiveSubmap().getPose();
 }
 template <typename SubmapType>
-const SubmapID& SubmapCollection<SubmapType>::getActiveSubmapID() const {
+SubmapID SubmapCollection<SubmapType>::getActiveSubmapID() const {
   return active_submap_id_;
 }
 
@@ -222,15 +222,9 @@ bool SubmapCollection<SubmapType>::setSubmapPose(const SubmapID submap_id,
 
 template <typename SubmapType>
 void SubmapCollection<SubmapType>::setSubmapPoses(
-    const TransformationVector& transforms) {
-  CHECK_EQ(transforms.size(), id_to_submap_.size());
-  // NOTE(alexmillane): This assumes that the order of transforms matches the
-  //                    submap order.
-  // NOTE(alexmillane): Should really be passing a map of ids to transforms.
-  size_t sub_map_index = 0;
-  for (const auto& id_submap_pair : id_to_submap_) {
-    (id_submap_pair.second)->setPose(transforms[sub_map_index]);
-    sub_map_index++;
+    const SubmapIdPoseMap& id_pose_map) {
+  for (const SubmapIdPosePair& id_pose_pair : id_pose_map) {
+    setSubmapPose(id_pose_pair.first, id_pose_pair.second);
   }
 }
 
@@ -356,12 +350,12 @@ void SubmapCollection<SubmapType>::fuseSubmapPair(
     const Transformation& T_G_S2 = submap_ptr_2->getPose();
     const Transformation T_S1_S2 = T_G_S1.inverse() * T_G_S2;
     // Merging the submap layers
-
-    std::unique_lock<std::mutex> lock_submap_1(submap_ptr_1->submap_mutex);
-    std::unique_lock<std::mutex> lock_submap_2(submap_ptr_2->submap_mutex);
-    mergeLayerAintoLayerB(submap_ptr_2->getTsdfMap().getTsdfLayer(), T_S1_S2,
-                          submap_ptr_1->getTsdfMapPtr()->getTsdfLayerPtr());
-
+    {
+      std::unique_lock<std::mutex> lock_submap_1(submap_ptr_1->submap_mutex_);
+      std::unique_lock<std::mutex> lock_submap_2(submap_ptr_2->submap_mutex_);
+      mergeLayerAintoLayerB(submap_ptr_2->getTsdfMap().getTsdfLayer(), T_S1_S2,
+                            submap_ptr_1->getTsdfMapPtr()->getTsdfLayerPtr());
+    }
     // Deleting Submap #2
     const size_t num_erased = id_to_submap_.erase(submap_id_2);
     CHECK_EQ(num_erased, 1);

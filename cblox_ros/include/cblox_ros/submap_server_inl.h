@@ -84,19 +84,6 @@ SubmapServer<SubmapType>::SubmapServer(
   trajectory_visualizer_ptr_.reset(new TrajectoryVisualizer);
 }
 
-template <>
-SubmapCollection<TsdfSubmap>::Ptr
-SubmapServer<TsdfSubmap>::getSubmapCollectionPtr();
-template <>
-SubmapCollection<TsdfSubmap>::ConstPtr
-SubmapServer<TsdfSubmap>::getSubmapCollectionPtr() const;
-template <>
-SubmapCollection<TsdfEsdfSubmap>::Ptr
-SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr();
-template <>
-SubmapCollection<TsdfEsdfSubmap>::ConstPtr
-SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() const;
-
 template <typename SubmapType>
 void SubmapServer<SubmapType>::subscribeToTopics() {
   // Subscribing to the input pointcloud
@@ -107,11 +94,10 @@ void SubmapServer<SubmapType>::subscribeToTopics() {
       nh_.subscribe("pointcloud", pointcloud_queue_size,
                     &SubmapServer<SubmapType>::pointcloudCallback, this);
   // Subscribing to new submaps and submap pose updates
-  int submap_queue_size = 20;
-  submap_sub_ = nh_.subscribe("submap_in", submap_queue_size,
+  constexpr int kQueueSize = 20;
+  submap_sub_ = nh_.subscribe("submap_in", kQueueSize,
                               &SubmapServer<SubmapType>::SubmapCallback, this);
-  int pose_queue_size = 20;
-  pose_sub_ = nh_.subscribe("submap_pose_in", pose_queue_size,
+  pose_sub_ = nh_.subscribe("submap_pose_in", kQueueSize,
                             &SubmapServer::PoseCallback, this);
 }
 
@@ -353,26 +339,23 @@ void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C,
   }
 }
 
-// Note: Specialized for TsdfSubmap
 template <typename SubmapType>
-void SubmapServer<SubmapType>::finishSubmap(const SubmapID& submap_id) {
+void SubmapServer<SubmapType>::finishSubmap(const SubmapID submap_id) {
   if (submap_collection_ptr_->exists(submap_id)) {
     typename SubmapType::Ptr submap_ptr =
         submap_collection_ptr_->getSubmapPtr(submap_id);
-    // stopping the mapping interval
+    // Stopping the mapping interval.
     submap_ptr->stopMappingTime(ros::Time::now().toSec());
-    // generating ESDF map
-    submap_ptr->generateEsdf();
+    // Finish submap.
+    submap_ptr->finishSubmap();
     // publishing the old submap
     publishSubmap(submap_id);
     ROS_INFO("[CbloxServer] Finished submap %d", submap_id);
   }
 }
-template <>
-void SubmapServer<TsdfSubmap>::finishSubmap(const SubmapID& submap_id);
 
 template <typename SubmapType>
-void SubmapServer<SubmapType>::visualizeSubmapMesh(const SubmapID& submap_id) {
+void SubmapServer<SubmapType>::visualizeSubmapMesh(const SubmapID submap_id) {
   if (active_submap_mesh_pub_.getNumSubscribers() < 1) {
     return;
   }
@@ -574,12 +557,10 @@ bool SubmapServer<SubmapType>::publishActiveSubmap() {
     return false;
   }
   SubmapID submap_id = submap_collection_ptr_->getActiveSubmapID();
-  submap_collection_ptr_->getSubmapPtr(submap_id)->generateEsdf();
+  submap_collection_ptr_->getSubmapPtr(submap_id)->prepareForPublish();
   publishSubmap(submap_id);
   return true;
 }
-template <>
-bool SubmapServer<TsdfSubmap>::publishActiveSubmap();
 
 template <typename SubmapType>
 void SubmapServer<SubmapType>::publishSubmapPoses() const {
@@ -618,7 +599,9 @@ void SubmapServer<SubmapType>::processPoseUpdate(
     const cblox_msgs::MapPoseUpdate& msg) {
   {
     std::lock_guard<std::mutex> lock(visualizer_mutex_);
-    deserializeMsgToPose<SubmapType>(&msg, submap_collection_ptr_);
+    SubmapIdPoseMap id_pose_map;
+    deserializeMsgToPose(msg, &id_pose_map);
+    submap_collection_ptr_->setSubmapPoses(id_pose_map);
   }
 
   visualizeWholeMap();
@@ -660,7 +643,7 @@ void SubmapServer<SubmapType>::publishWholeMap() const {
 }
 
 template <typename SubmapType>
-void SubmapServer<SubmapType>::visualizeSlice(const SubmapID& submap_id) const {
+void SubmapServer<SubmapType>::visualizeSlice(const SubmapID submap_id) const {
   if (sdf_slice_pub_.getNumSubscribers() < 1) {
     return;
   }
@@ -754,7 +737,7 @@ void SubmapServer<SubmapType>::visualizeSlice(const SubmapID& submap_id) const {
   sdf_slice_pub_.publish(marker_array);
 }
 template <>
-void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID& submap_id) const;
+void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID submap_id) const;
 
 template <typename SubmapType>
 TsdfMap::Ptr SubmapServer<SubmapType>::projectAndVisualizeIteratively() {

@@ -10,13 +10,12 @@ void TsdfEsdfSubmap::generateEsdf() {
                                           esdf_map_->getEsdfLayerPtr());
   // Generate the ESDF
   LOG(INFO) << "Generating ESDF from TSDF for submap with ID: " << submap_id_;
-  esdf_integrator.setFullEuclidean(false);
   esdf_integrator.updateFromTsdfLayerBatch();
 }
 
-void TsdfEsdfSubmap::setTsdfMap(const voxblox::Layer<TsdfVoxel>& tsdf_layer) {
-  tsdf_map_.reset(new voxblox::TsdfMap(tsdf_layer));
-}
+void TsdfEsdfSubmap::finishSubmap() { generateEsdf(); }
+
+void TsdfEsdfSubmap::prepareForPublish() { generateEsdf(); }
 
 void TsdfEsdfSubmap::getProto(cblox::SubmapProto* proto) const {
   CHECK_NOTNULL(proto);
@@ -26,6 +25,7 @@ void TsdfEsdfSubmap::getProto(cblox::SubmapProto* proto) const {
   size_t num_blocks = esdf_map_->getEsdfLayer().getNumberOfAllocatedBlocks();
   proto->set_num_esdf_blocks(num_blocks);
 }
+
 bool TsdfEsdfSubmap::saveToStream(std::fstream* outfile_ptr) const {
   CHECK_NOTNULL(outfile_ptr);
   bool success = TsdfSubmap::saveToStream(outfile_ptr);

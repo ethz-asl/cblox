@@ -24,13 +24,13 @@ class SubmapCollectionInterface {
   // design intent here in leaving some out. There is only the intent to be
   // lazy.
   virtual const Transformation& getActiveSubmapPose() const = 0;
-  virtual const SubmapID& getActiveSubmapID() const = 0;
+  virtual SubmapID getActiveSubmapID() const = 0;
   virtual bool getSubmapPose(const SubmapID submap_id,
                              Transformation* pose_ptr) const = 0;
 
   virtual TsdfMap::Ptr getActiveTsdfMapPtr() = 0;
   virtual const TsdfMap& getActiveTsdfMap() const = 0;
-  virtual TsdfMap::Ptr getTsdfMapPtr(const SubmapID& submap_id) = 0;
+  virtual TsdfMap::Ptr getTsdfMapPtr(const SubmapID submap_id) = 0;
 
   virtual bool empty() const = 0;
   virtual size_t size() const = 0;
@@ -57,7 +57,7 @@ class SubmapCollection : public SubmapCollectionInterface {
 
   // Gets a vector of the linked IDs
   std::vector<SubmapID> getIDs() const;
-  bool exists(const SubmapID& submap_id) const;
+  bool exists(const SubmapID submap_id) const;
 
   // Creates a new submap on the top of the collection
   // NOTE(alexmillane): T_G_S - Transformation between submap frame (S) and
@@ -88,13 +88,13 @@ class SubmapCollection : public SubmapCollectionInterface {
   const SubmapType& getActiveSubmap() const;
   typename SubmapType::Ptr getActiveSubmapPtr();
   const Transformation& getActiveSubmapPose() const;
-  const SubmapID& getActiveSubmapID() const;
+  SubmapID getActiveSubmapID() const;
 
   // Access the tsdf_map member of the active submap
   TsdfMap::Ptr getActiveTsdfMapPtr();
   const TsdfMap& getActiveTsdfMap() const;
   // Access the tsdf_map member of any submap
-  virtual TsdfMap::Ptr getTsdfMapPtr(const SubmapID& submap_id);
+  virtual TsdfMap::Ptr getTsdfMapPtr(const SubmapID submap_id);
 
   // Activate a submap
   // NOTE(alexmillane): Note that creating a new submap automatically activates
@@ -103,7 +103,7 @@ class SubmapCollection : public SubmapCollectionInterface {
 
   // Interacting with the submap poses
   bool setSubmapPose(const SubmapID submap_id, const Transformation& pose);
-  void setSubmapPoses(const TransformationVector& transforms);
+  void setSubmapPoses(const SubmapIdPoseMap& id_pose_map);
   bool getSubmapPose(const SubmapID submap_id, Transformation* pose_ptr) const;
   void getSubmapPoses(TransformationVector* submap_poses) const;
 

@@ -15,7 +15,7 @@
 namespace cblox {
 namespace io {
 
-// we assume most SubmapTypes to have an ESDF map
+// We assume all SubmapTypes to have a TSDF map.
 template <typename SubmapType>
 bool LoadSubmapFromStream(
     std::fstream* proto_file_ptr,
@@ -55,20 +55,6 @@ bool LoadSubmapFromStream(
           submap_collection_ptr->getActiveTsdfMapPtr()->getTsdfLayerPtr(),
           tmp_byte_offset_ptr)) {
     LOG(ERROR) << "Could not load the tsdf blocks from stream.";
-    return false;
-  }
-
-  // Getting the esdf blocks for this submap (the tsdf layer)
-  LOG(INFO) << "Esdf number of allocated blocks: "
-            << submap_proto.num_esdf_blocks();
-  if (!voxblox::io::LoadBlocksFromStream(
-          submap_proto.num_esdf_blocks(),
-          Layer<EsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
-          submap_collection_ptr->getActiveSubmapPtr()
-              ->getEsdfMapPtr()
-              ->getEsdfLayerPtr(),
-          tmp_byte_offset_ptr)) {
-    LOG(ERROR) << "Could not load the esdf blocks from stream.";
     return false;
   }
 

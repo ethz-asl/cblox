@@ -41,12 +41,12 @@ class TsdfSubmap {
 
   // Submap pose interaction
   const Transformation& getPose() const {
-    std::unique_lock<std::mutex> lock(transformation_mutex);
+    std::unique_lock<std::mutex> lock(transformation_mutex_);
     return T_M_S_;
   }
 
   void setPose(const Transformation& T_M_S) {
-    std::unique_lock<std::mutex> lock(transformation_mutex);
+    std::unique_lock<std::mutex> lock(transformation_mutex_);
     T_M_S_ = T_M_S;
   }
 
@@ -70,6 +70,10 @@ class TsdfSubmap {
     return tsdf_map_->getTsdfLayer().getMemorySize();
   }
 
+  virtual void finishSubmap();
+
+  virtual void prepareForPublish();
+
   // Getting the proto for this submap
   virtual void getProto(SubmapProto* proto) const;
 
@@ -85,7 +89,9 @@ class TsdfSubmap {
 
  private:
   // The pose of this submap in the global map frame
-  mutable std::mutex transformation_mutex;
+  mutable std::mutex transformation_mutex_;
+
+  mutable std::mutex submap_mutex_;
 
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW

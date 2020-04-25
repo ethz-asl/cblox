@@ -8,9 +8,9 @@ namespace cblox {
 namespace io {
 
 template <>
-bool LoadSubmapFromStream<cblox::TsdfSubmap>(
+bool LoadSubmapFromStream<cblox::TsdfEsdfSubmap>(
     std::fstream* proto_file_ptr,
-    typename SubmapCollection<cblox::TsdfSubmap>::Ptr submap_collection_ptr,
+    typename SubmapCollection<cblox::TsdfEsdfSubmap>::Ptr submap_collection_ptr,
     uint64_t* tmp_byte_offset_ptr) {
   CHECK_NOTNULL(proto_file_ptr);
   CHECK(submap_collection_ptr);
@@ -46,6 +46,20 @@ bool LoadSubmapFromStream<cblox::TsdfSubmap>(
           submap_collection_ptr->getActiveTsdfMapPtr()->getTsdfLayerPtr(),
           tmp_byte_offset_ptr)) {
     LOG(ERROR) << "Could not load the tsdf blocks from stream.";
+    return false;
+  }
+
+  // Getting the esdf blocks for this submap (the esdf layer)
+  LOG(INFO) << "Esdf number of allocated blocks: "
+            << submap_proto.num_esdf_blocks();
+  if (!voxblox::io::LoadBlocksFromStream(
+          submap_proto.num_esdf_blocks(),
+          Layer<EsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
+          submap_collection_ptr->getActiveSubmapPtr()
+              ->getEsdfMapPtr()
+              ->getEsdfLayerPtr(),
+          tmp_byte_offset_ptr)) {
+    LOG(ERROR) << "Could not load the esdf blocks from stream.";
     return false;
   }
 

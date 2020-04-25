@@ -7,8 +7,6 @@
 #include <string>
 #include <vector>
 
-#include <cblox_msgs/SubmapSrvRequest.h>
-#include <cblox_msgs/SubmapSrvResponse.h>
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <std_srvs/Empty.h>
@@ -24,6 +22,8 @@
 #include <cblox/mesh/submap_mesher.h>
 #include <cblox_msgs/MapLayer.h>
 #include <cblox_msgs/MapPoseUpdate.h>
+#include <cblox_msgs/SubmapSrvRequest.h>
+#include <cblox_msgs/SubmapSrvResponse.h>
 
 #include "cblox_ros/active_submap_visualizer.h"
 #include "cblox_ros/trajectory_visualizer.h"
@@ -69,16 +69,21 @@ class SubmapServer {
   void updateMeshEvent(const ros::TimerEvent& /*event*/);
 
   // Access Submap Collection Pointer
-  inline typename SubmapCollection<SubmapType>::Ptr getSubmapCollectionPtr();
+  inline typename SubmapCollection<SubmapType>::Ptr getSubmapCollectionPtr()
+      const {
+    return submap_collection_ptr_;
+  }
   inline typename SubmapCollection<SubmapType>::ConstPtr
-  getSubmapCollectionPtr() const;
+  getSubmapCollectionConstPtr() const {
+    return submap_collection_ptr_;
+  }
 
   // Visualizing
-  void visualizeSubmapMesh(const SubmapID& submap_id);
+  void visualizeSubmapMesh(const SubmapID submap_id);
   void visualizeWholeMap();
   void visualizeSubmapBaseframes() const;
   void visualizeTrajectory() const;
-  void visualizeSlice(const SubmapID& submap_id) const;
+  void visualizeSlice(const SubmapID submap_id) const;
   TsdfMap::Ptr projectAndVisualizeIteratively();
 
   // Mesh output
@@ -93,7 +98,7 @@ class SubmapServer {
   void SubmapCallback(const cblox_msgs::MapLayerPtr& msg);
 
   // Parameters
-  void setVerbose(bool verbose) {
+  inline void setVerbose(bool verbose) {
     verbose_ = verbose;
     active_submap_visualizer_ptr_->setVerbose(verbose_);
   };
@@ -130,7 +135,7 @@ class SubmapServer {
   // Submap creation
   bool newSubmapRequired() const;
   void createNewSubmap(const Transformation& T_G_C, const ros::Time& timestamp);
-  inline void finishSubmap(const SubmapID& submap_id);
+  void finishSubmap(const SubmapID submap_id);
 
   // Submap pose updates
   bool publishSubmapPosesCallback(std_srvs::EmptyRequest&,
