@@ -32,7 +32,8 @@ class ActiveSubmapVisualizer {
         tsdf_submap_collection_ptr_(tsdf_submap_collection_ptr),
         color_cycle_length_(kDefaultColorCycleLength),
         current_color_idx_(0),
-        verbose_(false), opacity_(1.0) {}
+        verbose_(false),
+        opacity_(1.0) {}
 
   void switchToSubmap(const SubmapID& submap_id);
   void switchToActiveSubmap();
@@ -42,8 +43,8 @@ class ActiveSubmapVisualizer {
   void getDisplayMesh(visualization_msgs::Marker* marker_ptr);
   MeshLayer::Ptr getDisplayMeshLayer();
 
-  void setVerbose(const bool& verbose) {verbose_ = verbose;}
-  void setOpacity(const float& opacity) {opacity_ = opacity;}
+  void setVerbose(const bool& verbose) { verbose_ = verbose; }
+  void setOpacity(const float& opacity) { opacity_ = opacity; }
 
  private:
   // Functions called when swapping active submaps

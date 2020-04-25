@@ -1,15 +1,16 @@
 #ifndef CBLOX_ROS_SUBMAP_CONVERSIONS_INL_H
 #define CBLOX_ROS_SUBMAP_CONVERSIONS_INL_H
 
+#include <voxblox_ros/conversions.h>
+
 #include <cblox_msgs/MapHeader.h>
 #include <cblox_msgs/MapPoseEstimate.h>
-#include <voxblox_ros/conversions.h>
 
 namespace cblox {
 
 template <typename SubmapType>
-std_msgs::Header generateHeaderMsg(
-    const typename SubmapType::Ptr& submap_ptr, const ros::Time &timestamp) {
+std_msgs::Header generateHeaderMsg(const typename SubmapType::Ptr& submap_ptr,
+                                   const ros::Time& timestamp) {
   std_msgs::Header msg_header;
   msg_header.frame_id = "submap_" + std::to_string(submap_ptr->getID());
   msg_header.stamp = timestamp;
@@ -37,22 +38,23 @@ cblox_msgs::MapHeader generateSubmapHeaderMsg(
   return submap_header;
 }
 
-template<typename SubmapType>
+template <typename SubmapType>
 void serializePoseToMsg(typename SubmapType::Ptr submap_ptr,
-    cblox_msgs::MapPoseUpdate* msg) {
+                        cblox_msgs::MapPoseUpdate* msg) {
   CHECK_NOTNULL(msg);
   CHECK_NOTNULL(submap_ptr);
 
   ros::Time timestamp = ros::Time::now();
   // fill in headers
   msg->header = generateHeaderMsg<SubmapType>(submap_ptr, timestamp);
-  msg->map_headers[submap_ptr->getID()] = generateSubmapHeaderMsg<SubmapType>(submap_ptr);
+  msg->map_headers[submap_ptr->getID()] =
+      generateSubmapHeaderMsg<SubmapType>(submap_ptr);
 }
 
-template<typename SubmapType>
-SubmapID deserializeMsgToPose(const cblox_msgs::MapPoseUpdate* msg,
+template <typename SubmapType>
+SubmapID deserializeMsgToPose(
+    const cblox_msgs::MapPoseUpdate* msg,
     typename SubmapCollection<SubmapType>::Ptr submap_collection_ptr) {
-
   std::vector<SubmapID> submap_ids;
   for (const cblox_msgs::MapHeader& pose_msg : msg->map_headers) {
     // read id
@@ -83,7 +85,7 @@ SubmapID deserializeMsgToPose(const cblox_msgs::MapPoseUpdate* msg,
 // Note: Specialized for TsdfEsdfSubmap
 template <typename SubmapType>
 void serializeSubmapToMsg(typename SubmapType::Ptr submap_ptr,
-    cblox_msgs::MapLayer* msg) {
+                          cblox_msgs::MapLayer* msg) {
   CHECK_NOTNULL(msg);
   CHECK_NOTNULL(submap_ptr);
 
@@ -117,8 +119,7 @@ typename SubmapType::Ptr deserializeMsgToSubmapPtr(
 // Note: Specialized for TsdfEsdfSubmap
 template <typename SubmapType>
 bool deserializeMsgToSubmapContent(cblox_msgs::MapLayer* msg_ptr,
-    typename SubmapType::Ptr submap_ptr) {
-
+                                   typename SubmapType::Ptr submap_ptr) {
   Transformation submap_pose = deserializeMsgToSubmapPose(msg_ptr);
   submap_ptr->setPose(submap_pose);
 
@@ -131,9 +132,9 @@ bool deserializeMsgToSubmapContent(cblox_msgs::MapLayer* msg_ptr,
 }
 
 template <typename SubmapType>
-SubmapID deserializeMsgToSubmap(cblox_msgs::MapLayer* msg_ptr,
+SubmapID deserializeMsgToSubmap(
+    cblox_msgs::MapLayer* msg_ptr,
     typename SubmapCollection<SubmapType>::Ptr submap_collection_ptr) {
-
   CHECK_NOTNULL(submap_collection_ptr);
   if (!msg_ptr->map_header.is_submap) {
     return -1;
@@ -146,5 +147,5 @@ SubmapID deserializeMsgToSubmap(cblox_msgs::MapLayer* msg_ptr,
   return submap_ptr->getID();
 }
 
-}
-#endif //CBLOX_ROS_SUBMAP_CONVERSIONS_INL_H
+}  // namespace cblox
+#endif  // CBLOX_ROS_SUBMAP_CONVERSIONS_INL_H

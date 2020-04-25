@@ -310,8 +310,11 @@ bool SubmapCollection<SubmapType>::saveToFile(
     LOG(INFO) << "Saving submap with ID: " << id_submap_pair.first;
     // Saving the submap
     bool success = (id_submap_pair.second)->saveToStream(&outfile);
-    if (success) {LOG(INFO) << "Saving successful";}
-    else {LOG(WARNING) << "Saving unsuccessful";}
+    if (success) {
+      LOG(INFO) << "Saving successful";
+    } else {
+      LOG(WARNING) << "Saving unsuccessful";
+    }
   }
   // Closing the file
   outfile.close();

@@ -42,12 +42,12 @@ using voxblox::Block;
 using voxblox::Color;
 using voxblox::Colors;
 using voxblox::EsdfMap;
+using voxblox::EsdfVoxel;
 using voxblox::Layer;
 using voxblox::Point;
 using voxblox::Pointcloud;
 using voxblox::TsdfMap;
 using voxblox::TsdfVoxel;
-using voxblox::EsdfVoxel;
 
 // Taking timing from voxblox
 namespace timing {

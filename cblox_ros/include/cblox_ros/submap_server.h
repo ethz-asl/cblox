@@ -2,16 +2,16 @@
 #define CBLOX_ROS_SUBMAP_SERVER_H_
 
 #include <memory>
+#include <mutex>
 #include <queue>
 #include <string>
 #include <vector>
-#include <mutex>
 
+#include <cblox_msgs/SubmapSrvRequest.h>
+#include <cblox_msgs/SubmapSrvResponse.h>
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <std_srvs/Empty.h>
-#include <cblox_msgs/SubmapSrvRequest.h>
-#include <cblox_msgs/SubmapSrvResponse.h>
 
 #include <voxblox/utils/color_maps.h>
 #include <voxblox_msgs/FilePath.h>
@@ -69,10 +69,9 @@ class SubmapServer {
   void updateMeshEvent(const ros::TimerEvent& /*event*/);
 
   // Access Submap Collection Pointer
-  inline typename SubmapCollection<SubmapType>::Ptr
-      getSubmapCollectionPtr();
+  inline typename SubmapCollection<SubmapType>::Ptr getSubmapCollectionPtr();
   inline typename SubmapCollection<SubmapType>::ConstPtr
-      getSubmapCollectionPtr() const;
+  getSubmapCollectionPtr() const;
 
   // Visualizing
   void visualizeSubmapMesh(const SubmapID& submap_id);
@@ -143,8 +142,8 @@ class SubmapServer {
   // Submap publishing
   void publishSubmap(SubmapID submap_id) const;
   void publishWholeMap() const;
-  bool publishActiveSubmapCallback(
-      cblox_msgs::SubmapSrvRequest& request, cblox_msgs::SubmapSrvResponse& response);
+  bool publishActiveSubmapCallback(cblox_msgs::SubmapSrvRequest& request,
+                                   cblox_msgs::SubmapSrvResponse& response);
   bool publishActiveSubmap();
 
   // visualization
@@ -227,6 +226,6 @@ class SubmapServer {
 
 }  // namespace cblox
 
-#include "cblox_ros/submap_server_inl.h"
-
 #endif  // CBLOX_ROS_SUBMAP_SERVER__H_
+
+#include "cblox_ros/submap_server_inl.h"

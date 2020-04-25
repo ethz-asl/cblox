@@ -51,12 +51,8 @@ class TsdfSubmap {
   }
 
   // Set interval in which submap was actively mapping
-  void startMappingTime(int32_t time) {
-    mapping_interval_.first = time;
-  }
-  void stopMappingTime(int32_t time) {
-    mapping_interval_.second = time;
-  }
+  void startMappingTime(int32_t time) { mapping_interval_.first = time; }
+  void stopMappingTime(int32_t time) { mapping_interval_.second = time; }
   // Access mapping interval
   const std::pair<int32_t, int32_t>& getMappingInterval() const {
     return mapping_interval_;

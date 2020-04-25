@@ -16,7 +16,7 @@ namespace cblox {
 namespace io {
 
 // we assume most SubmapTypes to have an ESDF map
-template<typename SubmapType>
+template <typename SubmapType>
 bool LoadSubmapFromStream(
     std::fstream* proto_file_ptr,
     typename SubmapCollection<SubmapType>::Ptr submap_collection_ptr,
@@ -27,8 +27,8 @@ bool LoadSubmapFromStream(
 
   // Getting the header for this submap
   SubmapProto submap_proto;
-  if (!voxblox::utils::readProtoMsgFromStream(
-          proto_file_ptr, &submap_proto, tmp_byte_offset_ptr)) {
+  if (!voxblox::utils::readProtoMsgFromStream(proto_file_ptr, &submap_proto,
+                                              tmp_byte_offset_ptr)) {
     LOG(ERROR) << "Could not read tsdf sub map protobuf message.";
     return false;
   }
@@ -48,8 +48,7 @@ bool LoadSubmapFromStream(
   submap_collection_ptr->createNewSubmap(T_M_S, submap_proto.id());
 
   // Getting the tsdf blocks for this submap (the tsdf layer)
-  LOG(INFO) << "Tsdf number of allocated blocks: "
-            << submap_proto.num_blocks();
+  LOG(INFO) << "Tsdf number of allocated blocks: " << submap_proto.num_blocks();
   if (!voxblox::io::LoadBlocksFromStream(
           submap_proto.num_blocks(),
           Layer<TsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
@@ -65,7 +64,9 @@ bool LoadSubmapFromStream(
   if (!voxblox::io::LoadBlocksFromStream(
           submap_proto.num_esdf_blocks(),
           Layer<EsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
-          submap_collection_ptr->getActiveSubmapPtr()->getEsdfMapPtr()->getEsdfLayerPtr(),
+          submap_collection_ptr->getActiveSubmapPtr()
+              ->getEsdfMapPtr()
+              ->getEsdfLayerPtr(),
           tmp_byte_offset_ptr)) {
     LOG(ERROR) << "Could not load the esdf blocks from stream.";
     return false;
@@ -75,9 +76,8 @@ bool LoadSubmapFromStream(
 }
 
 template <typename SubmapType>
-bool SaveSubmapCollection(
-    const SubmapCollection<SubmapType> &submap_collection,
-    const std::string &file_path) {
+bool SaveSubmapCollection(const SubmapCollection<SubmapType>& submap_collection,
+                          const std::string& file_path) {
   return submap_collection.saveToFile(file_path);
 }
 
@@ -108,12 +108,11 @@ bool LoadSubmapCollection(
 
   // Loading each of the submaps
   for (size_t sub_map_index = 0;
-       sub_map_index < submap_collection_proto.num_submaps();
-       sub_map_index++) {
+       sub_map_index < submap_collection_proto.num_submaps(); sub_map_index++) {
     LOG(INFO) << "Loading submap number: " << sub_map_index;
     // Loading the submaps
-    if (!LoadSubmapFromStream<SubmapType>(
-            &proto_file, *submap_collection_ptr, &tmp_byte_offset)) {
+    if (!LoadSubmapFromStream<SubmapType>(&proto_file, *submap_collection_ptr,
+                                          &tmp_byte_offset)) {
       LOG(ERROR) << "Could not load the submap from stream.";
       return false;
     }

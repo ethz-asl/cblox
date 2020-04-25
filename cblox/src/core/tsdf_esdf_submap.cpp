@@ -18,7 +18,7 @@ void TsdfEsdfSubmap::setTsdfMap(const voxblox::Layer<TsdfVoxel>& tsdf_layer) {
   tsdf_map_.reset(new voxblox::TsdfMap(tsdf_layer));
 }
 
-void TsdfEsdfSubmap::getProto(cblox::SubmapProto *proto) const {
+void TsdfEsdfSubmap::getProto(cblox::SubmapProto* proto) const {
   CHECK_NOTNULL(proto);
   TsdfSubmap::getProto(proto);
 

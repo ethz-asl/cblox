@@ -1,6 +1,8 @@
 #include "cblox_ros/submap_conversions.h"
-#include "cblox_ros/submap_conversions_inl.h"
+
 #include <voxblox_ros/conversions.h>
+
+#include "cblox_ros/submap_conversions_inl.h"
 
 namespace cblox {
 
@@ -46,4 +48,4 @@ bool deserializeMsgToSubmapContent<TsdfEsdfSubmap>(
   return true;
 }
 
-}
+}  // namespace cblox

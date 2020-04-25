@@ -7,7 +7,8 @@ namespace cblox {
 void TsdfSubmap::getProto(SubmapProto* proto) const {
   CHECK_NOTNULL(proto);
   // Getting the relevant data
-  size_t num_tsdf_blocks = tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks();
+  size_t num_tsdf_blocks =
+      tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks();
   QuatTransformationProto* transformation_proto_ptr =
       new QuatTransformationProto();
   conversions::transformKindrToProto(T_M_S_, transformation_proto_ptr);

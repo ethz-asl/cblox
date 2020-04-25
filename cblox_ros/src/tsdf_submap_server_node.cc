@@ -1,5 +1,6 @@
 #include <glog/logging.h>
 #include <ros/ros.h>
+
 #include <cblox_ros/submap_server.h>
 
 int main(int argc, char** argv) {

@@ -18,18 +18,18 @@ class SubmapCollectionInterface {
   typedef std::shared_ptr<SubmapCollectionInterface> Ptr;
   typedef std::shared_ptr<const SubmapCollectionInterface> ConstPtr;
 
-  SubmapCollectionInterface(){}
+  SubmapCollectionInterface() {}
 
   // NOTE(alexmillane): I'm moving methods over only as I need them. There's no
   // design intent here in leaving some out. There is only the intent to be
   // lazy.
-  virtual const Transformation &getActiveSubmapPose() const = 0;
+  virtual const Transformation& getActiveSubmapPose() const = 0;
   virtual const SubmapID& getActiveSubmapID() const = 0;
-  virtual bool getSubmapPose(
-      const SubmapID submap_id, Transformation* pose_ptr) const = 0;
+  virtual bool getSubmapPose(const SubmapID submap_id,
+                             Transformation* pose_ptr) const = 0;
 
   virtual TsdfMap::Ptr getActiveTsdfMapPtr() = 0;
-  virtual const TsdfMap &getActiveTsdfMap() const = 0;
+  virtual const TsdfMap& getActiveTsdfMap() const = 0;
   virtual TsdfMap::Ptr getTsdfMapPtr(const SubmapID& submap_id) = 0;
 
   virtual bool empty() const = 0;
@@ -46,8 +46,9 @@ class SubmapCollection : public SubmapCollectionInterface {
   typedef std::shared_ptr<const SubmapCollection> ConstPtr;
 
   // Constructor. Constructs an empty submap collection map
-  explicit SubmapCollection(const typename SubmapType::Config &submap_config)
-      : SubmapCollectionInterface(), submap_config_(submap_config),
+  explicit SubmapCollection(const typename SubmapType::Config& submap_config)
+      : SubmapCollectionInterface(),
+        submap_config_(submap_config),
         active_submap_id_(-1) {}
 
   // Constructor. Constructs a submap collection from a list of submaps

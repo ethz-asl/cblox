@@ -2,31 +2,31 @@
 
 namespace cblox {
 
-template<>
+template <>
 SubmapCollection<TsdfSubmap>::Ptr
 SubmapServer<TsdfSubmap>::getSubmapCollectionPtr() {
   return submap_collection_ptr_;
 }
 
-template<>
+template <>
 SubmapCollection<TsdfSubmap>::ConstPtr
 SubmapServer<TsdfSubmap>::getSubmapCollectionPtr() const {
   return submap_collection_ptr_;
 }
 
-template<>
+template <>
 SubmapCollection<TsdfEsdfSubmap>::Ptr
 SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() {
   return submap_collection_ptr_;
 }
 
-template<>
+template <>
 SubmapCollection<TsdfEsdfSubmap>::ConstPtr
 SubmapServer<TsdfEsdfSubmap>::getSubmapCollectionPtr() const {
   return submap_collection_ptr_;
 }
 
-template<>
+template <>
 void SubmapServer<TsdfSubmap>::finishSubmap(const SubmapID& submap_id) {
   if (submap_collection_ptr_->exists(submap_id)) {
     TsdfSubmap::Ptr submap_ptr =
@@ -39,7 +39,7 @@ void SubmapServer<TsdfSubmap>::finishSubmap(const SubmapID& submap_id) {
   }
 }
 
-template<>
+template <>
 bool SubmapServer<TsdfSubmap>::publishActiveSubmap() {
   if (submap_collection_ptr_->empty()) {
     ROS_WARN("[CbloxPlanner] Active submap does not exist!");
@@ -71,7 +71,8 @@ void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID& submap_id) const {
   vertex_marker.ns = std::string("esdf_slice_") + std::to_string(submap_id);
   vertex_marker.ns = "esdf_slice";
   vertex_marker.type = visualization_msgs::Marker::CUBE_LIST;
-  Transformation pose = submap_collection_ptr_->getSubmapPtr(submap_id)->getPose();
+  Transformation pose =
+      submap_collection_ptr_->getSubmapPtr(submap_id)->getPose();
   vertex_marker.pose.orientation.w = 1.0;
   vertex_marker.scale.x =
       submap_collection_ptr_->getActiveTsdfMapPtr()->voxel_size();
@@ -86,9 +87,8 @@ void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID& submap_id) const {
 
   float max_dist = 0.6;
   nh_private_.param("truncation_distance", max_dist, max_dist);
-  TsdfSubmap::Ptr submap_ptr =
-      submap_collection_ptr_->getSubmapPtr(submap_id);
-  voxblox::Layer<voxblox::TsdfVoxel> *layer =
+  TsdfSubmap::Ptr submap_ptr = submap_collection_ptr_->getSubmapPtr(submap_id);
+  voxblox::Layer<voxblox::TsdfVoxel>* layer =
       submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr();
   voxblox::BlockIndexList block_list;
   layer->getAllAllocatedBlocks(&block_list);
@@ -98,10 +98,10 @@ void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID& submap_id) const {
     voxblox::Block<voxblox::TsdfVoxel>::Ptr block =
         layer->getBlockPtrByIndex(block_id);
     for (size_t voxel_id = 0; voxel_id < block->num_voxels(); voxel_id++) {
-      const voxblox::TsdfVoxel& voxel =
-          block->getVoxelByLinearIndex(voxel_id);
+      const voxblox::TsdfVoxel& voxel = block->getVoxelByLinearIndex(voxel_id);
       voxblox::Point position =
-          submap_ptr->getPose() * block->computeCoordinatesFromLinearIndex(voxel_id);
+          submap_ptr->getPose() *
+          block->computeCoordinatesFromLinearIndex(voxel_id);
 
       if (voxel.weight < 1e-6) {
         continue;
@@ -110,16 +110,17 @@ void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID& submap_id) const {
       color_msg.r = 0.0;
       color_msg.g = 0.0;
       if (voxel.weight >= 1e-6) {
-        color_msg.r = std::max(std::min((max_dist - voxel.distance) /
-                                        2.0 / max_dist, 1.0), 0.0);
-        color_msg.g = std::max(std::min((max_dist + voxel.distance) /
-                                        2.0 / max_dist, 1.0), 0.0);
+        color_msg.r = std::max(
+            std::min((max_dist - voxel.distance) / 2.0 / max_dist, 1.0), 0.0);
+        color_msg.g = std::max(
+            std::min((max_dist + voxel.distance) / 2.0 / max_dist, 1.0), 0.0);
       }
 
-      if (std::abs(position.z() - slice_height_)
-          < submap_ptr->getTsdfMapPtr()->voxel_size()/2) {
-        vertex_marker.id = block_num + voxel_id *
-                                       std::pow(10, std::round(std::log10(block_list.size())));
+      if (std::abs(position.z() - slice_height_) <
+          submap_ptr->getTsdfMapPtr()->voxel_size() / 2) {
+        vertex_marker.id =
+            block_num +
+            voxel_id * std::pow(10, std::round(std::log10(block_list.size())));
         tf::pointEigenToMsg(position.cast<double>(), point_msg);
 
         vertex_marker.points.push_back(point_msg);
@@ -133,4 +134,4 @@ void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID& submap_id) const {
   sdf_slice_pub_.publish(marker_array);
 }
 
-}
+}  // namespace cblox

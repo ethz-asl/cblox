@@ -7,7 +7,7 @@
 namespace cblox {
 namespace io {
 
-template<>
+template <>
 bool LoadSubmapFromStream<cblox::TsdfSubmap>(
     std::fstream* proto_file_ptr,
     typename SubmapCollection<cblox::TsdfSubmap>::Ptr submap_collection_ptr,
@@ -18,8 +18,8 @@ bool LoadSubmapFromStream<cblox::TsdfSubmap>(
 
   // Getting the header for this submap
   SubmapProto submap_proto;
-  if (!voxblox::utils::readProtoMsgFromStream(
-      proto_file_ptr, &submap_proto, tmp_byte_offset_ptr)) {
+  if (!voxblox::utils::readProtoMsgFromStream(proto_file_ptr, &submap_proto,
+                                              tmp_byte_offset_ptr)) {
     LOG(ERROR) << "Could not read tsdf sub map protobuf message.";
     return false;
   }
@@ -39,13 +39,12 @@ bool LoadSubmapFromStream<cblox::TsdfSubmap>(
   submap_collection_ptr->createNewSubmap(T_M_S, submap_proto.id());
 
   // Getting the tsdf blocks for this submap (the tsdf layer)
-  LOG(INFO) << "Tsdf number of allocated blocks: "
-            << submap_proto.num_blocks();
+  LOG(INFO) << "Tsdf number of allocated blocks: " << submap_proto.num_blocks();
   if (!voxblox::io::LoadBlocksFromStream(
-      submap_proto.num_blocks(),
-      Layer<TsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
-      submap_collection_ptr->getActiveTsdfMapPtr()->getTsdfLayerPtr(),
-      tmp_byte_offset_ptr)) {
+          submap_proto.num_blocks(),
+          Layer<TsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
+          submap_collection_ptr->getActiveTsdfMapPtr()->getTsdfLayerPtr(),
+          tmp_byte_offset_ptr)) {
     LOG(ERROR) << "Could not load the tsdf blocks from stream.";
     return false;
   }

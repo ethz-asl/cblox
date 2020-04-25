@@ -16,17 +16,18 @@ class TsdfEsdfSubmap : public TsdfSubmap {
 
   struct Config : TsdfSubmap::Config, EsdfMap::Config {
     // default constructor
-    Config() : TsdfSubmap::Config(), EsdfMap::Config() {};
+    Config() : TsdfSubmap::Config(), EsdfMap::Config(){};
     // constructor based on tsdf and esdf config
     Config(const TsdfSubmap::Config& tsdf_map_config,
            const EsdfMap::Config& esdf_map_config)
         : TsdfSubmap::Config(tsdf_map_config),
-          EsdfMap::Config(esdf_map_config) {};
+          EsdfMap::Config(esdf_map_config){};
   };
   TsdfEsdfSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config,
                  voxblox::EsdfIntegrator::Config esdf_integrator_config =
                      voxblox::EsdfIntegrator::Config())
-      : TsdfSubmap(T_M_S, submap_id, config), config_(config),
+      : TsdfSubmap(T_M_S, submap_id, config),
+        config_(config),
         esdf_integrator_config_(esdf_integrator_config) {
     esdf_map_.reset(new EsdfMap(config));
   }
@@ -55,9 +56,8 @@ class TsdfEsdfSubmap : public TsdfSubmap {
    *       saveToStream() methods from tsdf_submap.
    */
 
-  virtual void getProto(cblox::SubmapProto *proto) const;
+  virtual void getProto(cblox::SubmapProto* proto) const;
   virtual bool saveToStream(std::fstream* outfile_ptr) const;
-
 
  protected:
   Config config_;
