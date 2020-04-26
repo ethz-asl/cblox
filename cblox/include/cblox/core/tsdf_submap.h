@@ -88,10 +88,7 @@ class TsdfSubmap {
   std::pair<int32_t, int32_t> mapping_interval_;
 
  private:
-  // The pose of this submap in the global map frame
   mutable std::mutex transformation_mutex_;
-
-  mutable std::mutex submap_mutex_;
 
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW

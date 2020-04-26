@@ -129,6 +129,10 @@ class SubmapCollection : public SubmapCollectionInterface {
   void getProto(SubmapCollectionProto* proto) const;
 
   // Fusing the submap pairs
+  // Note(alexmillane): This function is not thread-safe. The user must take
+  // care to ensure the fused submaps are not being modified while the fusion
+  // takes place. Or someone can implement locking of the underlying submaps and
+  // make a PR. :).
   void fuseSubmapPair(const SubmapIdPair& submap_id_pair);
 
   // Flattens the collection map down to a normal TSDF map
