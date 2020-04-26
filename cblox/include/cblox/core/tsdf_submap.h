@@ -80,6 +80,12 @@ class TsdfSubmap {
   // Save the submap to file
   virtual bool saveToStream(std::fstream* outfile_ptr) const;
 
+  // Load a submap from stream.
+  // CHECK THE STYLE GUIDE ON STATIC FUNCTION NAMES.
+  static bool LoadFromStream(const Config& config, std::fstream* proto_file_ptr,
+                             uint64_t* tmp_byte_offset_ptr,
+                             TsdfSubmap::Ptr* submap_ptr);
+
  protected:
   SubmapID submap_id_;
   TsdfMap::Ptr tsdf_map_;

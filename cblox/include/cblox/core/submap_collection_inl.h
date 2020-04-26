@@ -78,6 +78,18 @@ SubmapID SubmapCollection<SubmapType>::createNewSubmap(
 }
 
 template <typename SubmapType>
+void SubmapCollection<SubmapType>::addSubmap(
+    const typename SubmapType::Ptr& submap) {
+  // Check ID not already in the collection
+  const auto it = id_to_submap_.find(submap->getID());
+  CHECK(it == id_to_submap_.end());
+  // Add
+  id_to_submap_.emplace(submap);
+  active_submap_id_ = submap->getID();
+}
+
+
+template <typename SubmapType>
 bool SubmapCollection<SubmapType>::duplicateSubmap(
     const SubmapID source_submap_id, const SubmapID new_submap_id) {
   // Get pointer to the source submap

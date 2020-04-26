@@ -66,6 +66,8 @@ class SubmapCollection : public SubmapCollectionInterface {
   void createNewSubmap(const Transformation& T_G_S, const SubmapID submap_id);
   SubmapID createNewSubmap(const Transformation& T_G_S);
 
+  void addSubmap(const typename SubmapType::Ptr& submap);
+
   // Create a new submap which duplicates an existing source submap
   bool duplicateSubmap(const SubmapID source_submap_id,
                        const SubmapID new_submap_id);

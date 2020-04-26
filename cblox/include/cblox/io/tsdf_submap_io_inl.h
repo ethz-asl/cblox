@@ -97,11 +97,20 @@ bool LoadSubmapCollection(
        sub_map_index < submap_collection_proto.num_submaps(); sub_map_index++) {
     LOG(INFO) << "Loading submap number: " << sub_map_index;
     // Loading the submaps
-    if (!LoadSubmapFromStream<SubmapType>(&proto_file, *submap_collection_ptr,
-                                          &tmp_byte_offset)) {
+    // if (!LoadSubmapFromStream<SubmapType>(&proto_file, *submap_collection_ptr,
+    //                                       &tmp_byte_offset)) {
+    //   LOG(ERROR) << "Could not load the submap from stream.";
+    //   return false;
+    // }
+
+    typename SubmapType::Ptr submap_ptr;
+    if (!SubmapType::LoadFromStream((*submap_collection_ptr)->getConfig(),
+                                    &proto_file, &tmp_byte_offset,
+                                    &submap_ptr)) {
       LOG(ERROR) << "Could not load the submap from stream.";
       return false;
     }
+    (*submap_collection_ptr)->addSubmap(submap_ptr);
   }
   // Because grown ups clean up after themselves
   proto_file.close();
