@@ -79,7 +79,6 @@ bool TsdfSubmap::LoadFromStream(const Config& config,
 
   // Creating a new submap to hold the data
   submap_ptr->reset(new TsdfSubmap(T_M_S, submap_proto.id(), config));
-  // submap_collection_ptr->createNewSubmap(T_M_S, submap_proto.id());
 
   // Getting the tsdf blocks for this submap (the tsdf layer)
   LOG(INFO) << "Tsdf number of allocated blocks: " << submap_proto.num_blocks();

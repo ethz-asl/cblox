@@ -16,18 +16,6 @@ bool LoadSubmapCollection(
     const std::string& file_path,
     typename SubmapCollection<SubmapType>::Ptr* tsdf_submap_collection_ptr);
 
-// We assume all SubmapTypes to have a TSDF map.
-template <typename SubmapType>
-bool LoadSubmapFromStream(
-    std::fstream* proto_file_ptr,
-    typename SubmapCollection<SubmapType>::Ptr submap_collection_ptr,
-    uint64_t* tmp_byte_offset_ptr);
-template <>
-bool LoadSubmapFromStream<cblox::TsdfEsdfSubmap>(
-    std::fstream* proto_file_ptr,
-    typename SubmapCollection<cblox::TsdfEsdfSubmap>::Ptr submap_collection_ptr,
-    uint64_t* tmp_byte_offset_ptr);
-
 template <typename SubmapType>
 bool SaveSubmapCollection(const SubmapCollection<SubmapType>& submap_collection,
                           const std::string& file_path);
