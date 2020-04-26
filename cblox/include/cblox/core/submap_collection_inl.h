@@ -79,13 +79,13 @@ SubmapID SubmapCollection<SubmapType>::createNewSubmap(
 
 template <typename SubmapType>
 void SubmapCollection<SubmapType>::addSubmap(
-    const typename SubmapType::Ptr& submap) {
+    const typename SubmapType::Ptr submap) {
   // Check ID not already in the collection
   const SubmapID submap_id = submap->getID();
   const auto it = id_to_submap_.find(submap_id);
   CHECK(it == id_to_submap_.end());
   // Add
-  id_to_submap_.emplace(submap_id, submap);
+  id_to_submap_.emplace(submap_id, std::move(submap));
   active_submap_id_ = submap_id;
 }
 

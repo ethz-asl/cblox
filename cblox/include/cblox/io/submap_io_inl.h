@@ -34,7 +34,7 @@ bool LoadSubmapCollection(
     return false;
   }
   // Unused byte offset result.
-  uint64_t tmp_byte_offset = 0;
+  uint64_t tmp_byte_offset = 0u;
   // Loading the header
   SubmapCollectionProto submap_collection_proto;
   if (!voxblox::utils::readProtoMsgFromStream(
@@ -47,8 +47,8 @@ bool LoadSubmapCollection(
             << submap_collection_proto.num_submaps();
 
   // Loading each of the submaps
-  for (size_t sub_map_index = 0;
-       sub_map_index < submap_collection_proto.num_submaps(); sub_map_index++) {
+  for (size_t sub_map_index = 0u;
+       sub_map_index < submap_collection_proto.num_submaps(); ++sub_map_index) {
     LOG(INFO) << "Loading submap number: " << sub_map_index;
     // Loading the submaps
     typename SubmapType::Ptr submap_ptr;
