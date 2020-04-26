@@ -20,7 +20,7 @@
 #include <voxblox/utils/timing.h>
 #include <voxblox_ros/ros_params.h>
 
-#include <cblox/io/tsdf_submap_io.h>
+#include <cblox/io/submap_io.h>
 #include <cblox_msgs/SubmapSrv.h>
 
 #include "cblox_ros/pointcloud_conversions.h"

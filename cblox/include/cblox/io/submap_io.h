@@ -1,5 +1,5 @@
-#ifndef CBLOX_IO_TSDF_SUBMAP_IO_H_
-#define CBLOX_IO_TSDF_SUBMAP_IO_H_
+#ifndef CBLOX_IO_SUBMAP_IO_H_
+#define CBLOX_IO_SUBMAP_IO_H_
 
 #include <string>
 
@@ -23,6 +23,6 @@ bool SaveSubmapCollection(const SubmapCollection<SubmapType>& submap_collection,
 }  // namespace io
 }  // namespace cblox
 
-#endif  // CBLOX_IO_TSDF_SUBMAP_IO_H_
+#endif  // CBLOX_IO_SUBMAP_IO_H_
 
-#include "cblox/io/tsdf_submap_io_inl.h"
+#include "cblox/io/submap_io_inl.h"

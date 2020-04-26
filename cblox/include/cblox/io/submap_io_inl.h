@@ -1,5 +1,5 @@
-#ifndef CBLOX_IO_TSDF_SUBMAP_IO_INL_H_
-#define CBLOX_IO_TSDF_SUBMAP_IO_INL_H_
+#ifndef CBLOX_IO_SUBMAP_IO_INL_H_
+#define CBLOX_IO_SUBMAP_IO_INL_H_
 
 #include <string>
 
@@ -68,4 +68,4 @@ bool LoadSubmapCollection(
 }  // namespace io
 }  // namespace cblox
 
-#endif  // CBLOX_IO_TSDF_SUBMAP_IO_INL_H_
+#endif  // CBLOX_IO_SUBMAP_IO_INL_H_
