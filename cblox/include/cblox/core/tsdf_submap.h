@@ -8,7 +8,7 @@
 
 #include <glog/logging.h>
 
-#include "cblox/TsdfSubmap.pb.h"
+#include "cblox/Submap.pb.h"
 #include "cblox/core/common.h"
 
 namespace cblox {
@@ -41,13 +41,21 @@ class TsdfSubmap {
 
   // Submap pose interaction
   const Transformation& getPose() const {
-    std::unique_lock<std::mutex> lock(transformation_mutex);
+    std::unique_lock<std::mutex> lock(transformation_mutex_);
     return T_M_S_;
   }
 
   void setPose(const Transformation& T_M_S) {
-    std::unique_lock<std::mutex> lock(transformation_mutex);
+    std::unique_lock<std::mutex> lock(transformation_mutex_);
     T_M_S_ = T_M_S;
+  }
+
+  // Set interval in which submap was actively mapping
+  void startMappingTime(int32_t time) { mapping_interval_.first = time; }
+  void stopMappingTime(int32_t time) { mapping_interval_.second = time; }
+  // Access mapping interval
+  const std::pair<int32_t, int32_t>& getMappingInterval() const {
+    return mapping_interval_;
   }
 
   SubmapID getID() const { return submap_id_; }
@@ -62,20 +70,31 @@ class TsdfSubmap {
     return tsdf_map_->getTsdfLayer().getMemorySize();
   }
 
+  virtual void finishSubmap();
+
+  virtual void prepareForPublish();
+
   // Getting the proto for this submap
-  void getProto(TsdfSubmapProto* proto) const;
+  virtual void getProto(SubmapProto* proto) const;
 
   // Save the submap to file
-  bool saveToStream(std::fstream* outfile_ptr) const;
+  virtual bool saveToStream(std::fstream* outfile_ptr) const;
+
+  // Load a submap from stream.
+  // Note(alexmillane): Returns a nullptr if load is unsuccessful.
+  static TsdfSubmap::Ptr LoadFromStream(const Config& config,
+                                        std::fstream* proto_file_ptr,
+                                        uint64_t* tmp_byte_offset_ptr);
 
  protected:
   SubmapID submap_id_;
   TsdfMap::Ptr tsdf_map_;
 
- private:
-  // The pose of this submap in the global map frame
-  mutable std::mutex transformation_mutex;
   Transformation T_M_S_;
+  std::pair<int32_t, int32_t> mapping_interval_;
+
+ private:
+  mutable std::mutex transformation_mutex_;
 
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW

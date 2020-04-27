@@ -1,6 +1,7 @@
 syntax = "proto2";
+
 package cblox;
 
-message TsdfSubmapCollectionProto {
+message SubmapCollectionProto {
   optional uint32 num_submaps = 3;
 }

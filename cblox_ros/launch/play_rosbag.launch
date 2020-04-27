@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="ISO-8859-15"?>
+<launch>
+  <param name="use_sim_time" value="true"/>
+
+  <!-- Path to dataset -->
+  <arg name="dataset_path" default="/home/darpa/bags/big_maze.bag" />
+  <arg name="play_rate" default="2.0" />
+
+  <arg name="mav_name" default="firefly"/>
+  <arg name="namespace" default="$(arg mav_name)" />
+
+  <!-- cblox Parameters -->
+  <arg name="voxel_size" default="0.1" />
+  <arg name="truncation_distance_vox" default="4.0" />
+  <arg name="num_integrated_frames_per_submap" default="100" />
+
+  <group ns="$(arg namespace)" >
+
+    <node name="cblox" pkg="cblox_ros" type="tsdf_submap_server" output="screen" args="-alsologtostderr" clear_params="true">
+      <!-- Topics -->
+      <remap from="pointcloud" to="/velodyne_points" />
+      <remap from="cblox/tsdf_submap_out" to="cblox/tsdf_submap" />
+
+      <!-- Voxblox params -->
+      <param name="tsdf_voxel_size" value="$(arg voxel_size)" />
+      <param name="tsdf_voxels_per_side" value="16" />
+      <param name="esdf_voxel_size" value="$(arg voxel_size)" />
+      <param name="esdf_voxels_per_side" value="16" />
+      <param name="truncation_distance" value="$(eval arg('truncation_distance_vox') * arg('voxel_size'))"/>
+      <param name="voxel_carving_enabled" value="true" />
+      <param name="use_tf_transforms" value="true" />
+      <param name="enable_icp" value="false" />
+      <param name="verbose" value="false" />
+      <param name="update_mesh_every_n_sec" value="1.0" />
+      <param name="max_ray_length_m" value="20.0" />
+      <param name="min_ray_length_m" value="0.1" />
+      <param name="min_time_between_msgs_sec" value="0.0" />
+      <param name="method" value="fast" />
+      <param name="use_const_weight" value="true" />
+
+      <!-- Cblox params -->
+      <param name="num_integrated_frames_per_submap" value="$(arg num_integrated_frames_per_submap)" />
+
+      <!-- Mesh Output -->
+      <param name="mesh_filename" value="$(find cblox_ros)/mesh_results/$(anon kitti).ply" />
+    </node>
+
+  </group>
+
+  <!-- Open rvis to display map, trajectory and submap baseframes. -->
+  <node name="rviz" pkg="rviz" type="rviz" required="true"
+      args="-d $(find cblox_ros)/cfg/big_maze.rviz" />
+
+  <node pkg="tf" type="static_transform_publisher" name="firefly_to_velodyne"
+      args="-0.001 -0.010 0.171 -0.003 0.067 0.010 0.998 firefly/base_link velodyne 100"/>
+
+  <!-- Play the dataset -->
+  <node name="rosbag" pkg="rosbag" type="play"
+      args="--clock -r $(arg play_rate) -s 5 -q $(arg dataset_path)" />
+
+</launch>

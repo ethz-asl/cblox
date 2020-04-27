@@ -27,6 +27,8 @@ typedef kindr::minimal::RotationQuaternionTemplate<FloatingPoint> Quaternion;
 // Defines
 typedef unsigned int SubmapID;
 typedef std::pair<SubmapID, SubmapID> SubmapIdPair;
+typedef std::pair<SubmapID, Transformation> SubmapIdPosePair;
+typedef std::map<SubmapID, Transformation> SubmapIdPoseMap;
 
 // Aligned Eigen containers
 template <typename Type>
@@ -42,6 +44,7 @@ using voxblox::Block;
 using voxblox::Color;
 using voxblox::Colors;
 using voxblox::EsdfMap;
+using voxblox::EsdfVoxel;
 using voxblox::Layer;
 using voxblox::Point;
 using voxblox::Pointcloud;

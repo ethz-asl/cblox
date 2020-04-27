@@ -24,6 +24,8 @@ using voxblox::MeshIntegratorConfig;
 using voxblox::MeshLayer;
 using voxblox::VertexIndex;
 
+constexpr int kDefaultColorCycleLength = 20;
+
 class SubmapMesher {
  public:
   typedef std::shared_ptr<SubmapMesher> Ptr;

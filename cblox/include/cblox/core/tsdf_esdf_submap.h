@@ -14,12 +14,20 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   typedef std::shared_ptr<TsdfEsdfSubmap> Ptr;
   typedef std::shared_ptr<const TsdfEsdfSubmap> ConstPtr;
 
-  struct Config : TsdfSubmap::Config, EsdfMap::Config {};
-
+  struct Config : TsdfSubmap::Config, EsdfMap::Config {
+    // default constructor
+    Config() : TsdfSubmap::Config(), EsdfMap::Config(){};
+    // constructor based on tsdf and esdf config
+    Config(const TsdfSubmap::Config& tsdf_map_config,
+           const EsdfMap::Config& esdf_map_config)
+        : TsdfSubmap::Config(tsdf_map_config),
+          EsdfMap::Config(esdf_map_config){};
+  };
   TsdfEsdfSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config,
                  voxblox::EsdfIntegrator::Config esdf_integrator_config =
                      voxblox::EsdfIntegrator::Config())
       : TsdfSubmap(T_M_S, submap_id, config),
+        config_(config),
         esdf_integrator_config_(esdf_integrator_config) {
     esdf_map_.reset(new EsdfMap(config));
   }
@@ -46,7 +54,21 @@ class TsdfEsdfSubmap : public TsdfSubmap {
    *       saveToStream() methods from tsdf_submap.
    */
 
+  virtual void finishSubmap() override;
+
+  virtual void prepareForPublish() override;
+
+  virtual void getProto(cblox::SubmapProto* proto) const;
+  virtual bool saveToStream(std::fstream* outfile_ptr) const;
+
+  // Load a submap from stream.
+  // Note(alexmillane): Returns a nullptr if load is unsuccessful.
+  static TsdfEsdfSubmap::Ptr LoadFromStream(const Config& config,
+                                            std::fstream* proto_file_ptr,
+                                            uint64_t* tmp_byte_offset_ptr);
+
  protected:
+  Config config_;
   EsdfMap::Ptr esdf_map_;
   voxblox::EsdfIntegrator::Config esdf_integrator_config_;
 };

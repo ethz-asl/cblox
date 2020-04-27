@@ -14,8 +14,8 @@ include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 ############
 # Taken from voxblox
 set(PROTO_DEFNS proto/cblox/QuatTransformation.proto
-                proto/cblox/TsdfSubmap.proto
-                proto/cblox/TsdfSubmapCollection.proto)
+                proto/cblox/Submap.proto
+                proto/cblox/SubmapCollection.proto)
 set(BASE_PATH "proto")
 set(PROTOBUF_COMPILE_PYTHON true)
 
@@ -34,7 +34,6 @@ cs_add_library(${PROJECT_NAME}_lib
   src/integrator/tsdf_submap_collection_integrator.cpp
   src/utils/quat_transformation_protobuf_utils.cpp
   src/mesh/submap_mesher.cpp
-  src/io/tsdf_submap_io.cpp
   src/io/transformation_io.cpp
 )
 target_link_libraries(${PROJECT_NAME}_lib ${PROJECT_NAME}_proto)

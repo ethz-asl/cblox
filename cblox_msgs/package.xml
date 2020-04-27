@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>cblox_msgs</name>
+  <version>0.0.0</version>
+  <description>Message definitions for Cblox ROS interface.</description>
+
+  <author email="marius.fehr@mavt.ethz.ch">Marius Fehr</author>
+  <author email="gasserl@student.ethz.ch">Laura Gasser</author>
+  <author email="alex.millane@gmail.com">Alex Millane</author>
+  <author email="helen.oleynikova@mavt.ethz.ch">Helen Oleynikova</author>
+
+  <maintainer email="gasserl@student.ethz.ch">Laura Gasser</maintainer>
+  <maintainer email="alex.millane@gmail.com">Alex Millane</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>catkin_simple</buildtool_depend>
+
+  <depend>message_generation</depend>
+  <depend>message_runtime</depend>
+
+  <depend>geometry_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>std_msgs</depend>
+  <depend>voxblox_msgs</depend>
+
+</package>

@@ -23,7 +23,7 @@ bool SaveTransformationArray(
   }
 
   // Write the total number of messages to the beginning of this file.
-  const uint32_t num_messages = transformation_array.size();
+  const uint64_t num_messages = transformation_array.size();
   if (!voxblox::utils::writeProtoMsgCountToStream(num_messages, &proto_file)) {
     LOG(ERROR) << "Could not write message number to file.";
     proto_file.close();

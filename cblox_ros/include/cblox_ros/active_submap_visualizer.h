@@ -10,6 +10,7 @@
 #include <voxblox_ros/mesh_vis.h>
 
 #include <cblox/core/submap_collection.h>
+#include <cblox/mesh/submap_mesher.h>
 
 namespace cblox {
 
@@ -18,8 +19,6 @@ using voxblox::MeshIntegrator;
 using voxblox::MeshIntegratorConfig;
 using voxblox::MeshLayer;
 
-constexpr int kDefaultColorCycleLength = 20;
-
 class ActiveSubmapVisualizer {
  public:
   typedef std::shared_ptr<ActiveSubmapVisualizer> Ptr;
@@ -27,19 +26,25 @@ class ActiveSubmapVisualizer {
 
   // Constructor
   ActiveSubmapVisualizer(const MeshIntegratorConfig& mesh_config,
-                         const std::shared_ptr<SubmapCollection<TsdfSubmap>>&
+                         const std::shared_ptr<SubmapCollectionInterface>&
                              tsdf_submap_collection_ptr)
       : mesh_config_(mesh_config),
         tsdf_submap_collection_ptr_(tsdf_submap_collection_ptr),
         color_cycle_length_(kDefaultColorCycleLength),
-        current_color_idx_(0) {}
+        current_color_idx_(0),
+        verbose_(false),
+        opacity_(1.0) {}
 
+  void switchToSubmap(const SubmapID submap_id);
   void switchToActiveSubmap();
 
   void updateMeshLayer();
 
   void getDisplayMesh(visualization_msgs::Marker* marker_ptr);
   MeshLayer::Ptr getDisplayMeshLayer();
+
+  void setVerbose(const bool& verbose) { verbose_ = verbose; }
+  void setOpacity(const float& opacity) { opacity_ = opacity; }
 
  private:
   // Functions called when swapping active submaps
@@ -64,7 +69,8 @@ class ActiveSubmapVisualizer {
   std::unique_ptr<MeshIntegrator<TsdfVoxel>> active_submap_mesh_integrator_ptr_;
 
   // The submap collection
-  std::shared_ptr<SubmapCollection<TsdfSubmap>> tsdf_submap_collection_ptr_;
+  std::shared_ptr<SubmapCollectionInterface> tsdf_submap_collection_ptr_;
+  SubmapID active_submap_id_;
 
   // Storing the mesh layers
   std::map<SubmapID, std::shared_ptr<MeshLayer>> mesh_layers_;
@@ -73,6 +79,9 @@ class ActiveSubmapVisualizer {
   // Color stuff
   const int color_cycle_length_;
   int current_color_idx_;
+
+  bool verbose_;
+  float opacity_;
 };
 
 }  // namespace cblox

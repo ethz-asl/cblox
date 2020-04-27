@@ -78,6 +78,19 @@ SubmapID SubmapCollection<SubmapType>::createNewSubmap(
 }
 
 template <typename SubmapType>
+void SubmapCollection<SubmapType>::addSubmap(
+    const typename SubmapType::Ptr submap) {
+  // Check ID not already in the collection
+  const SubmapID submap_id = submap->getID();
+  const auto it = id_to_submap_.find(submap_id);
+  CHECK(it == id_to_submap_.end());
+  // Add
+  id_to_submap_.emplace(submap_id, std::move(submap));
+  active_submap_id_ = submap_id;
+}
+
+
+template <typename SubmapType>
 bool SubmapCollection<SubmapType>::duplicateSubmap(
     const SubmapID source_submap_id, const SubmapID new_submap_id) {
   // Get pointer to the source submap
@@ -136,6 +149,15 @@ TsdfMap::Ptr SubmapCollection<SubmapType>::getActiveTsdfMapPtr() {
   CHECK(it != id_to_submap_.end());
   return (it->second)->getTsdfMapPtr();
 }
+
+template <typename SubmapType>
+TsdfMap::Ptr SubmapCollection<SubmapType>::getTsdfMapPtr(
+    const SubmapID submap_id) {
+  const auto it = id_to_submap_.find(submap_id);
+  CHECK(it != id_to_submap_.end());
+  return (it->second)->getTsdfMapPtr();
+}
+
 template <typename SubmapType>
 const TsdfMap& SubmapCollection<SubmapType>::getActiveTsdfMap() const {
   const auto it = id_to_submap_.find(active_submap_id_);
@@ -213,15 +235,9 @@ bool SubmapCollection<SubmapType>::setSubmapPose(const SubmapID submap_id,
 
 template <typename SubmapType>
 void SubmapCollection<SubmapType>::setSubmapPoses(
-    const TransformationVector& transforms) {
-  CHECK_EQ(transforms.size(), id_to_submap_.size());
-  // NOTE(alexmillane): This assumes that the order of transforms matches the
-  //                    submap order.
-  // NOTE(alexmillane): Should really be passing a map of ids to transforms.
-  size_t sub_map_index = 0;
-  for (const auto& id_submap_pair : id_to_submap_) {
-    (id_submap_pair.second)->setPose(transforms[sub_map_index]);
-    sub_map_index++;
+    const SubmapIdPoseMap& id_pose_map) {
+  for (const SubmapIdPosePair& id_pose_pair : id_pose_map) {
+    setSubmapPose(id_pose_pair.first, id_pose_pair.second);
   }
 }
 
@@ -287,10 +303,10 @@ bool SubmapCollection<SubmapType>::saveToFile(
     return false;
   }
   // Saving the submap collection header object
-  TsdfSubmapCollectionProto tsdf_submap_collection_proto;
-  getProto(&tsdf_submap_collection_proto);
+  SubmapCollectionProto submap_collection_proto;
+  getProto(&submap_collection_proto);
   // Write out the layer header.
-  if (!voxblox::utils::writeProtoMsgToStream(tsdf_submap_collection_proto,
+  if (!voxblox::utils::writeProtoMsgToStream(submap_collection_proto,
                                              &outfile)) {
     LOG(ERROR) << "Could not write submap collection header message.";
     outfile.close();
@@ -298,9 +314,14 @@ bool SubmapCollection<SubmapType>::saveToFile(
   }
   // Saving the tsdf submaps
   for (const auto& id_submap_pair : id_to_submap_) {
-    LOG(INFO) << "Saving tsdf_submap with ID: " << id_submap_pair.first;
+    LOG(INFO) << "Saving submap with ID: " << id_submap_pair.first;
     // Saving the submap
-    (id_submap_pair.second)->saveToStream(&outfile);
+    bool success = (id_submap_pair.second)->saveToStream(&outfile);
+    if (success) {
+      LOG(INFO) << "Saving successful";
+    } else {
+      LOG(WARNING) << "Saving unsuccessful";
+    }
   }
   // Closing the file
   outfile.close();
@@ -309,10 +330,53 @@ bool SubmapCollection<SubmapType>::saveToFile(
 
 template <typename SubmapType>
 void SubmapCollection<SubmapType>::getProto(
-    TsdfSubmapCollectionProto* proto) const {
+    SubmapCollectionProto* proto) const {
   CHECK_NOTNULL(proto);
   // Filling out the description of the submap collection
   proto->set_num_submaps(num_patches());
+}
+
+template <typename SubmapType>
+bool SubmapCollection<SubmapType>::LoadFromFile(
+    const std::string& file_path,
+    typename SubmapCollection<SubmapType>::Ptr* submap_collection_ptr) {
+  CHECK_NOTNULL(submap_collection_ptr);
+  // Open and check the file
+  std::fstream proto_file;
+  proto_file.open(file_path, std::fstream::in);
+  if (!proto_file.is_open()) {
+    LOG(ERROR) << "Could not open protobuf file to load layer: " << file_path;
+    return false;
+  }
+  // Unused byte offset result.
+  uint64_t tmp_byte_offset = 0u;
+  // Loading the header
+  SubmapCollectionProto submap_collection_proto;
+  if (!voxblox::utils::readProtoMsgFromStream(
+          &proto_file, &submap_collection_proto, &tmp_byte_offset)) {
+    LOG(ERROR) << "Could not read tsdf submap collection map protobuf message.";
+    return false;
+  }
+
+  LOG(INFO) << "tsdf_submap_collection_proto.num_submaps(): "
+            << submap_collection_proto.num_submaps();
+
+  // Loading each of the submaps
+  for (size_t sub_map_index = 0u;
+       sub_map_index < submap_collection_proto.num_submaps(); ++sub_map_index) {
+    LOG(INFO) << "Loading submap number: " << sub_map_index;
+    // Loading the submaps
+    typename SubmapType::Ptr submap_ptr = SubmapType::LoadFromStream(
+        (*submap_collection_ptr)->getConfig(), &proto_file, &tmp_byte_offset);
+    if (submap_ptr == nullptr) {
+      LOG(ERROR) << "Could not load the submap from stream.";
+      return false;
+    }
+    (*submap_collection_ptr)->addSubmap(submap_ptr);
+  }
+  // Because grown ups clean up after themselves
+  proto_file.close();
+  return true;
 }
 
 template <typename SubmapType>
@@ -344,7 +408,6 @@ void SubmapCollection<SubmapType>::fuseSubmapPair(
     // Merging the submap layers
     mergeLayerAintoLayerB(submap_ptr_2->getTsdfMap().getTsdfLayer(), T_S1_S2,
                           submap_ptr_1->getTsdfMapPtr()->getTsdfLayerPtr());
-
     // Deleting Submap #2
     const size_t num_erased = id_to_submap_.erase(submap_id_2);
     CHECK_EQ(num_erased, 1);
