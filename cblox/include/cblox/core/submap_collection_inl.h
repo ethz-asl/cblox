@@ -366,10 +366,9 @@ bool SubmapCollection<SubmapType>::LoadFromFile(
        sub_map_index < submap_collection_proto.num_submaps(); ++sub_map_index) {
     LOG(INFO) << "Loading submap number: " << sub_map_index;
     // Loading the submaps
-    typename SubmapType::Ptr submap_ptr;
-    if (!SubmapType::LoadFromStream((*submap_collection_ptr)->getConfig(),
-                                    &proto_file, &tmp_byte_offset,
-                                    &submap_ptr)) {
+    typename SubmapType::Ptr submap_ptr = SubmapType::LoadFromStream(
+        (*submap_collection_ptr)->getConfig(), &proto_file, &tmp_byte_offset);
+    if (submap_ptr == nullptr) {
       LOG(ERROR) << "Could not load the submap from stream.";
       return false;
     }

@@ -62,9 +62,10 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   virtual bool saveToStream(std::fstream* outfile_ptr) const;
 
   // Load a submap from stream.
-  static bool LoadFromStream(const Config& config, std::fstream* proto_file_ptr,
-                             uint64_t* tmp_byte_offset_ptr,
-                             TsdfEsdfSubmap::Ptr* submap_ptr);
+  // Note(alexmillane): Returns a nullptr if load is unsuccessful.
+  static TsdfEsdfSubmap::Ptr LoadFromStream(const Config& config,
+                                            std::fstream* proto_file_ptr,
+                                            uint64_t* tmp_byte_offset_ptr);
 
  protected:
   Config config_;
