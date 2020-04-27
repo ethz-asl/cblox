@@ -1,7 +1,6 @@
 #ifndef CBLOX_CORE_SUBMAP_H_
 #define CBLOX_CORE_SUBMAP_H_
 
-#include <fstream>
 #include <mutex>
 
 #include "cblox/core/common.h"
