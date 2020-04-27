@@ -10,19 +10,21 @@
 
 #include "cblox/Submap.pb.h"
 #include "cblox/core/common.h"
+#include "cblox/core/submap.h"
 
 namespace cblox {
 
-// Class representing TSDF submap
-class TsdfSubmap {
+// Class representing TSDF submap.
+class TsdfSubmap : public Submap {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef std::shared_ptr<TsdfSubmap> Ptr;
   typedef std::shared_ptr<const TsdfSubmap> ConstPtr;
   typedef TsdfMap::Config Config;
 
-  // Constructor
   TsdfSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config)
-      : submap_id_(submap_id), T_M_S_(T_M_S) {
+      : Submap(T_M_S, submap_id) {
     tsdf_map_.reset(new TsdfMap(config));
   }
 
@@ -35,49 +37,37 @@ class TsdfSubmap {
     }
   }
 
-  // Returns the underlying TSDF map pointers
-  TsdfMap::Ptr getTsdfMapPtr() { return tsdf_map_; }
-  const TsdfMap& getTsdfMap() const { return *tsdf_map_; }
+  // Returns the underlying TSDF map pointers.
+  inline TsdfMap::Ptr getTsdfMapPtr() { return tsdf_map_; }
+  inline const TsdfMap& getTsdfMap() const { return *tsdf_map_; }
 
-  // Submap pose interaction
-  const Transformation& getPose() const {
-    std::unique_lock<std::mutex> lock(transformation_mutex_);
-    return T_M_S_;
-  }
+  inline FloatingPoint block_size() const { return tsdf_map_->block_size(); }
 
-  void setPose(const Transformation& T_M_S) {
-    std::unique_lock<std::mutex> lock(transformation_mutex_);
-    T_M_S_ = T_M_S;
-  }
+  // Set interval in which submap was actively mapping.
+  inline void startMappingTime(int64_t time) { mapping_interval_.first = time; }
+  inline void stopMappingTime(int64_t time) { mapping_interval_.second = time; }
 
-  // Set interval in which submap was actively mapping
-  void startMappingTime(int32_t time) { mapping_interval_.first = time; }
-  void stopMappingTime(int32_t time) { mapping_interval_.second = time; }
-  // Access mapping interval
-  const std::pair<int32_t, int32_t>& getMappingInterval() const {
+  // Access mapping interval.
+  inline const std::pair<int64_t, int64_t>& getMappingInterval() const {
     return mapping_interval_;
   }
 
-  SubmapID getID() const { return submap_id_; }
-
-  FloatingPoint block_size() const { return tsdf_map_->block_size(); }
-
-  size_t getNumberAllocatedBlocks() const {
+  virtual size_t getNumberAllocatedBlocks() const override {
     return tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks();
   }
 
-  size_t getMemorySize() const {
+  virtual size_t getMemorySize() const override {
     return tsdf_map_->getTsdfLayer().getMemorySize();
   }
 
-  virtual void finishSubmap();
+  virtual void finishSubmap() override;
 
-  virtual void prepareForPublish();
+  virtual void prepareForPublish() override;
 
-  // Getting the proto for this submap
+  // Getting the proto for this submap.
   virtual void getProto(SubmapProto* proto) const;
 
-  // Save the submap to file
+  // Save the submap to file.
   virtual bool saveToStream(std::fstream* outfile_ptr) const;
 
   // Load a submap from stream.
@@ -87,17 +77,8 @@ class TsdfSubmap {
                                         uint64_t* tmp_byte_offset_ptr);
 
  protected:
-  SubmapID submap_id_;
   TsdfMap::Ptr tsdf_map_;
-
-  Transformation T_M_S_;
-  std::pair<int32_t, int32_t> mapping_interval_;
-
- private:
-  mutable std::mutex transformation_mutex_;
-
- public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  std::pair<int64_t, int64_t> mapping_interval_;
 };
 
 }  // namespace cblox
