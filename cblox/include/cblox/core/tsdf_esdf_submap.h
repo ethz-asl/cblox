@@ -61,6 +61,11 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   virtual void getProto(cblox::SubmapProto* proto) const;
   virtual bool saveToStream(std::fstream* outfile_ptr) const;
 
+  // Load a submap from stream.
+  static bool LoadFromStream(const Config& config, std::fstream* proto_file_ptr,
+                             uint64_t* tmp_byte_offset_ptr,
+                             TsdfEsdfSubmap::Ptr* submap_ptr);
+
  protected:
   Config config_;
   EsdfMap::Ptr esdf_map_;

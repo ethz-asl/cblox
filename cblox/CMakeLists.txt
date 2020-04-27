@@ -34,7 +34,6 @@ cs_add_library(${PROJECT_NAME}_lib
   src/integrator/tsdf_submap_collection_integrator.cpp
   src/utils/quat_transformation_protobuf_utils.cpp
   src/mesh/submap_mesher.cpp
-  src/io/tsdf_submap_io.cpp
   src/io/transformation_io.cpp
 )
 target_link_libraries(${PROJECT_NAME}_lib ${PROJECT_NAME}_proto)
