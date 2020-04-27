@@ -4,7 +4,6 @@
 #include <fstream>
 #include <mutex>
 
-#include "cblox/Submap.pb.h"
 #include "cblox/core/common.h"
 
 namespace cblox {
