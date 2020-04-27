@@ -143,6 +143,11 @@ class SubmapCollection : public SubmapCollectionInterface {
   // Gets the combined memory size of the layers in this collection.
   size_t getMemorySize() const;
 
+  // Loading from file
+  static bool LoadFromFile(
+      const std::string& file_path,
+      typename SubmapCollection<SubmapType>::Ptr* submap_collection_ptr);
+
  private:
   // TODO(alexmillane): Get some concurrency guards
 
