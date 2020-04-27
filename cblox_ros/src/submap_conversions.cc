@@ -19,7 +19,7 @@ void serializeSubmapToMsg<TsdfEsdfSubmap>(TsdfEsdfSubmap::Ptr submap_ptr,
       static_cast<uint8_t>(voxblox::MapDerializationAction::kReset);
 }
 
-void deserializeMsgToPose(const cblox_msgs::MapPoseUpdate& msg,
+void deserializeMsgToPose(const cblox_msgs::MapPoseUpdates& msg,
                           SubmapIdPoseMap* id_pose_map) {
   CHECK_NOTNULL(id_pose_map);
 

@@ -8,7 +8,7 @@
 #include <cblox/core/submap_collection.h>
 
 #include <cblox_msgs/MapLayer.h>
-#include <cblox_msgs/MapPoseUpdate.h>
+#include <cblox_msgs/MapPoseUpdates.h>
 
 namespace cblox {
 
@@ -44,7 +44,7 @@ template <typename SubmapType>
 bool deserializeMsgToSubmapContent(cblox_msgs::MapLayer* msg_ptr,
                                    typename SubmapType::Ptr submap_ptr);
 
-void deserializeMsgToPose(const cblox_msgs::MapPoseUpdate& msg,
+void deserializeMsgToPose(const cblox_msgs::MapPoseUpdates& msg,
                           SubmapIdPoseMap* id_pose_map);
 
 SubmapID deserializeMsgToSubmapID(cblox_msgs::MapLayer* msg_ptr);

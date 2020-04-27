@@ -21,7 +21,7 @@
 #include <cblox/integrator/tsdf_submap_collection_integrator.h>
 #include <cblox/mesh/submap_mesher.h>
 #include <cblox_msgs/MapLayer.h>
-#include <cblox_msgs/MapPoseUpdate.h>
+#include <cblox_msgs/MapPoseUpdates.h>
 #include <cblox_msgs/SubmapSrvRequest.h>
 #include <cblox_msgs/SubmapSrvResponse.h>
 
@@ -141,8 +141,8 @@ class SubmapServer {
   bool publishSubmapPosesCallback(std_srvs::EmptyRequest&,
                                   std_srvs::EmptyResponse&);
   void publishSubmapPoses() const;
-  void PoseCallback(const cblox_msgs::MapPoseUpdate& msg);
-  void processPoseUpdate(const cblox_msgs::MapPoseUpdate& msg);
+  void PoseCallback(const cblox_msgs::MapPoseUpdates& msg);
+  void processPoseUpdate(const cblox_msgs::MapPoseUpdates& msg);
 
   // Submap publishing
   void publishSubmap(SubmapID submap_id) const;
@@ -225,6 +225,9 @@ class SubmapServer {
   int num_integrated_frames_current_submap_;
   // The number of frames integrated into a submap before requesting a new one.
   int num_integrated_frames_per_submap_;
+
+  // Truncation distance (stored here for visualization purposes)
+  float truncation_distance_;
 
   std::mutex visualizer_mutex_;
 };

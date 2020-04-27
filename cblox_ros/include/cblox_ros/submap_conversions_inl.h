@@ -40,7 +40,7 @@ cblox_msgs::MapHeader generateSubmapHeaderMsg(
 
 template <typename SubmapType>
 void serializePoseToMsg(typename SubmapType::Ptr submap_ptr,
-                        cblox_msgs::MapPoseUpdate* msg) {
+                        cblox_msgs::MapPoseUpdates* msg) {
   CHECK_NOTNULL(msg);
   CHECK_NOTNULL(submap_ptr);
 

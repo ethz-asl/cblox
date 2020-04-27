@@ -53,7 +53,8 @@ SubmapServer<SubmapType>::SubmapServer(
       transformer_(nh, nh_private),
       color_map_(new voxblox::GrayscaleColorMap()),
       num_integrated_frames_current_submap_(0),
-      num_integrated_frames_per_submap_(kDefaultNumFramesPerSubmap) {
+      num_integrated_frames_per_submap_(kDefaultNumFramesPerSubmap),
+      truncation_distance_(tsdf_integrator_config.default_truncation_distance) {
   ROS_DEBUG("Creating a TSDF Server");
 
   // Initial interaction with ROS
@@ -125,7 +126,7 @@ void SubmapServer<SubmapType>::advertiseTopics() {
 
   // Publisher for submaps
   pose_pub_ =
-      nh_private_.advertise<cblox_msgs::MapPoseUpdate>("submap_pose_out", 1);
+      nh_private_.advertise<cblox_msgs::MapPoseUpdates>("submap_pose_out", 1);
   submap_pub_ =
       nh_private_.advertise<cblox_msgs::MapLayer>("tsdf_submap_out", 1);
   sdf_slice_pub_ =
@@ -571,7 +572,7 @@ void SubmapServer<SubmapType>::publishSubmapPoses() const {
     ROS_INFO("[CbloxServer] Publishing submap poses");
   }
 
-  cblox_msgs::MapPoseUpdate pose_msg;
+  cblox_msgs::MapPoseUpdates pose_msg;
   pose_msg.header.frame_id = world_frame_;
   pose_msg.header.stamp = ros::Time::now();
   for (SubmapID submap_id : submap_collection_ptr_->getIDs()) {
@@ -585,7 +586,7 @@ void SubmapServer<SubmapType>::publishSubmapPoses() const {
 
 template <typename SubmapType>
 void SubmapServer<SubmapType>::PoseCallback(
-    const cblox_msgs::MapPoseUpdate& msg) {
+    const cblox_msgs::MapPoseUpdates& msg) {
   if (verbose_) {
     ROS_INFO("[CbloxServer] Received pose update");
   }
@@ -596,7 +597,7 @@ void SubmapServer<SubmapType>::PoseCallback(
 
 template <typename SubmapType>
 void SubmapServer<SubmapType>::processPoseUpdate(
-    const cblox_msgs::MapPoseUpdate& msg) {
+    const cblox_msgs::MapPoseUpdates& msg) {
   {
     std::lock_guard<std::mutex> lock(visualizer_mutex_);
     SubmapIdPoseMap id_pose_map;

@@ -37,8 +37,7 @@ void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID submap_id) const {
   color_msg.b = 0.0;
   color_msg.a = 1.0;
 
-  float max_dist = 0.6;
-  nh_private_.param("truncation_distance", max_dist, max_dist);
+  const float max_dist = truncation_distance_;
   TsdfSubmap::Ptr submap_ptr = submap_collection_ptr_->getSubmapPtr(submap_id);
   voxblox::Layer<voxblox::TsdfVoxel>* layer =
       submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr();
