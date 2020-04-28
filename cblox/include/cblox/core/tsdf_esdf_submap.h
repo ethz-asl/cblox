@@ -11,6 +11,8 @@ namespace cblox {
 
 class TsdfEsdfSubmap : public TsdfSubmap {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef std::shared_ptr<TsdfEsdfSubmap> Ptr;
   typedef std::shared_ptr<const TsdfEsdfSubmap> ConstPtr;
 
@@ -23,6 +25,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
         : TsdfSubmap::Config(tsdf_map_config),
           EsdfMap::Config(esdf_map_config){};
   };
+
   TsdfEsdfSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config,
                  voxblox::EsdfIntegrator::Config esdf_integrator_config =
                      voxblox::EsdfIntegrator::Config())
@@ -41,24 +44,19 @@ class TsdfEsdfSubmap : public TsdfSubmap {
     }
   }
 
-  // Generate the ESDF from the TSDF
+  // Generate the ESDF from the TSDF.
   void generateEsdf();
 
   // Returns the underlying ESDF map pointers
   EsdfMap::Ptr getEsdfMapPtr() { return esdf_map_; }
   const EsdfMap& getEsdfMap() const { return *esdf_map_; }
 
-  /* NOTE: When converting TsdfEsdf submaps into protobuffs, only their
-   *       TSDF map is converted. The ESDF can be recomputed when needed.
-   *       If you'd like to also store the ESDF, override the getProto() and
-   *       saveToStream() methods from tsdf_submap.
-   */
-
   virtual void finishSubmap() override;
 
   virtual void prepareForPublish() override;
 
   virtual void getProto(cblox::SubmapProto* proto) const;
+
   virtual bool saveToStream(std::fstream* outfile_ptr) const;
 
   // Load a submap from stream.
@@ -72,6 +70,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   EsdfMap::Ptr esdf_map_;
   voxblox::EsdfIntegrator::Config esdf_integrator_config_;
 };
+
 }  // namespace cblox
 
 #endif  // CBLOX_CORE_TSDF_ESDF_SUBMAP_H_
