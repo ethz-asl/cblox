@@ -89,7 +89,6 @@ void SubmapCollection<SubmapType>::addSubmap(
   active_submap_id_ = submap_id;
 }
 
-
 template <typename SubmapType>
 bool SubmapCollection<SubmapType>::duplicateSubmap(
     const SubmapID source_submap_id, const SubmapID new_submap_id) {
@@ -420,11 +419,11 @@ void SubmapCollection<SubmapType>::fuseSubmapPair(
 }
 
 template <typename SubmapType>
-size_t SubmapCollection<SubmapType>::getNumberAllocatedBlocks() const {
+size_t SubmapCollection<SubmapType>::getNumberOfAllocatedBlocks() const {
   // Looping over the submaps totalling the sizes
   size_t total_blocks = 0;
   for (const auto& id_submap_pair : id_to_submap_) {
-    total_blocks += (id_submap_pair.second)->getNumberAllocatedBlocks();
+    total_blocks += (id_submap_pair.second)->getNumberOfAllocatedBlocks();
   }
   return total_blocks;
 }

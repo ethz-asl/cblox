@@ -31,7 +31,7 @@ class Submap {
 
   inline SubmapID getID() const { return submap_id_; }
 
-  virtual size_t getNumberAllocatedBlocks() const = 0;
+  virtual size_t getNumberOfAllocatedBlocks() const = 0;
 
   virtual size_t getMemorySize() const = 0;
 
