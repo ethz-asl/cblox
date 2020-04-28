@@ -52,7 +52,7 @@ class TsdfSubmap : public Submap {
     return mapping_interval_;
   }
 
-  virtual size_t getNumberAllocatedBlocks() const override {
+  virtual size_t getNumberOfAllocatedBlocks() const override {
     return tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks();
   }
 

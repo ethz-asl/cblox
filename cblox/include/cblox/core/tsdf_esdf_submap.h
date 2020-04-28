@@ -55,9 +55,9 @@ class TsdfEsdfSubmap : public TsdfSubmap {
 
   virtual void prepareForPublish() override;
 
-  virtual void getProto(cblox::SubmapProto* proto) const;
+  virtual void getProto(cblox::SubmapProto* proto) const override;
 
-  virtual bool saveToStream(std::fstream* outfile_ptr) const;
+  virtual bool saveToStream(std::fstream* outfile_ptr) const override;
 
   // Load a submap from stream.
   // Note(alexmillane): Returns a nullptr if load is unsuccessful.

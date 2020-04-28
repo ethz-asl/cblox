@@ -119,7 +119,7 @@ class SubmapCollection : public SubmapCollectionInterface {
   FloatingPoint block_size() const {
     return (id_to_submap_.begin()->second)->block_size();
   }
-  size_t getNumberAllocatedBlocks() const;
+  size_t getNumberOfAllocatedBlocks() const;
 
   // Returns the config of the submaps
   const typename SubmapType::Config& getConfig() const {
