@@ -3,7 +3,6 @@
 
 #include <memory>
 #include <mutex>
-#include <shared_mutex>
 #include <thread>
 
 #include <geometry_msgs/PoseArray.h>
