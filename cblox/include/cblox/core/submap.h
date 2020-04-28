@@ -39,8 +39,24 @@ class Submap {
 
   virtual void prepareForPublish() = 0;
 
+  /*
+  // Note(ntonci): In order to provide saving/loading functionality to the
+  // derived class, the following methods should be implemented (see TsdfSubmap
+  // as an example):
+
+  // Getting the proto for this submap.
+  virtual void getProto(SubmapProto* proto) const = 0;
+  // Save the submap to file.
+  virtual bool saveToStream(std::fstream* outfile_ptr) const;
+  // Load a submap from stream.
+  // Note(alexmillane): Returns a nullptr if load is unsuccessful.
+  static Submap::Ptr LoadFromStream(const Config& config,
+                                    std::fstream* proto_file_ptr,
+                                    uint64_t* tmp_byte_offset_ptr);
+  */
+
  protected:
-  SubmapID submap_id_;
+  const SubmapID submap_id_;
   Transformation T_M_S_;
 
  private:
