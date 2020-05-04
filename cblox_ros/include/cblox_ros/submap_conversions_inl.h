@@ -26,8 +26,8 @@ cblox_msgs::MapHeader generateSubmapHeaderMsg(
   submap_header.is_submap = true;
 
   // Set the submap's start and end time.
-  submap_header.start_time = ros::Time(submap_ptr->getMappingInterval().first);
-  submap_header.end_time = ros::Time(submap_ptr->getMappingInterval().second);
+  submap_header.start_time.fromNSec(submap_ptr->getMappingInterval().first);
+  submap_header.end_time.fromNSec(submap_ptr->getMappingInterval().second);
 
   // Set the pose estimate and indicate what frame it's in.
   submap_header.pose_estimate.frame_id =
@@ -94,8 +94,8 @@ bool deserializeMsgToSubmapContent(cblox_msgs::MapLayer* msg_ptr,
   submap_ptr->setPose(submap_pose);
 
   // Read mapping interval.
-  submap_ptr->startMappingTime(msg_ptr->map_header.start_time.toSec());
-  submap_ptr->stopMappingTime(msg_ptr->map_header.end_time.toSec());
+  submap_ptr->startMappingTime(msg_ptr->map_header.start_time.toNSec());
+  submap_ptr->stopMappingTime(msg_ptr->map_header.end_time.toNSec());
 
   return voxblox::deserializeMsgToLayer(
       msg_ptr->tsdf_layer, submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr());
