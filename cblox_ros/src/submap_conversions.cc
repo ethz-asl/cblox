@@ -7,14 +7,14 @@
 namespace cblox {
 
 template <>
-void serializeSubmapToMsg<TsdfEsdfSubmap>(TsdfEsdfSubmap::Ptr submap_ptr,
+void serializeSubmapToMsg<TsdfEsdfSubmap>(const TsdfEsdfSubmap& submap,
                                           cblox_msgs::MapLayer* msg) {
-  serializeSubmapToMsg<TsdfSubmap>(submap_ptr, msg);
+  serializeSubmapToMsg<TsdfSubmap>(submap, msg);
 
   // set type to ESDF
   msg->type = static_cast<uint8_t>(MapLayerTypes::kEsdf);
   voxblox::serializeLayerAsMsg<EsdfVoxel>(
-      submap_ptr->getEsdfMapPtr()->getEsdfLayer(), false, &msg->esdf_layer);
+      submap.getEsdfMap().getEsdfLayer(), false, &msg->esdf_layer);
   msg->esdf_layer.action =
       static_cast<uint8_t>(voxblox::MapDerializationAction::kReset);
 }

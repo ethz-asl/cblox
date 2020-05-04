@@ -9,67 +9,65 @@
 namespace cblox {
 
 template <typename SubmapType>
-std_msgs::Header generateHeaderMsg(const typename SubmapType::Ptr& submap_ptr,
+std_msgs::Header generateHeaderMsg(const SubmapType& submap,
                                    const ros::Time& timestamp) {
   std_msgs::Header msg_header;
-  msg_header.frame_id = "submap_" + std::to_string(submap_ptr->getID());
+  msg_header.frame_id = "submap_" + std::to_string(submap.getID());
   msg_header.stamp = timestamp;
   return msg_header;
 }
 
 template <typename SubmapType>
 cblox_msgs::MapHeader generateSubmapHeaderMsg(
-    const typename SubmapType::Ptr& submap_ptr) {
+    const SubmapType& submap) {
   // Set the submap ID and type.
   cblox_msgs::MapHeader submap_header;
-  submap_header.id = submap_ptr->getID();
+  submap_header.id = submap.getID();
   submap_header.is_submap = true;
 
   // Set the submap's start and end time.
-  submap_header.start_time.fromNSec(submap_ptr->getMappingInterval().first);
-  submap_header.end_time.fromNSec(submap_ptr->getMappingInterval().second);
+  submap_header.start_time.fromNSec(submap.getMappingInterval().first);
+  submap_header.end_time.fromNSec(submap.getMappingInterval().second);
 
   // Set the pose estimate and indicate what frame it's in.
   submap_header.pose_estimate.frame_id =
-      "submap_" + std::to_string(submap_ptr->getID());
-  tf::poseKindrToMsg(submap_ptr->getPose().template cast<double>(),
+      "submap_" + std::to_string(submap.getID());
+  tf::poseKindrToMsg(submap.getPose().template cast<double>(),
                      &submap_header.pose_estimate.map_pose);
 
   return submap_header;
 }
 
 template <typename SubmapType>
-void serializePoseToMsg(typename SubmapType::Ptr submap_ptr,
+void serializePoseToMsg(const SubmapType& submap,
                         cblox_msgs::MapPoseUpdates* msg) {
   CHECK_NOTNULL(msg);
-  CHECK_NOTNULL(submap_ptr);
 
   ros::Time timestamp = ros::Time::now();
   // Fill in headers.
-  msg->header = generateHeaderMsg<SubmapType>(submap_ptr, timestamp);
+  msg->header = generateHeaderMsg<SubmapType>(submap, timestamp);
   // NOTE: Assuming that the submap IDs are equal to their index in storage.
-  msg->map_headers[submap_ptr->getID()] =
-      generateSubmapHeaderMsg<SubmapType>(submap_ptr);
+  msg->map_headers[submap.getID()] =
+      generateSubmapHeaderMsg<SubmapType>(submap);
 }
 
 // Note: Assumes that SubmapType contains a tsdf map.
 template <typename SubmapType>
-void serializeSubmapToMsg(typename SubmapType::Ptr submap_ptr,
+void serializeSubmapToMsg(const SubmapType& submap,
                           cblox_msgs::MapLayer* msg) {
   CHECK_NOTNULL(msg);
-  CHECK_NOTNULL(submap_ptr);
 
   ros::Time timestamp = ros::Time::now();
   // Fill in headers.
-  msg->header = generateHeaderMsg<SubmapType>(submap_ptr, timestamp);
-  msg->map_header = generateSubmapHeaderMsg<SubmapType>(submap_ptr);
+  msg->header = generateHeaderMsg<SubmapType>(submap, timestamp);
+  msg->map_header = generateSubmapHeaderMsg<SubmapType>(submap);
 
   // Set type to TSDF.
   msg->type = static_cast<uint8_t>(MapLayerTypes::kTsdf);
 
   // Fill in TSDF layer.
   voxblox::serializeLayerAsMsg<voxblox::TsdfVoxel>(
-      submap_ptr->getTsdfMapPtr()->getTsdfLayer(), false, &msg->tsdf_layer);
+      submap.getTsdfMap().getTsdfLayer(), false, &msg->tsdf_layer);
   msg->tsdf_layer.action =
       static_cast<uint8_t>(voxblox::MapDerializationAction::kReset);
 }

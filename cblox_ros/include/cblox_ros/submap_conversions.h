@@ -15,20 +15,17 @@ namespace cblox {
 enum class MapLayerTypes : uint8_t { kTsdf = 0u, kEsdf = 1u };
 
 template <typename SubmapType>
-std_msgs::Header generateHeaderMsg(const typename SubmapType::Ptr& submap_ptr,
+std_msgs::Header generateHeaderMsg(const SubmapType& submap,
                                    const ros::Time& timestamp);
 
 template <typename SubmapType>
-cblox_msgs::MapHeader generateSubmapHeaderMsg(
-    const typename SubmapType::Ptr& submap_ptr);
+cblox_msgs::MapHeader generateSubmapHeaderMsg(const SubmapType& submap);
 
 template <typename SubmapType>
-void serializePoseToMsg(typename SubmapType::Ptr submap_ptr,
-                        cblox_msgs::MapHeader* msg);
+void serializePoseToMsg(const SubmapType& submap, cblox_msgs::MapHeader* msg);
 
 template <typename SubmapType>
-void serializeSubmapToMsg(typename SubmapType::Ptr submap_ptr,
-                          cblox_msgs::MapLayer* msg);
+void serializeSubmapToMsg(const SubmapType& submap, cblox_msgs::MapLayer* msg);
 
 template <typename SubmapType>
 SubmapID deserializeMsgToSubmap(
