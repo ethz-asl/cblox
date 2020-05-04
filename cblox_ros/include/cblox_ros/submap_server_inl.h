@@ -330,7 +330,7 @@ void SubmapServer<SubmapType>::createNewSubmap(const Transformation& T_G_C,
 
   // Time the start of recording
   submap_collection_ptr_->getActiveSubmapPtr()->startMappingTime(
-      timestamp.toSec());
+      timestamp.toNSec());
 
   if (verbose_) {
     ROS_INFO_STREAM("Created a new submap with id: "
@@ -345,7 +345,7 @@ void SubmapServer<SubmapType>::finishSubmap(const SubmapID submap_id) {
     typename SubmapType::Ptr submap_ptr =
         submap_collection_ptr_->getSubmapPtr(submap_id);
     // Stopping the mapping interval.
-    submap_ptr->stopMappingTime(ros::Time::now().toSec());
+    submap_ptr->stopMappingTime(ros::Time::now().toNSec());
     // Finish submap.
     submap_ptr->finishSubmap();
     // publishing the old submap
