@@ -94,8 +94,8 @@ bool deserializeMsgToSubmapContent(cblox_msgs::MapLayer* msg_ptr,
   submap_ptr->setPose(submap_pose);
 
   // Read mapping interval.
-  submap_ptr->startMappingTime(msg_ptr->map_header.start_time.toSec());
-  submap_ptr->stopMappingTime(msg_ptr->map_header.end_time.toSec());
+  submap_ptr->startMappingTime(msg_ptr->map_header.start_time.toNSec());
+  submap_ptr->stopMappingTime(msg_ptr->map_header.end_time.toNSec());
 
   return voxblox::deserializeMsgToLayer(
       msg_ptr->tsdf_layer, submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr());
