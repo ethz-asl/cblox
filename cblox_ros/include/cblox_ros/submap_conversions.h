@@ -26,6 +26,9 @@ void serializePoseToMsg(const SubmapType& submap, cblox_msgs::MapHeader* msg);
 
 template <typename SubmapType>
 void serializeSubmapToMsg(const SubmapType& submap, cblox_msgs::MapLayer* msg);
+template <>
+void serializeSubmapToMsg<TsdfEsdfSubmap>(const TsdfEsdfSubmap& submap,
+                                          cblox_msgs::MapLayer* msg);
 
 template <typename SubmapType>
 SubmapID deserializeMsgToSubmap(
@@ -40,6 +43,9 @@ typename SubmapType::Ptr deserializeMsgToSubmapPtr(
 template <typename SubmapType>
 bool deserializeMsgToSubmapContent(cblox_msgs::MapLayer* msg_ptr,
                                    typename SubmapType::Ptr submap_ptr);
+template <>
+bool deserializeMsgToSubmapContent<TsdfEsdfSubmap>(
+    cblox_msgs::MapLayer* msg_ptr, TsdfEsdfSubmap::Ptr submap_ptr);
 
 void deserializeMsgToPose(const cblox_msgs::MapPoseUpdates& msg,
                           SubmapIdPoseMap* id_pose_map);
