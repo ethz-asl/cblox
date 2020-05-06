@@ -518,8 +518,8 @@ void SubmapServer<SubmapType>::publishSubmap(SubmapID submap_id) const {
   CHECK(submap_collection_ptr_->exists(submap_id))
       << "[CbloxServer] Submap " << submap_id << " does not exist!";
   cblox_msgs::MapLayer submap_msg;
-  serializeSubmapToMsg<SubmapType>(
-      submap_collection_ptr_->getSubmapPtr(submap_id), &submap_msg);
+  serializeSubmapToMsg<SubmapType>(submap_collection_ptr_->getSubmap(submap_id),
+                                   &submap_msg);
   submap_pub_.publish(submap_msg);
 }
 
@@ -534,10 +534,8 @@ bool SubmapServer<SubmapType>::publishActiveSubmapCallback(
     ROS_ERROR("[CbloxServer] Active submap does not exist");
     return false;
   }
-  TsdfSubmap::Ptr submap_ptr = submap_collection_ptr_->getSubmapPtr(submap_id);
-  if (submap_ptr->getTsdfMapPtr()
-          ->getTsdfLayerPtr()
-          ->getNumberOfAllocatedBlocks() == 0) {
+  const TsdfSubmap& submap = submap_collection_ptr_->getSubmap(submap_id);
+  if (submap.getTsdfMap().getTsdfLayer().getNumberOfAllocatedBlocks() == 0) {
     if (verbose_) {
       ROS_WARN("[CbloxServer] Active submap has no allocated blocks yet");
     }
@@ -545,7 +543,7 @@ bool SubmapServer<SubmapType>::publishActiveSubmapCallback(
   }
 
   cblox_msgs::MapLayer submap_msg;
-  serializeSubmapToMsg<TsdfSubmap>(submap_ptr, &submap_msg);
+  serializeSubmapToMsg<TsdfSubmap>(submap, &submap_msg);
   response.submap_msg = submap_msg;
   return true;
 }
@@ -575,10 +573,9 @@ void SubmapServer<SubmapType>::publishSubmapPoses() const {
   pose_msg.header.frame_id = world_frame_;
   pose_msg.header.stamp = ros::Time::now();
   for (SubmapID submap_id : submap_collection_ptr_->getIDs()) {
-    typename SubmapType::Ptr submap_ptr =
-        submap_collection_ptr_->getSubmapPtr(submap_id);
+    const SubmapType& submap = submap_collection_ptr_->getSubmap(submap_id);
     pose_msg.map_headers.emplace_back(
-        generateSubmapHeaderMsg<SubmapType>(submap_ptr));
+        generateSubmapHeaderMsg<SubmapType>(submap));
   }
   pose_pub_.publish(pose_msg);
 }
