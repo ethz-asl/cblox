@@ -1,0 +1,8 @@
+prefix=/home/davide/catkin_ws/src/cblox/cblox/cmake-build-debug/devel
+
+Name: cblox
+Description: Description of cblox
+Version: 0.0.0
+Cflags: -I/home/davide/catkin_ws/src/cblox/cblox/include -I/home/davide/catkin_ws/src/cblox/cblox/cmake-build-debug
+Libs: -L${prefix}/lib -lcblox_lib
+Requires: roscpp eigen_catkin glog_catkin voxblox voxblox_ros minkindr cblox_msgs

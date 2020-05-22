@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>cblox</name>
+  <version>0.0.0</version>
+  <description>
+    Cblox is a tools for consistent mapping using voxblox.
+  </description>
+  <url></url>
+  <author>Alex Millane</author>
+  <maintainer email="alex.millane@gmail.com">Alex Millane</maintainer>
+  <license>New BSD</license>
+
+  <!-- Dependencies which this package needs to build itself. -->
+  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>catkin_simple</buildtool_depend>
+
+  <!-- Dependencies. -->
+  <depend>roscpp</depend>
+  <depend>eigen_catkin</depend>
+  <depend>glog_catkin</depend>
+  <depend>voxblox</depend>
+  <depend>voxblox_ros</depend>
+  <depend>minkindr</depend>
+  <depend>cblox_msgs</depend>
+
+</package>

@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: cblox
+Description: Description of cblox
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib -lcblox_lib
+Requires: roscpp eigen_catkin glog_catkin voxblox voxblox_ros minkindr cblox_msgs

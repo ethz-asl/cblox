@@ -115,9 +115,9 @@ void SubmapServer<SubmapType>::advertiseTopics() {
       this);
   // Services for loading and saving
   save_map_srv_ = nh_private_.advertiseService(
-      "save_map", &SubmapServer<SubmapType>::saveMapCallback, this);
+      "save_submaps", &SubmapServer<SubmapType>::saveMapCallback, this);
   load_map_srv_ = nh_private_.advertiseService(
-      "load_map", &SubmapServer<SubmapType>::loadMapCallback, this);
+      "load_submaps", &SubmapServer<SubmapType>::loadMapCallback, this);
   // Real-time publishing for rviz
   active_submap_mesh_pub_ =
       nh_private_.advertise<visualization_msgs::MarkerArray>("separated_mesh", 1);

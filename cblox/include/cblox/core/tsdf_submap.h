@@ -57,7 +57,7 @@ class TsdfSubmap {
       return T_S_M_;
   }
 
-  void setPose(const Transformation& T_M_S) {
+  virtual void setPose(const Transformation& T_M_S) {
     std::unique_lock<std::mutex> lock(transformation_mutex);
     T_M_S_ = T_M_S;
     T_S_M_ = T_M_S_.inverse();
