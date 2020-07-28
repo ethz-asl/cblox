@@ -51,6 +51,8 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   EsdfMap::Ptr getEsdfMapPtr() { return esdf_map_; }
   const EsdfMap& getEsdfMap() const { return *esdf_map_; }
 
+  virtual Config getConfig() const { return config_; }
+
   virtual void finishSubmap() override;
 
   virtual void prepareForPublish() override;
@@ -62,7 +64,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   // Load a submap from stream.
   // Note(alexmillane): Returns a nullptr if load is unsuccessful.
   static TsdfEsdfSubmap::Ptr LoadFromStream(const Config& config,
-                                            std::fstream* proto_file_ptr,
+                                            std::istream* proto_file_ptr,
                                             uint64_t* tmp_byte_offset_ptr);
 
  protected:

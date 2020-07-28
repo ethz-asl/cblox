@@ -42,6 +42,7 @@ class TsdfSubmap : public Submap {
   inline const TsdfMap& getTsdfMap() const { return *tsdf_map_; }
 
   inline FloatingPoint block_size() const { return tsdf_map_->block_size(); }
+  inline FloatingPoint voxel_size() const { return tsdf_map_->voxel_size(); }
 
   // Set interval in which submap was actively mapping.
   inline void startMappingTime(int64_t time) { mapping_interval_.first = time; }
@@ -73,7 +74,7 @@ class TsdfSubmap : public Submap {
   // Load a submap from stream.
   // Note(alexmillane): Returns a nullptr if load is unsuccessful.
   static TsdfSubmap::Ptr LoadFromStream(const Config& config,
-                                        std::fstream* proto_file_ptr,
+                                        std::istream* proto_file_ptr,
                                         uint64_t* tmp_byte_offset_ptr);
 
  protected:
