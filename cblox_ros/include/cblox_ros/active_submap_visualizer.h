@@ -30,8 +30,6 @@ class ActiveSubmapVisualizer {
                              tsdf_submap_collection_ptr)
       : mesh_config_(mesh_config),
         tsdf_submap_collection_ptr_(tsdf_submap_collection_ptr),
-        color_cycle_length_(kDefaultColorCycleLength),
-        current_color_idx_(0),
         verbose_(false),
         opacity_(1.0) {}
 
@@ -63,7 +61,6 @@ class ActiveSubmapVisualizer {
 
   // The mesh layer for the active submap
   std::shared_ptr<MeshLayer> active_submap_mesh_layer_ptr_;
-  int active_submap_color_idx_;
 
   // The integrator
   std::unique_ptr<MeshIntegrator<TsdfVoxel>> active_submap_mesh_integrator_ptr_;
@@ -74,11 +71,9 @@ class ActiveSubmapVisualizer {
 
   // Storing the mesh layers
   std::map<SubmapID, std::shared_ptr<MeshLayer>> mesh_layers_;
-  std::map<SubmapID, int> mesh_color_indices_;
 
   // Color stuff
-  const int color_cycle_length_;
-  int current_color_idx_;
+  const voxblox::ExponentialOffsetColorMap submap_id_color_map_;
 
   bool verbose_;
   float opacity_;

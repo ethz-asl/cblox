@@ -85,9 +85,7 @@ void SubmapMesher::colorMeshLayersWithIndex(
     // Extracting the mesh layer
     MeshLayer* mesh_layer_ptr = ((*sub_map_mesh_layers)[sub_map_index]).get();
     // Generating a color
-    double color_map_index = static_cast<double>(sub_map_index) /
-                             static_cast<double>(kDefaultColorCycleLength);
-    Color sub_map_color = voxblox::rainbowColorMap(color_map_index);
+    Color sub_map_color = submap_id_color_map_.colorLookup(sub_map_index);
     // Coloring this mesh layer
     colorMeshLayer(sub_map_color, mesh_layer_ptr);
   }

@@ -10,6 +10,7 @@
 #include <voxblox/io/mesh_ply.h>
 #include <voxblox/mesh/mesh_integrator.h>
 #include <voxblox/mesh/mesh_layer.h>
+#include <voxblox/utils/color_maps.h>
 
 #include "cblox/core/common.h"
 #include "cblox/core/submap_collection.h"
@@ -23,8 +24,6 @@ using voxblox::MeshIntegrator;
 using voxblox::MeshIntegratorConfig;
 using voxblox::MeshLayer;
 using voxblox::VertexIndex;
-
-constexpr int kDefaultColorCycleLength = 20;
 
 class SubmapMesher {
  public:
@@ -103,6 +102,9 @@ class SubmapMesher {
   // The configs
   const TsdfMap::Config tsdf_map_config_;
   const MeshIntegratorConfig mesh_config_;
+
+  // Color map from submap IDs to unique colors
+  const voxblox::ExponentialOffsetColorMap submap_id_color_map_;
 };
 
 }  // namespace cblox

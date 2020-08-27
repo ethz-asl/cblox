@@ -33,23 +33,15 @@ void ActiveSubmapVisualizer::createMeshLayer() {
   CHECK(tsdf_submap_collection_ptr_);
   active_submap_mesh_layer_ptr_.reset(
       new voxblox::MeshLayer(tsdf_submap_collection_ptr_->block_size()));
-  active_submap_color_idx_ = current_color_idx_;
   // Saving mesh layer and color for later recovery
   mesh_layers_[active_submap_id_] = active_submap_mesh_layer_ptr_;
-  mesh_color_indices_[active_submap_id_] = active_submap_color_idx_;
-  // Updating the color index for the next map.
-  current_color_idx_ = (current_color_idx_ + 1) % color_cycle_length_;
 }
 
 void ActiveSubmapVisualizer::recoverMeshLayer() {
   auto mesh_it = mesh_layers_.find(active_submap_id_);
-  auto color_it = mesh_color_indices_.find(active_submap_id_);
   CHECK(mesh_it != mesh_layers_.end())
       << "Tried to recover layer not already created";
-  CHECK(color_it != mesh_color_indices_.end())
-      << "Tried to recover layer not already created";
   active_submap_mesh_layer_ptr_ = mesh_it->second;
-  active_submap_color_idx_ = color_it->second;
 }
 
 void ActiveSubmapVisualizer::updateIntegrator() {
@@ -85,10 +77,7 @@ void ActiveSubmapVisualizer::transformMeshLayerToGlobalFrame(
 void ActiveSubmapVisualizer::colorMeshWithCurrentIndex(
     MeshLayer* mesh_layer_ptr) const {
   CHECK_NOTNULL(mesh_layer_ptr);
-  // Coloring
-  double color_map_float = static_cast<double>(active_submap_color_idx_) /
-                           static_cast<double>(color_cycle_length_ - 1);
-  const Color color = voxblox::rainbowColorMap(color_map_float);
+  const Color color = submap_id_color_map_.colorLookup(active_submap_id_);
   SubmapMesher::colorMeshLayer(color, mesh_layer_ptr);
 }
 
