@@ -102,9 +102,6 @@ class SubmapMesher {
   // The configs
   const TsdfMap::Config tsdf_map_config_;
   const MeshIntegratorConfig mesh_config_;
-
-  // Color map from submap IDs to unique colors
-  const voxblox::ExponentialOffsetColorMap submap_id_color_map_;
 };
 
 }  // namespace cblox

@@ -78,6 +78,9 @@ MeshLayer::Ptr SubmapMesher::transformMeshLayer(
 
 void SubmapMesher::colorMeshLayersWithIndex(
     std::vector<MeshLayer::Ptr>* sub_map_mesh_layers) {
+  // Color map from submap IDs to unique colors
+  static const voxblox::ExponentialOffsetColorMap submap_id_color_map;
+
   // Looping over submaps and coloring
   size_t num_sub_maps = sub_map_mesh_layers->size();
   for (size_t sub_map_index = 0; sub_map_index < num_sub_maps;
@@ -85,7 +88,7 @@ void SubmapMesher::colorMeshLayersWithIndex(
     // Extracting the mesh layer
     MeshLayer* mesh_layer_ptr = ((*sub_map_mesh_layers)[sub_map_index]).get();
     // Generating a color
-    Color sub_map_color = submap_id_color_map_.colorLookup(sub_map_index);
+    Color sub_map_color = submap_id_color_map.colorLookup(sub_map_index);
     // Coloring this mesh layer
     colorMeshLayer(sub_map_color, mesh_layer_ptr);
   }
