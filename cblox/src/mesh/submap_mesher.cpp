@@ -79,7 +79,7 @@ MeshLayer::Ptr SubmapMesher::transformMeshLayer(
 void SubmapMesher::colorMeshLayersWithIndex(
     std::vector<MeshLayer::Ptr>* sub_map_mesh_layers) {
   // Color map from submap IDs to unique colors
-  static const voxblox::ExponentialOffsetColorMap submap_id_color_map;
+  static const voxblox::ExponentialOffsetIdColorMap submap_id_color_map;
 
   // Looping over submaps and coloring
   size_t num_sub_maps = sub_map_mesh_layers->size();

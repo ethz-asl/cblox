@@ -73,7 +73,7 @@ class ActiveSubmapVisualizer {
   std::map<SubmapID, std::shared_ptr<MeshLayer>> mesh_layers_;
 
   // Color stuff
-  const voxblox::ExponentialOffsetColorMap submap_id_color_map_;
+  const voxblox::ExponentialOffsetIdColorMap submap_id_color_map_;
 
   bool verbose_;
   float opacity_;
