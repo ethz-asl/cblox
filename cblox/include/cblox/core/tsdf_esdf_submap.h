@@ -35,6 +35,14 @@ class TsdfEsdfSubmap : public TsdfSubmap {
     esdf_map_.reset(new EsdfMap(config));
   }
 
+  // Create a new TsdfEsdfSubmap based on a deep copy of another submap
+  // NOTE: The full TSDF and ESDF are copied (not their shared pointers)
+  TsdfEsdfSubmap(const TsdfEsdfSubmap& original_submap)
+      : TsdfSubmap(original_submap),
+        config_(original_submap.config_),
+        esdf_map_(std::make_shared<EsdfMap>(*original_submap.esdf_map_)),
+        esdf_integrator_config_(original_submap.esdf_integrator_config_) {}
+
   ~TsdfEsdfSubmap() {
     if (!esdf_map_.unique()) {
       LOG(WARNING) << "Underlying esdf map from SubmapID: " << submap_id_

@@ -24,9 +24,15 @@ class TsdfSubmap : public Submap {
   typedef TsdfMap::Config Config;
 
   TsdfSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config)
-      : Submap(T_M_S, submap_id) {
-    tsdf_map_.reset(new TsdfMap(config));
-  }
+      : Submap(T_M_S, submap_id),
+        tsdf_map_(std::make_shared<TsdfMap>(config)) {}
+
+  // Create a new TsdfSubmap based on a deep copy of another submap
+  // NOTE: The full TSDF is copied (not the shared pointer to it)
+  TsdfSubmap(const TsdfSubmap& original_submap)
+      : Submap(original_submap.T_M_S_, original_submap.submap_id_),
+        tsdf_map_(std::make_shared<TsdfMap>(*original_submap.tsdf_map_)),
+        mapping_interval_(original_submap.mapping_interval_) {}
 
   ~TsdfSubmap() {
     if (!tsdf_map_.unique()) {
