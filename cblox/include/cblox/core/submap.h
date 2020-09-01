@@ -11,10 +11,23 @@ namespace cblox {
 class Submap {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-  // Constructor.
+  // Constructors
+  // Standard constructor
   Submap(const Transformation& T_M_S, SubmapID submap_id)
       : submap_id_(submap_id), T_M_S_(T_M_S) {}
+  // Copy constructor (threadsafe)
+  Submap(const Submap& rhs) : submap_id_(rhs.submap_id_) {
+    std::unique_lock<std::mutex> rhs_lk(rhs.transformation_mutex_);
+    T_M_S_ = rhs.T_M_S_;
+  }
+  // Move constructor (threadsafe)
+  // NOTE: The implicit move constructor is deleted due to the
+  //       transformation_mutex_, hence we need this constructor if we want to
+  //       be able to move instances of this class or its derived classes
+  Submap(Submap&& rhs) noexcept : submap_id_(rhs.submap_id_) {
+    std::unique_lock<std::mutex> rhs_lk(rhs.transformation_mutex_);
+    T_M_S_ = rhs.T_M_S_;
+  }
 
   ~Submap() {}
 
