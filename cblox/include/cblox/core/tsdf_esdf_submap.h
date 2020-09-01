@@ -26,6 +26,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
           EsdfMap::Config(esdf_map_config){};
   };
 
+  // Constructor
   TsdfEsdfSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config,
                  voxblox::EsdfIntegrator::Config esdf_integrator_config =
                      voxblox::EsdfIntegrator::Config())
@@ -34,16 +35,19 @@ class TsdfEsdfSubmap : public TsdfSubmap {
         esdf_integrator_config_(esdf_integrator_config) {
     esdf_map_.reset(new EsdfMap(config));
   }
+  // Copy constructor
+  // NOTE: This performs a deep copy (full TSDF and ESDF are copied)
+  TsdfEsdfSubmap(const TsdfEsdfSubmap& rhs)
+      : TsdfSubmap(rhs),
+        config_(rhs.config_),
+        esdf_map_(std::make_shared<EsdfMap>(*rhs.esdf_map_)),
+        esdf_integrator_config_(rhs.esdf_integrator_config_) {}
+  // Move constructor
+  // NOTE: This will move the TSDF and ESDF by transferring
+  //       smart pointer ownership
+  TsdfEsdfSubmap(TsdfEsdfSubmap&& rhs) = default;
 
-  // Create a new TsdfEsdfSubmap based on a deep copy of another submap
-  // NOTE: The full TSDF and ESDF are copied (not their shared pointers)
-  TsdfEsdfSubmap(const TsdfEsdfSubmap& original_submap)
-      : TsdfSubmap(original_submap),
-        config_(original_submap.config_),
-        esdf_map_(std::make_shared<EsdfMap>(*original_submap.esdf_map_)),
-        esdf_integrator_config_(original_submap.esdf_integrator_config_) {}
-
-  ~TsdfEsdfSubmap() {
+  ~TsdfEsdfSubmap() override {
     if (!esdf_map_.unique()) {
       LOG(WARNING) << "Underlying esdf map from SubmapID: " << submap_id_
                    << " is NOT unique. Therefore its memory may leak.";

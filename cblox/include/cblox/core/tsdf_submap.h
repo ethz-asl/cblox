@@ -23,18 +23,21 @@ class TsdfSubmap : public Submap {
   typedef std::shared_ptr<const TsdfSubmap> ConstPtr;
   typedef TsdfMap::Config Config;
 
+  // Constructor
   TsdfSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config)
       : Submap(T_M_S, submap_id),
         tsdf_map_(std::make_shared<TsdfMap>(config)) {}
+  // Copy constructor
+  // NOTE: This performs a deep copy (full TSDF is copied)
+  TsdfSubmap(const TsdfSubmap& rhs)
+      : Submap(rhs),
+        tsdf_map_(std::make_shared<TsdfMap>(*rhs.tsdf_map_)),
+        mapping_interval_(rhs.mapping_interval_) {}
+  // Move constructor
+  // NOTE: This will move the TSDF by transferring smart pointer ownership
+  TsdfSubmap(TsdfSubmap&& rhs) = default;
 
-  // Create a new TsdfSubmap based on a deep copy of another submap
-  // NOTE: The full TSDF is copied (not the shared pointer to it)
-  TsdfSubmap(const TsdfSubmap& original_submap)
-      : Submap(original_submap.T_M_S_, original_submap.submap_id_),
-        tsdf_map_(std::make_shared<TsdfMap>(*original_submap.tsdf_map_)),
-        mapping_interval_(original_submap.mapping_interval_) {}
-
-  ~TsdfSubmap() {
+  ~TsdfSubmap() override {
     if (!tsdf_map_.unique()) {
       LOG(WARNING) << "Underlying tsdf map from SubmapID: " << submap_id_
                    << " is NOT unique. Therefore its memory may leak.";
