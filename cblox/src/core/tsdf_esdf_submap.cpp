@@ -9,7 +9,7 @@ void TsdfEsdfSubmap::generateEsdf() {
                                           tsdf_map_->getTsdfLayerPtr(),
                                           esdf_map_->getEsdfLayerPtr());
   // Generate the ESDF.
-  LOG(INFO) << "Generating ESDF from TSDF for submap with ID: " << submap_id_;
+  //LOG(INFO) << "Generating ESDF from TSDF for submap with ID: " << submap_id_;
   esdf_integrator.updateFromTsdfLayerBatch();
 }
 
