@@ -29,7 +29,10 @@ class Submap {
     T_M_S_ = rhs.T_M_S_;
   }
 
-  ~Submap() {}
+  // Destructor
+  // NOTE: It must be virtual, to ensure that derived class members are also
+  //       destructed when the destructor is called through a base class pointer
+  virtual ~Submap() = default;
 
   // Submap pose interaction.
   inline const Transformation& getPose() const {
