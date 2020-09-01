@@ -57,19 +57,37 @@ class SubmapCollection : public SubmapCollectionInterface {
 
   // Gets a vector of the linked IDs
   std::vector<SubmapID> getIDs() const;
+
+  // Helpers related to (unique) submap IDs
   bool exists(const SubmapID submap_id) const;
+  virtual SubmapID getNextSubmapID() const;
 
   // Creates a new submap on the top of the collection
   // NOTE(alexmillane): T_G_S - Transformation between submap frame (S) and
   //                           the global tracking frame (G).
   // NOTE(alexmillane): Creating a new submap automatically makes it active.
-  void createNewSubmap(const Transformation& T_G_S, const SubmapID submap_id);
-  SubmapID createNewSubmap(const Transformation& T_G_S);
+  virtual void createNewSubmap(const Transformation& T_G_S,
+                               const SubmapID submap_id);
+  virtual SubmapID createNewSubmap(const Transformation& T_G_S);
 
-  void addSubmap(const typename SubmapType::Ptr submap);
+  // Create a new submap with a valid ID, but without adding to the collection
+  // NOTE: This can be used to create a submap and only add it to the collection
+  //       later, once it's ready (e.g. once it's filled and transformed into
+  //       the right frame).
+  virtual SubmapType draftNewSubmap() const;
+
+  // Add submap, and set as active:
+  // by deep copy
+  virtual void addSubmap(const SubmapType& submap);
+  // by move
+  virtual void addSubmap(SubmapType&& submap);
+  // by shared pointer ownership
+  virtual void addSubmap(const typename SubmapType::Ptr submap);
 
   // Create a new submap which duplicates an existing source submap
-  bool duplicateSubmap(const SubmapID source_submap_id,
+  // NOTE: The submap can not just be copied, since the ID cannot be
+  //       changed externally (since it's const once constructed)
+  void duplicateSubmap(const SubmapID source_submap_id,
                        const SubmapID new_submap_id);
 
   // Gets a const pointer to a raw submap

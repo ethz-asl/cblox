@@ -47,6 +47,16 @@ bool SubmapCollection<SubmapType>::exists(const SubmapID submap_id) const {
 }
 
 template <typename SubmapType>
+SubmapID SubmapCollection<SubmapType>::getNextSubmapID() const {
+  // NOTE(alexmillane): rbegin() returns the pair with the highest key.
+  SubmapID new_ID = 0;
+  if (!id_to_submap_.empty()) {
+    new_ID = id_to_submap_.rbegin()->first + 1;
+  }
+  return new_ID;
+}
+
+template <typename SubmapType>
 void SubmapCollection<SubmapType>::createNewSubmap(const Transformation& T_G_S,
                                                    const SubmapID submap_id) {
   // Checking if the submap already exists
@@ -54,11 +64,11 @@ void SubmapCollection<SubmapType>::createNewSubmap(const Transformation& T_G_S,
   // exists. This is fairly brittle behaviour and we may want to change it at a
   // later date. Currently the onus is put in the caller to exists() before
   // creating a submap.
-  const auto it = id_to_submap_.find(submap_id);
-  CHECK(it == id_to_submap_.end());
-  // Creating the new submap and adding it to the list
+  CHECK(!exists(submap_id));
+  // Creating the new submap
   typename SubmapType::Ptr tsdf_sub_map(
       new SubmapType(T_G_S, submap_id, submap_config_));
+  // Add it to the collection
   id_to_submap_.emplace(submap_id, std::move(tsdf_sub_map));
   // Updating the active submap
   active_submap_id_ = submap_id;
@@ -67,14 +77,38 @@ void SubmapCollection<SubmapType>::createNewSubmap(const Transformation& T_G_S,
 template <typename SubmapType>
 SubmapID SubmapCollection<SubmapType>::createNewSubmap(
     const Transformation& T_G_S) {
-  // Creating a submap with a generated SubmapID
-  // NOTE(alexmillane): rbegin() returns the pair with the highest key.
-  SubmapID new_ID = 0;
-  if (!id_to_submap_.empty()) {
-    new_ID = id_to_submap_.rbegin()->first + 1;
-  }
+  // Creating a submap with an auto-generated SubmapID
+  SubmapID new_ID = getNextSubmapID();
   createNewSubmap(T_G_S, new_ID);
   return new_ID;
+}
+
+template <typename SubmapType>
+SubmapType SubmapCollection<SubmapType>::draftNewSubmap() const {
+  const Transformation dummy_pose = Transformation();
+  const SubmapID new_submap_id = getNextSubmapID();
+  return SubmapType(dummy_pose, new_submap_id, submap_config_);
+}
+
+template <typename SubmapType>
+void SubmapCollection<SubmapType>::addSubmap(const SubmapType& submap) {
+  // Check ID not already in the collection
+  const SubmapID submap_id = submap.getID();
+  CHECK(!exists(submap_id));
+  // Add and activate
+  id_to_submap_.emplace(submap_id, std::make_shared<SubmapType>(submap));
+  active_submap_id_ = submap_id;
+}
+
+template <typename SubmapType>
+void SubmapCollection<SubmapType>::addSubmap(SubmapType&& submap) {
+  // Check ID not already in the collection
+  const SubmapID submap_id = submap.getID();
+  CHECK(!exists(submap_id));
+  // Add and activate
+  id_to_submap_.emplace(submap_id,
+                        std::make_shared<SubmapType>(std::move(submap)));
+  active_submap_id_ = submap_id;
 }
 
 template <typename SubmapType>
@@ -82,36 +116,25 @@ void SubmapCollection<SubmapType>::addSubmap(
     const typename SubmapType::Ptr submap) {
   // Check ID not already in the collection
   const SubmapID submap_id = submap->getID();
-  const auto it = id_to_submap_.find(submap_id);
-  CHECK(it == id_to_submap_.end());
-  // Add
+  CHECK(!exists(submap_id));
+  // Add and activate
   id_to_submap_.emplace(submap_id, std::move(submap));
   active_submap_id_ = submap_id;
 }
 
 template <typename SubmapType>
-bool SubmapCollection<SubmapType>::duplicateSubmap(
+void SubmapCollection<SubmapType>::duplicateSubmap(
     const SubmapID source_submap_id, const SubmapID new_submap_id) {
   // Get pointer to the source submap
-  const auto src_submap_ptr_it = id_to_submap_.find(source_submap_id);
-  if (src_submap_ptr_it != id_to_submap_.end()) {
-    typename SubmapType::Ptr src_submap_ptr = src_submap_ptr_it->second;
-    // Create a new submap with the same pose and get its pointer
-    const Transformation T_G_S = src_submap_ptr->getPose();
-    // Creating the new submap and adding it to the list
-    typename SubmapType::Ptr new_tsdf_sub_map(
-        new SubmapType(T_G_S, new_submap_id, submap_config_));
-    // Reset the TsdfMap based on a copy of the source submap's TSDF layer
-    // TODO(victorr): Find a better way to do this, however with .reset(...) as
-    // below the new submap appears empty
-    // new_tsdf_sub_map->getTsdfMapPtr().reset(new
-    // TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
-    *(new_tsdf_sub_map->getTsdfMapPtr()) =
-        *(new TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
-    id_to_submap_.emplace(new_submap_id, new_tsdf_sub_map);
-    return true;
-  }
-  return false;
+  SubmapType src_submap = getSubmap(source_submap_id);
+  const Transformation T_G_S = src_submap.getPose();
+  // Create a new submap with the same pose
+  typename SubmapType::Ptr new_tsdf_sub_map =
+      std::make_shared<SubmapType>(T_G_S, new_submap_id, submap_config_);
+  // Deep copy the TSDF map
+  *(new_tsdf_sub_map->getTsdfMapPtr()) = src_submap.getTsdfMap();
+  // Add the submap to the collection
+  addSubmap(new_tsdf_sub_map);
 }
 
 template <typename SubmapType>
