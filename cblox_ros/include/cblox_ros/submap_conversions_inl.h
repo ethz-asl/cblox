@@ -18,8 +18,7 @@ std_msgs::Header generateHeaderMsg(const SubmapType& submap,
 }
 
 template <typename SubmapType>
-cblox_msgs::MapHeader generateSubmapHeaderMsg(
-    const SubmapType& submap) {
+cblox_msgs::MapHeader generateSubmapHeaderMsg(const SubmapType& submap) {
   // Set the submap ID and type.
   cblox_msgs::MapHeader submap_header;
   submap_header.id = submap.getID();
@@ -53,8 +52,7 @@ void serializePoseToMsg(const SubmapType& submap,
 
 // Note: Assumes that SubmapType contains a tsdf map.
 template <typename SubmapType>
-void serializeSubmapToMsg(const SubmapType& submap,
-                          cblox_msgs::MapLayer* msg) {
+void serializeSubmapToMsg(const SubmapType& submap, cblox_msgs::MapLayer* msg) {
   CHECK_NOTNULL(msg);
 
   ros::Time timestamp = ros::Time::now();
