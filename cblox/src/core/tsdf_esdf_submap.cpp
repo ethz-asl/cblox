@@ -48,7 +48,7 @@ bool TsdfEsdfSubmap::saveToStream(std::fstream* outfile_ptr) const {
 }
 
 TsdfEsdfSubmap::Ptr TsdfEsdfSubmap::LoadFromStream(
-    const Config& config, std::fstream* proto_file_ptr,
+    const Config& config, std::istream* proto_file_ptr,
     uint64_t* tmp_byte_offset_ptr) {
   CHECK_NOTNULL(proto_file_ptr);
   CHECK_NOTNULL(tmp_byte_offset_ptr);
@@ -89,6 +89,10 @@ TsdfEsdfSubmap::Ptr TsdfEsdfSubmap::LoadFromStream(
   // Getting the esdf blocks for this submap (the esdf layer).
   LOG(INFO) << "Esdf number of allocated blocks: "
             << submap_proto.num_esdf_blocks();
+  if (submap_proto.num_esdf_blocks() == 0) {
+    LOG(WARNING)
+        << "Number of ESDF blocks is zero. You may be loading TSDFSubmap.";
+  }
   if (!voxblox::io::LoadBlocksFromStream(
           submap_proto.num_esdf_blocks(),
           Layer<EsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,

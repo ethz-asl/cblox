@@ -147,6 +147,9 @@ class SubmapCollection : public SubmapCollectionInterface {
   static bool LoadFromFile(
       const std::string& file_path,
       typename SubmapCollection<SubmapType>::Ptr* submap_collection_ptr);
+  static bool LoadFromStream(
+      std::istream* proto_file_ptr,
+      typename SubmapCollection<SubmapType>::Ptr* submap_collection_ptr);
 
  private:
   // TODO(alexmillane): Get some concurrency guards

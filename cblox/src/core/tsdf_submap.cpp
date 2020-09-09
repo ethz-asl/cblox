@@ -51,7 +51,7 @@ bool TsdfSubmap::saveToStream(std::fstream* outfile_ptr) const {
 }
 
 TsdfSubmap::Ptr TsdfSubmap::LoadFromStream(const Config& config,
-                                           std::fstream* proto_file_ptr,
+                                           std::istream* proto_file_ptr,
                                            uint64_t* tmp_byte_offset_ptr) {
   CHECK_NOTNULL(proto_file_ptr);
   CHECK_NOTNULL(tmp_byte_offset_ptr);

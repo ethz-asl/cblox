@@ -347,13 +347,27 @@ bool SubmapCollection<SubmapType>::LoadFromFile(
     LOG(ERROR) << "Could not open protobuf file to load layer: " << file_path;
     return false;
   }
+  // Loading from the stream
+  const bool success = SubmapCollection<SubmapType>::LoadFromStream(
+      &proto_file, submap_collection_ptr);
+  // Because grown ups clean up after themselves
+  proto_file.close();
+  return success;
+}
+
+template <typename SubmapType>
+bool SubmapCollection<SubmapType>::LoadFromStream(
+      std::istream* proto_file_ptr,
+      typename SubmapCollection<SubmapType>::Ptr* submap_collection_ptr) {
+  CHECK_NOTNULL(proto_file_ptr);
+  CHECK_NOTNULL(submap_collection_ptr);
   // Unused byte offset result.
   uint64_t tmp_byte_offset = 0u;
   // Loading the header
   SubmapCollectionProto submap_collection_proto;
   if (!voxblox::utils::readProtoMsgFromStream(
-          &proto_file, &submap_collection_proto, &tmp_byte_offset)) {
-    LOG(ERROR) << "Could not read tsdf submap collection map protobuf message.";
+          proto_file_ptr, &submap_collection_proto, &tmp_byte_offset)) {
+    LOG(ERROR) << "Could not read submap collection protobuf message.";
     return false;
   }
 
@@ -366,15 +380,13 @@ bool SubmapCollection<SubmapType>::LoadFromFile(
     LOG(INFO) << "Loading submap number: " << sub_map_index;
     // Loading the submaps
     typename SubmapType::Ptr submap_ptr = SubmapType::LoadFromStream(
-        (*submap_collection_ptr)->getConfig(), &proto_file, &tmp_byte_offset);
+        (*submap_collection_ptr)->getConfig(), proto_file_ptr, &tmp_byte_offset);
     if (submap_ptr == nullptr) {
       LOG(ERROR) << "Could not load the submap from stream.";
       return false;
     }
     (*submap_collection_ptr)->addSubmap(submap_ptr);
   }
-  // Because grown ups clean up after themselves
-  proto_file.close();
   return true;
 }
 
