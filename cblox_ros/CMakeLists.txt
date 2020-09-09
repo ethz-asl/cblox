@@ -4,7 +4,7 @@ project(cblox_ros)
 find_package(catkin_simple REQUIRED)
 catkin_simple(ALL_DEPS_REQUIRED)
 
-add_definitions(-std=c++11 -Wall -Wextra)
+add_definitions(-std=c++11 -Wall -Wextra) # -fsanitize=address,leak
 
 #############
 # LIBRARIES #
@@ -27,8 +27,8 @@ cs_add_executable(tsdf_submap_server
 cs_add_executable(esdf_submap_server
   src/esdf_submap_server_node.cc
 )
-target_link_libraries(tsdf_submap_server ${PROJECT_NAME})
-target_link_libraries(esdf_submap_server ${PROJECT_NAME})
+target_link_libraries(tsdf_submap_server ${PROJECT_NAME}) # -fsanitize=address,leak
+target_link_libraries(esdf_submap_server ${PROJECT_NAME}) # -fsanitize=address,leak
 
 ##########
 # EXPORT #

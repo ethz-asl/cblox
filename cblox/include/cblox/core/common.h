@@ -28,6 +28,8 @@ typedef kindr::minimal::RotationQuaternionTemplate<FloatingPoint> Quaternion;
 typedef unsigned int SubmapID;
 typedef std::pair<SubmapID, SubmapID> SubmapIdPair;
 typedef std::pair<SubmapID, Transformation> SubmapIdPosePair;
+
+// TODO(alexmillane): I'm thinking that this motherfucker should be aligned.
 typedef std::map<SubmapID, Transformation> SubmapIdPoseMap;
 
 // Aligned Eigen containers

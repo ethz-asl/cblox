@@ -101,10 +101,7 @@ void SubmapMesher::colorMeshLayer(const Color& color_in,
   for (const BlockIndex& block_index : meshes_block_index_list) {
     // Getting the mesh in this block
     Mesh::Ptr mesh_ptr = mesh_layer_ptr->getMeshPtrByIndex(block_index);
-    // Coloring the vertices in the mesh mesh
-    for (Color& color : mesh_ptr->colors) {
-      color = color_in;
-    }
+    mesh_ptr->colorizeMesh(color_in);
   }
 }
 

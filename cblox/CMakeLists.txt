@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.0)
 project(cblox)
 
-add_definitions(-std=c++11)
+add_definitions(-std=c++11) #-fsanitize=address,leak
 
 find_package(catkin_simple REQUIRED)
 catkin_simple(ALL_DEPS_REQUIRED)
@@ -36,7 +36,7 @@ cs_add_library(${PROJECT_NAME}_lib
   src/mesh/submap_mesher.cpp
   src/io/transformation_io.cpp
 )
-target_link_libraries(${PROJECT_NAME}_lib ${catkin_LIBRARIES} ${PROJECT_NAME}_proto)
+target_link_libraries(${PROJECT_NAME}_lib ${catkin_LIBRARIES} ${PROJECT_NAME}_proto) # -fsanitize=address,leak
 
 ##########
 # EXPORT #

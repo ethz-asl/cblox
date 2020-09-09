@@ -26,16 +26,36 @@ class TsdfEsdfSubmap : public TsdfSubmap {
           EsdfMap::Config(esdf_map_config){};
   };
 
-  TsdfEsdfSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config,
-                 voxblox::EsdfIntegrator::Config esdf_integrator_config =
+  TsdfEsdfSubmap(const Transformation& T_M_S, const SubmapID submap_id,
+                 const Config& config,
+                 const voxblox::EsdfIntegrator::Config& esdf_integrator_config =
                      voxblox::EsdfIntegrator::Config())
       : TsdfSubmap(T_M_S, submap_id, config),
         config_(config),
+        esdf_map_(new EsdfMap(config)),
+        esdf_integrator_config_(esdf_integrator_config) {}
+
+  // Creating a TsdfEsdfSubmap from a TsdfSubmap by SHARING the underlying
+  // TsdfMap Makes a submap by SHARING the underlying TsdfMap with another
+  // party.
+  // NOTE(alexmillane): The submaps share a submap_id and transform.
+  TsdfEsdfSubmap(TsdfSubmap::Ptr tsdf_submap,
+                 const voxblox::EsdfIntegrator::Config& esdf_integrator_config =
+                     voxblox::EsdfIntegrator::Config())
+      : TsdfSubmap(tsdf_submap->getPose(), 
+                   tsdf_submap->getID(),
+                   tsdf_submap->getTsdfMapPtr()),
         esdf_integrator_config_(esdf_integrator_config) {
-    esdf_map_.reset(new EsdfMap(config));
+    CHECK(tsdf_submap);
+    // Copying the config
+    config_.tsdf_voxel_size = tsdf_submap->voxel_size();
+    config_.tsdf_voxels_per_side = tsdf_submap->voxels_per_side();
+    config_.esdf_voxel_size = tsdf_submap->voxel_size();
+    config_.esdf_voxels_per_side = tsdf_submap->voxels_per_side();
+    esdf_map_ = std::make_shared<EsdfMap>(config_);
   }
 
-  ~TsdfEsdfSubmap() {
+  virtual ~TsdfEsdfSubmap() {
     if (!esdf_map_.unique()) {
       LOG(WARNING) << "Underlying esdf map from SubmapID: " << submap_id_
                    << " is NOT unique. Therefore its memory may leak.";
@@ -51,7 +71,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   EsdfMap::Ptr getEsdfMapPtr() { return esdf_map_; }
   const EsdfMap& getEsdfMap() const { return *esdf_map_; }
 
-  virtual Config getConfig() const { return config_; }
+  virtual Config getEsdfConfig() const { return config_; }
 
   virtual void finishSubmap() override;
 
