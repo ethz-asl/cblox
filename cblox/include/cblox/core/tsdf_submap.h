@@ -38,12 +38,12 @@ class TsdfSubmap : public Submap {
   TsdfSubmap(TsdfSubmap&& rhs) = default;
 
   ~TsdfSubmap() override {
-    if (!tsdf_map_.unique()) {
-      LOG(WARNING) << "Underlying tsdf map from SubmapID: " << submap_id_
-                   << " is NOT unique. Therefore its memory may leak.";
-    } else {
-      LOG(INFO) << "TsdfSubmap " << submap_id_ << " is being deleted.";
-    }
+//    if (!tsdf_map_.unique()) {
+//      LOG(WARNING) << "Underlying tsdf map from SubmapID: " << submap_id_
+//                   << " is NOT unique. Therefore its memory may leak.";
+//    } else {
+//      LOG(INFO) << "TsdfSubmap " << submap_id_ << " is being deleted.";
+//    }
   }
 
   // Returns the underlying TSDF map pointers.
