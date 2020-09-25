@@ -27,10 +27,13 @@ class SubmapCollectionInterface {
   virtual SubmapID getActiveSubmapID() const = 0;
   virtual bool getSubmapPose(const SubmapID submap_id,
                              Transformation* pose_ptr) const = 0;
+  virtual std::vector<SubmapID> getIDs() const = 0;
 
   virtual TsdfMap::Ptr getActiveTsdfMapPtr() = 0;
   virtual const TsdfMap& getActiveTsdfMap() const = 0;
   virtual TsdfMap::Ptr getTsdfMapPtr(const SubmapID submap_id) = 0;
+  virtual std::shared_ptr<const TsdfMap> getTsdfMapConstPtr(
+      const SubmapID submap_id) const = 0;
 
   virtual bool empty() const = 0;
   virtual size_t size() const = 0;
@@ -56,7 +59,7 @@ class SubmapCollection : public SubmapCollectionInterface {
                    const std::vector<typename SubmapType::Ptr>& tsdf_sub_maps);
 
   // Gets a vector of the linked IDs
-  std::vector<SubmapID> getIDs() const;
+  std::vector<SubmapID> getIDs() const override;
 
   // Helpers related to (unique) submap IDs
   bool exists(const SubmapID submap_id) const;
@@ -114,7 +117,9 @@ class SubmapCollection : public SubmapCollectionInterface {
   TsdfMap::Ptr getActiveTsdfMapPtr();
   const TsdfMap& getActiveTsdfMap() const;
   // Access the tsdf_map member of any submap
-  virtual TsdfMap::Ptr getTsdfMapPtr(const SubmapID submap_id);
+  TsdfMap::Ptr getTsdfMapPtr(const SubmapID submap_id) override;
+  std::shared_ptr<const TsdfMap> getTsdfMapConstPtr(
+      const SubmapID submap_id) const override;
 
   // Activate a submap
   // NOTE(alexmillane): Note that creating a new submap automatically activates

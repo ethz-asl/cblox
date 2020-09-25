@@ -181,6 +181,14 @@ TsdfMap::Ptr SubmapCollection<SubmapType>::getTsdfMapPtr(
 }
 
 template <typename SubmapType>
+std::shared_ptr<const TsdfMap> SubmapCollection<SubmapType>::getTsdfMapConstPtr(
+    const SubmapID submap_id) const {
+  const auto it = id_to_submap_.find(submap_id);
+  CHECK(it != id_to_submap_.end());
+  return (it->second)->getTsdfMapPtr();
+}
+
+template <typename SubmapType>
 const TsdfMap& SubmapCollection<SubmapType>::getActiveTsdfMap() const {
   const auto it = id_to_submap_.find(active_submap_id_);
   CHECK(it != id_to_submap_.end());
