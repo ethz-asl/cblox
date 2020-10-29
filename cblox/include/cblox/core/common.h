@@ -29,17 +29,19 @@ typedef unsigned int SubmapID;
 typedef std::pair<SubmapID, SubmapID> SubmapIdPair;
 typedef std::pair<SubmapID, Transformation> SubmapIdPosePair;
 
-// TODO(alexmillane): I'm thinking that this motherfucker should be aligned.
-typedef std::map<SubmapID, Transformation> SubmapIdPoseMap;
-
 // Aligned Eigen containers
 template <typename Type>
 using AlignedVector = std::vector<Type, Eigen::aligned_allocator<Type>>;
 template <typename Type>
 using AlignedDeque = std::deque<Type, Eigen::aligned_allocator<Type>>;
+template <typename KeyType, typename Type, class Compare = std::less<KeyType>>
+using AlignedMap =
+    std::map<KeyType, Type, Compare,
+             Eigen::aligned_allocator<std::pair<const KeyType, Type>>>;
 
 // Containers of transforms
 typedef AlignedVector<Transformation> TransformationVector;
+typedef AlignedMap<SubmapID, Transformation> SubmapIdPoseMap;
 
 // Taking some voxblox datatypes
 using voxblox::Block;

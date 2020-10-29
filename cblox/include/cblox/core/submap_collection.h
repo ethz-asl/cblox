@@ -50,12 +50,6 @@ class SubmapCollection : public SubmapCollectionInterface {
   typedef std::shared_ptr<SubmapCollection> Ptr;
   typedef std::shared_ptr<const SubmapCollection> ConstPtr;
 
-  // The map type
-  typedef std::map<SubmapID, typename SubmapType::Ptr, std::less<SubmapID>,
-                   Eigen::aligned_allocator<
-                       std::pair<const SubmapID, typename SubmapType::Ptr>>>
-      IDToSubmapMap;
-
   // Constructor. Constructs an empty submap collection map
   explicit SubmapCollection(const typename SubmapType::Config& submap_config)
       : SubmapCollectionInterface(),
@@ -133,12 +127,15 @@ class SubmapCollection : public SubmapCollectionInterface {
   size_t size() const { return id_to_submap_.size(); }
   size_t num_patches() const { return id_to_submap_.size(); }
 
-  // Note(alexmillane): These functions are unsafe and results in unexpected
-  // behaviour because they will crash if theres are no submaps. Remove!
+  // Note(alexmillane): These functions with result in a failed check if the
+  // collection is empty. We could return 0 instead however that could results
+  // in weird stuff in the client code.
   FloatingPoint block_size() const {
+    CHECK(!id_to_submap_.empty());
     return (id_to_submap_.begin()->second)->block_size();
   }
   FloatingPoint voxel_size() const {
+    CHECK(!id_to_submap_.empty());
     return (id_to_submap_.begin()->second)->block_size();
   }
 
@@ -184,9 +181,7 @@ class SubmapCollection : public SubmapCollectionInterface {
   SubmapID active_submap_id_;
 
   // Submap storage and access
-  // TODO(alexmillane): Remove commented out version once aligned version works.
-  //std::map<SubmapID, typename SubmapType::Ptr> id_to_submap_;
-  IDToSubmapMap id_to_submap_;
+  std::map<SubmapID, typename SubmapType::Ptr> id_to_submap_;
 };
 
 }  // namespace cblox

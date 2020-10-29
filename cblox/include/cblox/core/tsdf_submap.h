@@ -34,7 +34,7 @@ class TsdfSubmap : public Submap {
              TsdfMap::Ptr tsdf_map_ptr)
       : Submap(T_M_S, submap_id), tsdf_map_(tsdf_map_ptr) {
     CHECK(tsdf_map_ptr);
-    // I think uniform initializatino wont work until c++14 apparently. Lame.
+    // I think uniform initialization wont work until c++14 apparently. Lame.
     config_.tsdf_voxel_size = tsdf_map_ptr->getTsdfLayer().voxel_size();
     config_.tsdf_voxels_per_side =
         tsdf_map_ptr->getTsdfLayer().voxels_per_side();
