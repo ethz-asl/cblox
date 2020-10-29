@@ -15,10 +15,13 @@ namespace cblox {
 // A interface for use where the type of submap doesnt matter.
 class SubmapCollectionInterface {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  
   typedef std::shared_ptr<SubmapCollectionInterface> Ptr;
   typedef std::shared_ptr<const SubmapCollectionInterface> ConstPtr;
 
   SubmapCollectionInterface() {}
+  virtual ~SubmapCollectionInterface() {}
 
   // NOTE(alexmillane): I'm moving methods over only as I need them. There's no
   // design intent here in leaving some out. There is only the intent to be
@@ -42,6 +45,8 @@ class SubmapCollectionInterface {
 template <typename SubmapType>
 class SubmapCollection : public SubmapCollectionInterface {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   typedef std::shared_ptr<SubmapCollection> Ptr;
   typedef std::shared_ptr<const SubmapCollection> ConstPtr;
 
@@ -54,6 +59,8 @@ class SubmapCollection : public SubmapCollectionInterface {
   // Constructor. Constructs a submap collection from a list of submaps
   SubmapCollection(const typename SubmapType::Config& submap_config,
                    const std::vector<typename SubmapType::Ptr>& tsdf_sub_maps);
+
+  virtual ~SubmapCollection() {}
 
   // Gets a vector of the linked IDs
   std::vector<SubmapID> getIDs() const;
@@ -86,6 +93,9 @@ class SubmapCollection : public SubmapCollectionInterface {
   const std::vector<typename SubmapType::Ptr> getSubmapPtrs() const;
   const std::vector<typename SubmapType::ConstPtr> getSubmapConstPtrs() const;
 
+  // Removal
+  void deleteSubmap(const SubmapID submap_id);
+
   // Interactions with the active submap
   const SubmapType& getActiveSubmap() const;
   typename SubmapType::Ptr getActiveSubmapPtr();
@@ -116,9 +126,19 @@ class SubmapCollection : public SubmapCollectionInterface {
   bool empty() const { return id_to_submap_.empty(); }
   size_t size() const { return id_to_submap_.size(); }
   size_t num_patches() const { return id_to_submap_.size(); }
+
+  // Note(alexmillane): These functions with result in a failed check if the
+  // collection is empty. We could return 0 instead however that could results
+  // in weird stuff in the client code.
   FloatingPoint block_size() const {
+    CHECK(!id_to_submap_.empty());
     return (id_to_submap_.begin()->second)->block_size();
   }
+  FloatingPoint voxel_size() const {
+    CHECK(!id_to_submap_.empty());
+    return (id_to_submap_.begin()->second)->block_size();
+  }
+
   size_t getNumberOfAllocatedBlocks() const;
 
   // Returns the config of the submaps

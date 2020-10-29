@@ -165,6 +165,18 @@ const TsdfMap& SubmapCollection<SubmapType>::getActiveTsdfMap() const {
 }
 
 template <typename SubmapType>
+void SubmapCollection<SubmapType>::deleteSubmap(const SubmapID submap_id) {
+  if (exists(submap_id)) {
+    const size_t num_erased = id_to_submap_.erase(submap_id);
+    CHECK_EQ(num_erased, 1);
+    LOG(INFO) << "Erased the submap: " << submap_id
+              << " from the submap collection";
+  } else {
+    LOG(WARNING) << "Submap " << submap_id << " doesn't exist. Can't remove.";
+  }
+}
+
+template <typename SubmapType>
 const SubmapType& SubmapCollection<SubmapType>::getActiveSubmap() const {
   const auto it = id_to_submap_.find(active_submap_id_);
   CHECK(it != id_to_submap_.end());
@@ -357,8 +369,8 @@ bool SubmapCollection<SubmapType>::LoadFromFile(
 
 template <typename SubmapType>
 bool SubmapCollection<SubmapType>::LoadFromStream(
-      std::istream* proto_file_ptr,
-      typename SubmapCollection<SubmapType>::Ptr* submap_collection_ptr) {
+    std::istream* proto_file_ptr,
+    typename SubmapCollection<SubmapType>::Ptr* submap_collection_ptr) {
   CHECK_NOTNULL(proto_file_ptr);
   CHECK_NOTNULL(submap_collection_ptr);
   // Unused byte offset result.
@@ -379,8 +391,9 @@ bool SubmapCollection<SubmapType>::LoadFromStream(
        sub_map_index < submap_collection_proto.num_submaps(); ++sub_map_index) {
     LOG(INFO) << "Loading submap number: " << sub_map_index;
     // Loading the submaps
-    typename SubmapType::Ptr submap_ptr = SubmapType::LoadFromStream(
-        (*submap_collection_ptr)->getConfig(), proto_file_ptr, &tmp_byte_offset);
+    typename SubmapType::Ptr submap_ptr =
+        SubmapType::LoadFromStream((*submap_collection_ptr)->getConfig(),
+                                   proto_file_ptr, &tmp_byte_offset);
     if (submap_ptr == nullptr) {
       LOG(ERROR) << "Could not load the submap from stream.";
       return false;

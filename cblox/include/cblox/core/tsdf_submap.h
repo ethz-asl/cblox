@@ -23,12 +23,24 @@ class TsdfSubmap : public Submap {
   typedef std::shared_ptr<const TsdfSubmap> ConstPtr;
   typedef TsdfMap::Config Config;
 
-  TsdfSubmap(const Transformation& T_M_S, SubmapID submap_id, Config config)
-      : Submap(T_M_S, submap_id) {
-    tsdf_map_.reset(new TsdfMap(config));
+  TsdfSubmap(const Transformation& T_M_S, const SubmapID submap_id,
+             const Config& config)
+      : Submap(T_M_S, submap_id),
+        config_(config),
+        tsdf_map_(new TsdfMap(config)) {}
+
+  // Makes a submap by SHARING the underlying TsdfMap with another party.
+  TsdfSubmap(const Transformation& T_M_S, const SubmapID submap_id,
+             TsdfMap::Ptr tsdf_map_ptr)
+      : Submap(T_M_S, submap_id), tsdf_map_(tsdf_map_ptr) {
+    CHECK(tsdf_map_ptr);
+    // I think uniform initialization wont work until c++14 apparently. Lame.
+    config_.tsdf_voxel_size = tsdf_map_ptr->getTsdfLayer().voxel_size();
+    config_.tsdf_voxels_per_side =
+        tsdf_map_ptr->getTsdfLayer().voxels_per_side();
   }
 
-  ~TsdfSubmap() {
+  virtual ~TsdfSubmap() {
     if (!tsdf_map_.unique()) {
       LOG(WARNING) << "Underlying tsdf map from SubmapID: " << submap_id_
                    << " is NOT unique. Therefore its memory may leak.";
@@ -43,6 +55,11 @@ class TsdfSubmap : public Submap {
 
   inline FloatingPoint block_size() const { return tsdf_map_->block_size(); }
   inline FloatingPoint voxel_size() const { return tsdf_map_->voxel_size(); }
+  inline size_t voxels_per_side() const {
+    return tsdf_map_->getTsdfLayer().voxels_per_side();
+  }
+
+  Config getTsdfConfig() const { return config_; }
 
   // Set interval in which submap was actively mapping.
   inline void startMappingTime(int64_t time) { mapping_interval_.first = time; }
@@ -78,6 +95,7 @@ class TsdfSubmap : public Submap {
                                         uint64_t* tmp_byte_offset_ptr);
 
  protected:
+  Config config_;
   TsdfMap::Ptr tsdf_map_;
   std::pair<int64_t, int64_t> mapping_interval_;
 };

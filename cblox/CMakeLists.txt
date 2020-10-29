@@ -36,7 +36,7 @@ cs_add_library(${PROJECT_NAME}_lib
   src/mesh/submap_mesher.cpp
   src/io/transformation_io.cpp
 )
-target_link_libraries(${PROJECT_NAME}_lib ${catkin_LIBRARIES} ${PROJECT_NAME}_proto)
+target_link_libraries(${PROJECT_NAME}_lib ${PROJECT_NAME}_proto)
 
 ##########
 # EXPORT #

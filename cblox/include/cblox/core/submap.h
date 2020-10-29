@@ -16,7 +16,7 @@ class Submap {
   Submap(const Transformation& T_M_S, SubmapID submap_id)
       : submap_id_(submap_id), T_M_S_(T_M_S) {}
 
-  ~Submap() {}
+  virtual ~Submap() {}
 
   // Submap pose interaction.
   inline const Transformation& getPose() const {
