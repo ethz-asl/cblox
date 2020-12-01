@@ -1,5 +1,5 @@
-#ifndef CBLOX_ROS_SUBMAP_CONVERSIONS_H
-#define CBLOX_ROS_SUBMAP_CONVERSIONS_H
+#ifndef CBLOX_ROS_SUBMAP_CONVERSIONS_H_
+#define CBLOX_ROS_SUBMAP_CONVERSIONS_H_
 
 #include <geometry_msgs/Pose.h>
 #include <minkindr_conversions/kindr_msg.h>
@@ -56,6 +56,6 @@ Transformation deserializeMsgToSubmapPose(cblox_msgs::MapLayer* msg_ptr);
 
 }  // namespace cblox
 
-#endif  // CBLOX_ROS_SUBMAP_CONVERSIONS_H
+#endif  // CBLOX_ROS_SUBMAP_CONVERSIONS_H_
 
 #include "cblox_ros/submap_conversions_inl.h"

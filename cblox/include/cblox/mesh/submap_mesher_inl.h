@@ -57,14 +57,11 @@ void SubmapMesher::generateSeparatedMeshLayers(
     CHECK_NOTNULL(sub_map_ptr.get());
     LOG(INFO) << "Generating mesh for submap number #" << mesh_index;
     mesh_index++;
-    // Getting the TSDF data
-    const TsdfMap& tsdf_map = sub_map_ptr->getTsdfMap();
     // Creating a mesh layer to hold the mesh fragment
-    MeshLayer::Ptr mesh_layer_ptr(
-        new MeshLayer(sub_map_ptr->getTsdfMap().block_size()));
+    MeshLayer::Ptr mesh_layer_ptr(new MeshLayer(sub_map_ptr->block_size()));
     // Generating the mesh
     MeshIntegrator<TsdfVoxel> mesh_integrator(
-        mesh_config_, tsdf_map.getTsdfLayer(), mesh_layer_ptr.get());
+        mesh_config_, sub_map_ptr->getTsdfLayer(), mesh_layer_ptr.get());
     constexpr bool only_mesh_updated_blocks = false;
     constexpr bool clear_updated_flag = false;
     mesh_integrator.generateMesh(only_mesh_updated_blocks, clear_updated_flag);
@@ -78,7 +75,7 @@ void SubmapMesher::generateMeshInGlobalFrame(const SubmapType& submap,
                                              MeshLayer* mesh_layer_G_ptr) {
   CHECK_NOTNULL(mesh_layer_G_ptr);
   // Mesh in submap frame
-  MeshLayer mesh_layer_S(submap.getTsdfMap().block_size());
+  MeshLayer mesh_layer_S(submap.block_size());
   generateMeshInSubmapFrame(submap, &mesh_layer_S);
   // To world frame
   const Transformation& T_G_S = submap.getPose();
@@ -89,11 +86,9 @@ template <typename SubmapType>
 void SubmapMesher::generateMeshInSubmapFrame(const SubmapType& submap,
                                              MeshLayer* mesh_layer_S_ptr) {
   CHECK_NOTNULL(mesh_layer_S_ptr);
-  // Getting the TSDF data
-  const TsdfMap& tsdf_map = submap.getTsdfMap();
   // Generating the mesh
-  MeshIntegrator<TsdfVoxel> mesh_integrator(
-      mesh_config_, tsdf_map.getTsdfLayer(), mesh_layer_S_ptr);
+  MeshIntegrator<TsdfVoxel> mesh_integrator(mesh_config_, submap.getTsdfLayer(),
+                                            mesh_layer_S_ptr);
   constexpr bool only_mesh_updated_blocks = false;
   constexpr bool clear_updated_flag = false;
   mesh_integrator.generateMesh(only_mesh_updated_blocks, clear_updated_flag);

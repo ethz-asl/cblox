@@ -106,8 +106,8 @@ bool SubmapCollection<SubmapType>::duplicateSubmap(
     // below the new submap appears empty
     // new_tsdf_sub_map->getTsdfMapPtr().reset(new
     // TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
-    *(new_tsdf_sub_map->getTsdfMapPtr()) =
-        *(new TsdfMap(src_submap_ptr->getTsdfMap().getTsdfLayer()));
+    *(new_tsdf_sub_map->getTsdfLayerPtr()) =
+        *(new voxblox::Layer<TsdfVoxel>(src_submap_ptr->getTsdfLayer()));
     id_to_submap_.emplace(new_submap_id, new_tsdf_sub_map);
     return true;
   }
@@ -143,25 +143,27 @@ SubmapCollection<SubmapType>::getSubmapConstPtrs() const {
 }
 
 template <typename SubmapType>
-TsdfMap::Ptr SubmapCollection<SubmapType>::getActiveTsdfMapPtr() {
+voxblox::Layer<TsdfVoxel>*
+SubmapCollection<SubmapType>::getActiveTsdfLayerPtr() {
   const auto it = id_to_submap_.find(active_submap_id_);
   CHECK(it != id_to_submap_.end());
-  return (it->second)->getTsdfMapPtr();
+  return (it->second)->getTsdfLayerPtr();
 }
 
 template <typename SubmapType>
-TsdfMap::Ptr SubmapCollection<SubmapType>::getTsdfMapPtr(
+voxblox::Layer<TsdfVoxel>* SubmapCollection<SubmapType>::getTsdfLayerPtr(
     const SubmapID submap_id) {
   const auto it = id_to_submap_.find(submap_id);
   CHECK(it != id_to_submap_.end());
-  return (it->second)->getTsdfMapPtr();
+  return (it->second)->getTsdfLayerPtr();
 }
 
 template <typename SubmapType>
-const TsdfMap& SubmapCollection<SubmapType>::getActiveTsdfMap() const {
+const voxblox::Layer<TsdfVoxel>&
+SubmapCollection<SubmapType>::getActiveTsdfLayer() const {
   const auto it = id_to_submap_.find(active_submap_id_);
   CHECK(it != id_to_submap_.end());
-  return (it->second)->getTsdfMap();
+  return (it->second)->getTsdfLayer();
 }
 
 template <typename SubmapType>
@@ -218,10 +220,9 @@ TsdfMap::Ptr SubmapCollection<SubmapType>::getProjectedMap() const {
   // Looping over the current submaps
   for (const auto& id_submap_pair : id_to_submap_) {
     // Getting the tsdf submap and its pose
-    const TsdfMap& tsdf_map = (id_submap_pair.second)->getTsdfMap();
     const Transformation& T_G_S = (id_submap_pair.second)->getPose();
     // Merging layers the submap into the global layer
-    mergeLayerAintoLayerB(tsdf_map.getTsdfLayer(), T_G_S,
+    mergeLayerAintoLayerB(id_submap_pair.second->getTsdfLayer(), T_G_S,
                           combined_tsdf_layer_ptr);
   }
   // Returning the new map
@@ -430,8 +431,8 @@ void SubmapCollection<SubmapType>::fuseSubmapPair(
     const Transformation& T_G_S2 = submap_ptr_2->getPose();
     const Transformation T_S1_S2 = T_G_S1.inverse() * T_G_S2;
     // Merging the submap layers
-    mergeLayerAintoLayerB(submap_ptr_2->getTsdfMap().getTsdfLayer(), T_S1_S2,
-                          submap_ptr_1->getTsdfMapPtr()->getTsdfLayerPtr());
+    mergeLayerAintoLayerB(submap_ptr_2->getTsdfLayer(), T_S1_S2,
+                          submap_ptr_1->getTsdfLayerPtr());
     // Deleting Submap #2
     const size_t num_erased = id_to_submap_.erase(submap_id_2);
     CHECK_EQ(num_erased, 1);

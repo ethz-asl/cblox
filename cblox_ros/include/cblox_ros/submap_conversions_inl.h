@@ -1,5 +1,5 @@
-#ifndef CBLOX_ROS_SUBMAP_CONVERSIONS_INL_H
-#define CBLOX_ROS_SUBMAP_CONVERSIONS_INL_H
+#ifndef CBLOX_ROS_SUBMAP_CONVERSIONS_INL_H_
+#define CBLOX_ROS_SUBMAP_CONVERSIONS_INL_H_
 
 #include <voxblox_ros/conversions.h>
 
@@ -18,8 +18,7 @@ std_msgs::Header generateHeaderMsg(const SubmapType& submap,
 }
 
 template <typename SubmapType>
-cblox_msgs::MapHeader generateSubmapHeaderMsg(
-    const SubmapType& submap) {
+cblox_msgs::MapHeader generateSubmapHeaderMsg(const SubmapType& submap) {
   // Set the submap ID and type.
   cblox_msgs::MapHeader submap_header;
   submap_header.id = submap.getID();
@@ -53,8 +52,7 @@ void serializePoseToMsg(const SubmapType& submap,
 
 // Note: Assumes that SubmapType contains a tsdf map.
 template <typename SubmapType>
-void serializeSubmapToMsg(const SubmapType& submap,
-                          cblox_msgs::MapLayer* msg) {
+void serializeSubmapToMsg(const SubmapType& submap, cblox_msgs::MapLayer* msg) {
   CHECK_NOTNULL(msg);
 
   ros::Time timestamp = ros::Time::now();
@@ -66,8 +64,8 @@ void serializeSubmapToMsg(const SubmapType& submap,
   msg->type = static_cast<uint8_t>(MapLayerTypes::kTsdf);
 
   // Fill in TSDF layer.
-  voxblox::serializeLayerAsMsg<voxblox::TsdfVoxel>(
-      submap.getTsdfMap().getTsdfLayer(), false, &msg->tsdf_layer);
+  voxblox::serializeLayerAsMsg<voxblox::TsdfVoxel>(submap.getTsdfLayer(), false,
+                                                   &msg->tsdf_layer);
   msg->tsdf_layer.action =
       static_cast<uint8_t>(voxblox::MapDerializationAction::kReset);
 }
@@ -95,8 +93,8 @@ bool deserializeMsgToSubmapContent(cblox_msgs::MapLayer* msg_ptr,
   submap_ptr->startMappingTime(msg_ptr->map_header.start_time.toNSec());
   submap_ptr->stopMappingTime(msg_ptr->map_header.end_time.toNSec());
 
-  return voxblox::deserializeMsgToLayer(
-      msg_ptr->tsdf_layer, submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr());
+  return voxblox::deserializeMsgToLayer(msg_ptr->tsdf_layer,
+                                        submap_ptr->getTsdfLayerPtr());
 }
 
 template <typename SubmapType>
@@ -116,4 +114,4 @@ SubmapID deserializeMsgToSubmap(
 }
 
 }  // namespace cblox
-#endif  // CBLOX_ROS_SUBMAP_CONVERSIONS_INL_H
+#endif  // CBLOX_ROS_SUBMAP_CONVERSIONS_INL_H_

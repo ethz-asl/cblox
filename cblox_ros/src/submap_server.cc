@@ -27,7 +27,7 @@ void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID submap_id) const {
       submap_collection_ptr_->getSubmapPtr(submap_id)->getPose();
   vertex_marker.pose.orientation.w = 1.0;
   vertex_marker.scale.x =
-      submap_collection_ptr_->getActiveTsdfMapPtr()->voxel_size();
+      submap_collection_ptr_->getActiveSubmapPtr()->voxel_size();
   vertex_marker.scale.y = vertex_marker.scale.x;
   vertex_marker.scale.z = vertex_marker.scale.x;
   geometry_msgs::Point point_msg;
@@ -39,8 +39,7 @@ void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID submap_id) const {
 
   const float max_dist = truncation_distance_;
   TsdfSubmap::Ptr submap_ptr = submap_collection_ptr_->getSubmapPtr(submap_id);
-  voxblox::Layer<voxblox::TsdfVoxel>* layer =
-      submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr();
+  voxblox::Layer<voxblox::TsdfVoxel>* layer = submap_ptr->getTsdfLayerPtr();
   voxblox::BlockIndexList block_list;
   layer->getAllAllocatedBlocks(&block_list);
   int block_num = 0;
@@ -68,7 +67,7 @@ void SubmapServer<TsdfSubmap>::visualizeSlice(const SubmapID submap_id) const {
       }
 
       if (std::abs(position.z() - slice_height_) <
-          submap_ptr->getTsdfMapPtr()->voxel_size() / 2) {
+          submap_ptr->voxel_size() / 2) {
         vertex_marker.id =
             block_num +
             voxel_id * std::pow(10, std::round(std::log10(block_list.size())));

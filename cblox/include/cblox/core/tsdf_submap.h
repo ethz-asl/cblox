@@ -39,6 +39,13 @@ class TsdfSubmap : public Submap {
     config_.tsdf_voxels_per_side =
         tsdf_map_ptr->getTsdfLayer().voxels_per_side();
   }
+  TsdfSubmap(const Transformation& T_M_S, const SubmapID submap_id,
+             voxblox::Layer<TsdfVoxel>::Ptr tsdf_layer_ptr)
+      : Submap(T_M_S, submap_id), tsdf_map_(new TsdfMap(tsdf_layer_ptr)) {
+    CHECK(tsdf_layer_ptr);
+    config_.tsdf_voxel_size = tsdf_layer_ptr->voxel_size();
+    config_.tsdf_voxels_per_side = tsdf_layer_ptr->voxels_per_side();
+  }
 
   virtual ~TsdfSubmap() {
     if (!tsdf_map_.unique()) {
@@ -49,9 +56,17 @@ class TsdfSubmap : public Submap {
     }
   }
 
-  // Returns the underlying TSDF map pointers.
-  inline TsdfMap::Ptr getTsdfMapPtr() { return tsdf_map_; }
-  inline const TsdfMap& getTsdfMap() const { return *tsdf_map_; }
+  // Returns the underlying tsdf_layer pointers.
+  inline voxblox::Layer<TsdfVoxel>* getTsdfLayerPtr() {
+    return tsdf_map_->getTsdfLayerPtr();
+  }
+  inline voxblox::Layer<TsdfVoxel>::Ptr getTsdfLayerSharedPtr() {
+    return std::shared_ptr<voxblox::Layer<TsdfVoxel>>(
+        tsdf_map_->getTsdfLayerPtr());
+  }
+  inline const voxblox::Layer<TsdfVoxel>& getTsdfLayer() const {
+    return tsdf_map_->getTsdfLayer();
+  }
 
   inline FloatingPoint block_size() const { return tsdf_map_->block_size(); }
   inline FloatingPoint voxel_size() const { return tsdf_map_->voxel_size(); }
@@ -60,15 +75,6 @@ class TsdfSubmap : public Submap {
   }
 
   Config getTsdfConfig() const { return config_; }
-
-  // Set interval in which submap was actively mapping.
-  inline void startMappingTime(int64_t time) { mapping_interval_.first = time; }
-  inline void stopMappingTime(int64_t time) { mapping_interval_.second = time; }
-
-  // Access mapping interval.
-  inline const std::pair<int64_t, int64_t>& getMappingInterval() const {
-    return mapping_interval_;
-  }
 
   virtual size_t getNumberOfAllocatedBlocks() const override {
     return tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks();
@@ -97,7 +103,6 @@ class TsdfSubmap : public Submap {
  protected:
   Config config_;
   TsdfMap::Ptr tsdf_map_;
-  std::pair<int64_t, int64_t> mapping_interval_;
 };
 
 }  // namespace cblox

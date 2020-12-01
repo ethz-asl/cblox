@@ -2,6 +2,7 @@
 #define CBLOX_CORE_SUBMAP_H_
 
 #include <mutex>
+#include <utility>
 
 #include "cblox/core/common.h"
 
@@ -31,6 +32,15 @@ class Submap {
 
   inline SubmapID getID() const { return submap_id_; }
 
+  // Set interval in which submap was actively mapping.
+  inline void startMappingTime(int64_t time) { mapping_interval_.first = time; }
+  inline void stopMappingTime(int64_t time) { mapping_interval_.second = time; }
+
+  // Access mapping interval.
+  inline const std::pair<int64_t, int64_t>& getMappingInterval() const {
+    return mapping_interval_;
+  }
+
   virtual size_t getNumberOfAllocatedBlocks() const = 0;
 
   virtual size_t getMemorySize() const = 0;
@@ -38,6 +48,14 @@ class Submap {
   virtual void finishSubmap() = 0;
 
   virtual void prepareForPublish() = 0;
+
+  // NOTE(ntonci): This assumes that all derived submap types will have at least
+  // TSDF Layer.
+  virtual voxblox::Layer<TsdfVoxel>* getTsdfLayerPtr() = 0;
+  virtual const voxblox::Layer<TsdfVoxel>& getTsdfLayer() const = 0;
+
+  virtual FloatingPoint block_size() const = 0;
+  virtual FloatingPoint voxel_size() const = 0;
 
   /*
   // Note(ntonci): In order to provide saving/loading functionality to the
@@ -58,6 +76,7 @@ class Submap {
  protected:
   const SubmapID submap_id_;
   Transformation T_M_S_;
+  std::pair<int64_t, int64_t> mapping_interval_;
 
  private:
   mutable std::mutex transformation_mutex_;
