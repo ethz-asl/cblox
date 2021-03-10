@@ -211,8 +211,7 @@ typename SubmapType::Ptr SubmapCollection<SubmapType>::getActiveSubmapPtr() {
 }
 
 template <typename SubmapType>
-const Transformation& SubmapCollection<SubmapType>::getActiveSubmapPose()
-    const {
+Transformation SubmapCollection<SubmapType>::getActiveSubmapPose() const {
   return getActiveSubmap().getPose();
 }
 template <typename SubmapType>

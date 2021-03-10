@@ -23,7 +23,7 @@ class SubmapCollectionInterface {
   // NOTE(alexmillane): I'm moving methods over only as I need them. There's no
   // design intent here in leaving some out. There is only the intent to be
   // lazy.
-  virtual const Transformation& getActiveSubmapPose() const = 0;
+  virtual Transformation getActiveSubmapPose() const = 0;
   virtual SubmapID getActiveSubmapID() const = 0;
   virtual bool getSubmapPose(const SubmapID submap_id,
                              Transformation* pose_ptr) const = 0;
@@ -110,7 +110,7 @@ class SubmapCollection : public SubmapCollectionInterface {
   // Interactions with the active submap
   const SubmapType& getActiveSubmap() const;
   typename SubmapType::Ptr getActiveSubmapPtr();
-  const Transformation& getActiveSubmapPose() const;
+  Transformation getActiveSubmapPose() const;
   SubmapID getActiveSubmapID() const;
 
   // Access the tsdf_map member of the active submap

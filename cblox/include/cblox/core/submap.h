@@ -35,7 +35,8 @@ class Submap {
   virtual ~Submap() = default;
 
   // Submap pose interaction.
-  inline const Transformation& getPose() const {
+  // NOTE: The pose must be returned by copy to get the desired thread safety
+  inline Transformation getPose() const {
     std::unique_lock<std::mutex> lock(transformation_mutex_);
     return T_M_S_;
   }
