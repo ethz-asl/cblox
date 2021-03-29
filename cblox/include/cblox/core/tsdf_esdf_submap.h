@@ -47,14 +47,7 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   //       smart pointer ownership
   TsdfEsdfSubmap(TsdfEsdfSubmap&& rhs) = default;
 
-  ~TsdfEsdfSubmap() override {
-//    if (!esdf_map_.unique()) {
-//      LOG(WARNING) << "Underlying esdf map from SubmapID: " << submap_id_
-//                   << " is NOT unique. Therefore its memory may leak.";
-//    } else {
-//      LOG(INFO) << "EsdfSubmap " << submap_id_ << " is being deleted.";
-//    }
-  }
+  ~TsdfEsdfSubmap() override = default;
 
   // Generate the ESDF from the TSDF.
   void generateEsdf();

@@ -37,14 +37,7 @@ class TsdfSubmap : public Submap {
   // NOTE: This will move the TSDF by transferring smart pointer ownership
   TsdfSubmap(TsdfSubmap&& rhs) = default;
 
-  ~TsdfSubmap() override {
-//    if (!tsdf_map_.unique()) {
-//      LOG(WARNING) << "Underlying tsdf map from SubmapID: " << submap_id_
-//                   << " is NOT unique. Therefore its memory may leak.";
-//    } else {
-//      LOG(INFO) << "TsdfSubmap " << submap_id_ << " is being deleted.";
-//    }
-  }
+  ~TsdfSubmap() override = default;
 
   // Returns the underlying TSDF map pointers.
   inline TsdfMap::Ptr getTsdfMapPtr() { return tsdf_map_; }
