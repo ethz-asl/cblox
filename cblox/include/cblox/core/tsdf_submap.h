@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <mutex>
+#include <utility>
 
 #include <Eigen/Geometry>
 
@@ -54,17 +55,17 @@ class TsdfSubmap : public Submap {
     return mapping_interval_;
   }
 
-  virtual size_t getNumberOfAllocatedBlocks() const override {
+  size_t getNumberOfAllocatedBlocks() const override {
     return tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks();
   }
 
-  virtual size_t getMemorySize() const override {
+  size_t getMemorySize() const override {
     return tsdf_map_->getTsdfLayer().getMemorySize();
   }
 
-  virtual void finishSubmap() override;
+  void finishSubmap() override;
 
-  virtual void prepareForPublish() override;
+  void prepareForPublish() override;
 
   // Getting the proto for this submap.
   virtual void getProto(SubmapProto* proto) const;

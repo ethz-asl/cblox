@@ -18,12 +18,12 @@ class TsdfEsdfSubmap : public TsdfSubmap {
 
   struct Config : TsdfSubmap::Config, EsdfMap::Config {
     // default constructor
-    Config() : TsdfSubmap::Config(), EsdfMap::Config(){};
+    Config() : TsdfSubmap::Config(), EsdfMap::Config() {}
     // constructor based on tsdf and esdf config
     Config(const TsdfSubmap::Config& tsdf_map_config,
            const EsdfMap::Config& esdf_map_config)
         : TsdfSubmap::Config(tsdf_map_config),
-          EsdfMap::Config(esdf_map_config){};
+          EsdfMap::Config(esdf_map_config) {}
   };
 
   // Constructor
@@ -56,13 +56,13 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   EsdfMap::Ptr getEsdfMapPtr() { return esdf_map_; }
   const EsdfMap& getEsdfMap() const { return *esdf_map_; }
 
-  virtual void finishSubmap() override;
+  void finishSubmap() override;
 
-  virtual void prepareForPublish() override;
+  void prepareForPublish() override;
 
-  virtual void getProto(cblox::SubmapProto* proto) const override;
+  void getProto(cblox::SubmapProto* proto) const override;
 
-  virtual bool saveToStream(std::fstream* outfile_ptr) const override;
+  bool saveToStream(std::fstream* outfile_ptr) const override;
 
   // Load a submap from stream.
   // Note(alexmillane): Returns a nullptr if load is unsuccessful.
