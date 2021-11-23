@@ -57,9 +57,7 @@ void ActiveSubmapVisualizer::updateIntegrator() {
   // New integrator operating on the mesh.
   active_submap_mesh_integrator_ptr_.reset(
       new voxblox::MeshIntegrator<TsdfVoxel>(
-          mesh_config_,
-          tsdf_submap_collection_ptr_->getTsdfMapPtr(active_submap_id_)
-              ->getTsdfLayerPtr(),
+          mesh_config_, tsdf_submap_collection_ptr_->getActiveTsdfLayerPtr(),
           active_submap_mesh_layer_ptr_.get()));
 }
 

@@ -13,8 +13,8 @@ void serializeSubmapToMsg<TsdfEsdfSubmap>(const TsdfEsdfSubmap& submap,
 
   // set type to ESDF
   msg->type = static_cast<uint8_t>(MapLayerTypes::kEsdf);
-  voxblox::serializeLayerAsMsg<EsdfVoxel>(
-      submap.getEsdfMap().getEsdfLayer(), false, &msg->esdf_layer);
+  voxblox::serializeLayerAsMsg<EsdfVoxel>(submap.getEsdfLayer(), false,
+                                          &msg->esdf_layer);
   msg->esdf_layer.action =
       static_cast<uint8_t>(voxblox::MapDerializationAction::kReset);
 }
@@ -58,9 +58,9 @@ bool deserializeMsgToSubmapContent<TsdfEsdfSubmap>(
   }
 
   bool esdf_success = voxblox::deserializeMsgToLayer(
-      msg_ptr->esdf_layer, submap_ptr->getEsdfMapPtr()->getEsdfLayerPtr());
+      msg_ptr->esdf_layer, submap_ptr->getEsdfLayerPtr());
   // generate ESDF layer if necessary
-  if (tsdf_success and !esdf_success) {
+  if (tsdf_success && !esdf_success) {
     submap_ptr->generateEsdf();
   }
   return true;

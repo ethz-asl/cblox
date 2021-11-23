@@ -1,5 +1,7 @@
 #include "cblox/core/tsdf_submap.h"
 
+#include <memory>
+
 #include "cblox/utils/quat_transformation_protobuf_utils.h"
 
 namespace cblox {
@@ -84,8 +86,7 @@ TsdfSubmap::Ptr TsdfSubmap::LoadFromStream(const Config& config,
   if (!voxblox::io::LoadBlocksFromStream(
           submap_proto.num_blocks(),
           Layer<TsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
-          submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr(),
-          tmp_byte_offset_ptr)) {
+          submap_ptr->getTsdfLayerPtr(), tmp_byte_offset_ptr)) {
     LOG(ERROR) << "Could not load the tsdf blocks from stream.";
     return nullptr;
   }

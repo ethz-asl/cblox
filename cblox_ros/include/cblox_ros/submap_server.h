@@ -101,7 +101,7 @@ class SubmapServer {
   inline void setVerbose(bool verbose) {
     verbose_ = verbose;
     active_submap_visualizer_ptr_->setVerbose(verbose_);
-  };
+  }
 
  protected:
   // Gets parameters
@@ -130,12 +130,12 @@ class SubmapServer {
 
   // Initializes the map
   bool mapIntialized() const { return !submap_collection_ptr_->empty(); }
-  void intializeMap(const Transformation& T_G_C);
+  void intializeMap(const Transformation& T_G_C, const ros::Time& timestamp);
 
   // Submap creation
   bool newSubmapRequired() const;
   void createNewSubmap(const Transformation& T_G_C, const ros::Time& timestamp);
-  void finishSubmap(const SubmapID submap_id);
+  void finishSubmap(const SubmapID submap_id, const ros::Time& timestamp);
 
   // Submap pose updates
   bool publishSubmapPosesCallback(std_srvs::EmptyRequest&,
@@ -147,8 +147,9 @@ class SubmapServer {
   // Submap publishing
   void publishSubmap(SubmapID submap_id) const;
   void publishWholeMap() const;
-  bool publishActiveSubmapCallback(cblox_msgs::SubmapSrvRequest& request,
-                                   cblox_msgs::SubmapSrvResponse& response);
+  bool publishActiveSubmapCallback(
+      cblox_msgs::SubmapSrvRequest& request,     // NOLINT
+      cblox_msgs::SubmapSrvResponse& response);  // NOLINT
   bool publishActiveSubmap();
 
   // visualization
@@ -234,6 +235,6 @@ class SubmapServer {
 
 }  // namespace cblox
 
-#endif  // CBLOX_ROS_SUBMAP_SERVER__H_
+#endif  // CBLOX_ROS_SUBMAP_SERVER_H_
 
 #include "cblox_ros/submap_server_inl.h"

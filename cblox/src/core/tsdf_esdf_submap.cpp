@@ -1,4 +1,7 @@
 #include "cblox/core/tsdf_esdf_submap.h"
+
+#include <memory>
+
 #include "cblox/utils/quat_transformation_protobuf_utils.h"
 
 namespace cblox {
@@ -81,8 +84,7 @@ TsdfEsdfSubmap::Ptr TsdfEsdfSubmap::LoadFromStream(
   if (!voxblox::io::LoadBlocksFromStream(
           submap_proto.num_blocks(),
           Layer<TsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
-          submap_ptr->getTsdfMapPtr()->getTsdfLayerPtr(),
-          tmp_byte_offset_ptr)) {
+          submap_ptr->getTsdfLayerPtr(), tmp_byte_offset_ptr)) {
     LOG(ERROR) << "Could not load the tsdf blocks from stream.";
     return nullptr;
   }
@@ -96,8 +98,7 @@ TsdfEsdfSubmap::Ptr TsdfEsdfSubmap::LoadFromStream(
   if (!voxblox::io::LoadBlocksFromStream(
           submap_proto.num_esdf_blocks(),
           Layer<EsdfVoxel>::BlockMergingStrategy::kReplace, proto_file_ptr,
-          submap_ptr->getEsdfMapPtr()->getEsdfLayerPtr(),
-          tmp_byte_offset_ptr)) {
+          submap_ptr->getEsdfLayerPtr(), tmp_byte_offset_ptr)) {
     LOG(ERROR) << "Could not load the esdf blocks from stream.";
     return nullptr;
   }

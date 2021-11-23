@@ -18,12 +18,12 @@ class TsdfEsdfSubmap : public TsdfSubmap {
 
   struct Config : TsdfSubmap::Config, EsdfMap::Config {
     // default constructor
-    Config() : TsdfSubmap::Config(), EsdfMap::Config(){};
+    Config() : TsdfSubmap::Config(), EsdfMap::Config() {}
     // constructor based on tsdf and esdf config
     Config(const TsdfSubmap::Config& tsdf_map_config,
            const EsdfMap::Config& esdf_map_config)
         : TsdfSubmap::Config(tsdf_map_config),
-          EsdfMap::Config(esdf_map_config){};
+          EsdfMap::Config(esdf_map_config) {}
   };
 
   TsdfEsdfSubmap(const Transformation& T_M_S, const SubmapID submap_id,
@@ -42,9 +42,8 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   TsdfEsdfSubmap(TsdfSubmap::Ptr tsdf_submap,
                  const voxblox::EsdfIntegrator::Config& esdf_integrator_config =
                      voxblox::EsdfIntegrator::Config())
-      : TsdfSubmap(tsdf_submap->getPose(), 
-                   tsdf_submap->getID(),
-                   tsdf_submap->getTsdfMapPtr()),
+      : TsdfSubmap(tsdf_submap->getPose(), tsdf_submap->getID(),
+                   tsdf_submap->getTsdfLayerSharedPtr()),
         esdf_integrator_config_(esdf_integrator_config) {
     CHECK(tsdf_submap);
     // Copying the config
@@ -67,11 +66,25 @@ class TsdfEsdfSubmap : public TsdfSubmap {
   // Generate the ESDF from the TSDF.
   void generateEsdf();
 
-  // Returns the underlying ESDF map pointers
-  EsdfMap::Ptr getEsdfMapPtr() { return esdf_map_; }
-  const EsdfMap& getEsdfMap() const { return *esdf_map_; }
+  // Returns the underlying esdf_layer pointers
+  inline voxblox::Layer<EsdfVoxel>* getEsdfLayerPtr() {
+    return esdf_map_->getEsdfLayerPtr();
+  }
+  inline const voxblox::Layer<EsdfVoxel>& getEsdfLayer() const {
+    return esdf_map_->getEsdfLayer();
+  }
 
   virtual Config getEsdfConfig() const { return config_; }
+
+  virtual size_t getNumberOfAllocatedBlocks() const override {
+    return tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks() +
+           esdf_map_->getEsdfLayer().getNumberOfAllocatedBlocks();
+  }
+
+  virtual size_t getMemorySize() const override {
+    return tsdf_map_->getTsdfLayer().getMemorySize() +
+           esdf_map_->getEsdfLayer().getMemorySize();
+  }
 
   virtual void finishSubmap() override;
 

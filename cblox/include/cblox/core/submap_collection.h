@@ -16,7 +16,7 @@ namespace cblox {
 class SubmapCollectionInterface {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  
+
   typedef std::shared_ptr<SubmapCollectionInterface> Ptr;
   typedef std::shared_ptr<const SubmapCollectionInterface> ConstPtr;
 
@@ -31,9 +31,10 @@ class SubmapCollectionInterface {
   virtual bool getSubmapPose(const SubmapID submap_id,
                              Transformation* pose_ptr) const = 0;
 
-  virtual TsdfMap::Ptr getActiveTsdfMapPtr() = 0;
-  virtual const TsdfMap& getActiveTsdfMap() const = 0;
-  virtual TsdfMap::Ptr getTsdfMapPtr(const SubmapID submap_id) = 0;
+  virtual voxblox::Layer<TsdfVoxel>* getActiveTsdfLayerPtr() = 0;
+  virtual voxblox::Layer<TsdfVoxel>* getTsdfLayerPtr(
+      const SubmapID submap_id) = 0;
+  virtual const voxblox::Layer<TsdfVoxel>& getActiveTsdfLayer() const = 0;
 
   virtual bool empty() const = 0;
   virtual size_t size() const = 0;
@@ -102,11 +103,11 @@ class SubmapCollection : public SubmapCollectionInterface {
   const Transformation& getActiveSubmapPose() const;
   SubmapID getActiveSubmapID() const;
 
-  // Access the tsdf_map member of the active submap
-  TsdfMap::Ptr getActiveTsdfMapPtr();
-  const TsdfMap& getActiveTsdfMap() const;
-  // Access the tsdf_map member of any submap
-  virtual TsdfMap::Ptr getTsdfMapPtr(const SubmapID submap_id);
+  // Access the tsdf_layer member of the active submap
+  voxblox::Layer<TsdfVoxel>* getActiveTsdfLayerPtr();
+  const voxblox::Layer<TsdfVoxel>& getActiveTsdfLayer() const;
+  // Access the tsdf_layer member of any submap
+  voxblox::Layer<TsdfVoxel>* getTsdfLayerPtr(const SubmapID submap_id);
 
   // Activate a submap
   // NOTE(alexmillane): Note that creating a new submap automatically activates
@@ -162,6 +163,11 @@ class SubmapCollection : public SubmapCollectionInterface {
 
   // Gets the combined memory size of the layers in this collection.
   size_t getMemorySize() const;
+
+  inline const std::map<SubmapID, typename SubmapType::Ptr>& getIdToSubmap()
+      const {
+    return id_to_submap_;
+  }
 
   // Loading from file
   static bool LoadFromFile(

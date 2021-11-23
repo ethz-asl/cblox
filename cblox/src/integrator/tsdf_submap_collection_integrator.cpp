@@ -25,27 +25,27 @@ void TsdfSubmapCollectionIntegrator::switchToActiveSubmap() {
   //                    that between new submap creation and activation the
   //                    integrator wont be affecting the latest submap in the
   //                    collection.
-  updateIntegratorTarget(tsdf_submap_collection_ptr_->getActiveTsdfMapPtr());
+  updateIntegratorTarget(tsdf_submap_collection_ptr_->getActiveTsdfLayerPtr());
   T_G_S_active_ = tsdf_submap_collection_ptr_->getActiveSubmapPose();
 }
 
 void TsdfSubmapCollectionIntegrator::initializeIntegrator(
-    const TsdfMap::Ptr& tsdf_map_ptr) {
-  CHECK(tsdf_map_ptr);
+    voxblox::Layer<TsdfVoxel>* tsdf_layer_ptr) {
+  CHECK(tsdf_layer_ptr);
   // Creating with the voxblox provided factory
   tsdf_integrator_ = voxblox::TsdfIntegratorFactory::create(
-      method_, tsdf_integrator_config_, tsdf_map_ptr->getTsdfLayerPtr());
+      method_, tsdf_integrator_config_, tsdf_layer_ptr);
 }
 
 void TsdfSubmapCollectionIntegrator::updateIntegratorTarget(
-    const TsdfMap::Ptr& tsdf_map_ptr) {
-  CHECK(tsdf_map_ptr);
+    voxblox::Layer<TsdfVoxel>* tsdf_layer_ptr) {
+  CHECK(tsdf_layer_ptr);
   // Creating the integrator if not yet created.
   // Otherwise, changing the integration target.
   if (tsdf_integrator_ == nullptr) {
-    initializeIntegrator(tsdf_map_ptr);
+    initializeIntegrator(tsdf_layer_ptr);
   } else {
-    tsdf_integrator_->setLayer(tsdf_map_ptr->getTsdfLayerPtr());
+    tsdf_integrator_->setLayer(tsdf_layer_ptr);
   }
 }
 

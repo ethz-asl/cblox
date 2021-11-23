@@ -34,10 +34,10 @@ class TsdfSubmapCollectionIntegrator {
 
  private:
   // Initializes the integrator
-  void initializeIntegrator(const TsdfMap::Ptr& tsdf_map_ptr);
+  void initializeIntegrator(voxblox::Layer<TsdfVoxel>* tsdf_layer_ptr);
 
   // Changes the integration target the latest submap in the collection.
-  void updateIntegratorTarget(const TsdfMap::Ptr& tsdf_map_ptr);
+  void updateIntegratorTarget(voxblox::Layer<TsdfVoxel>* tsdf_layer_ptr);
 
   // Gets the submap relative pose
   // NOTE(alexmilane): T_G_S - Transformation between camera frame (C) and
